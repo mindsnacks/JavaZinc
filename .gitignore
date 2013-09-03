@@ -35,22 +35,16 @@ out/
 .DS_Store
 
 # Maven
-MindSnacks-Android/target
+JavaZinc/target
 */gen-external-apklibs/
 
-# CoreMS
 bin/*
-.idea
 libs/arm*
 gen/*
 local.properties
-jni/*.c*
 obj
 target/
-CoreMS-Android.iml
-CoreMS-Android/libs/arm*
-CoreMS-Android/jni/*.c*
+JavaZinc.iml
 .gradle/*
-CoreMS-Android/build/*
-CoreMS-Android/libs/native-libs-1.0.jar
-MindSnacks-Android/build/*
+JavaZinc/JavaZinc/build/*
+JavaZinc/build/*
