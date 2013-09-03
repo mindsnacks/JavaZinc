@@ -1,18 +1,19 @@
 package zinc;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import utils.BaseTest;
+import zinc.classes.Catalog;
 
 import static org.junit.Assert.assertEquals;
 
-public class CatalogTests {
+public class CatalogTests extends BaseTest {
     private Gson gson;
 
     @Before
     public void setUp() throws Exception {
-        gson = new GsonBuilder().setPrettyPrinting().create();
+        gson = createGson();
     }
 
     @Test

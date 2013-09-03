@@ -1,4 +1,4 @@
-package zinc;
+package zinc.classes;
 
 import com.google.gson.annotations.SerializedName;
 
