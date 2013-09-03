@@ -1,11 +1,14 @@
+package zinc;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import zinc.Catalog;
 
 import static org.junit.Assert.assertEquals;
 
-public class testCatalog {
+public class CatalogTests {
     private Gson gson;
 
     @Before
