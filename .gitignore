@@ -35,16 +35,4 @@ out/
 .DS_Store
 
 # Maven
-JavaZinc/target
-*/gen-external-apklibs/
-
-bin/*
-libs/arm*
-gen/*
-local.properties
-obj
-target/
-JavaZinc.iml
-.gradle/*
-JavaZinc/JavaZinc/build/*
-JavaZinc/build/*
+target
