@@ -10,7 +10,7 @@ import java.util.Set;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public class RepoIndex {
+public class ZincRepoIndex {
     @SerializedName("sources")
     final private Set<URL> mSources = new HashSet<URL>();
 
@@ -24,7 +24,7 @@ public class RepoIndex {
 
     @Override
     public String toString() {
-        return "RepoIndex{" +
+        return "ZincRepoIndex{" +
                 "mSources=" + mSources +
                 '}';
     }

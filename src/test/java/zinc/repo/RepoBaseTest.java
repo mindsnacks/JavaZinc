@@ -6,8 +6,8 @@ import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import utils.BaseTest;
 import utils.DirectExecutor;
-import zinc.classes.Repo;
-import zinc.classes.RepoIndex;
+import zinc.classes.ZincRepo;
+import zinc.classes.ZincRepoIndex;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,7 +19,7 @@ import java.util.concurrent.Executor;
  * Date: 9/3/13
  */
 public abstract class RepoBaseTest extends BaseTest {
-    protected Repo mRepo;
+    protected ZincRepo mRepo;
 
     private Executor mExecutor;
     private Gson mGson;
@@ -32,12 +32,12 @@ public abstract class RepoBaseTest extends BaseTest {
         mExecutor = new DirectExecutor();
         mGson = createGson();
 
-        mRepo = new Repo(mExecutor, mGson, rootFolder.getRoot().toURI());
+        mRepo = new ZincRepo(mExecutor, mGson, rootFolder.getRoot().toURI());
     }
 
-    protected RepoIndex readRepoIndex() throws FileNotFoundException {
+    protected ZincRepoIndex readRepoIndex() throws FileNotFoundException {
         final FileReader fileReader = new FileReader(getIndexFile());
-        return mGson.fromJson(fileReader, RepoIndex.class);
+        return mGson.fromJson(fileReader, ZincRepoIndex.class);
     }
 
     protected File getIndexFile() {
