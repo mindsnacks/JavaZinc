@@ -1,0 +1,10 @@
+# incremental data. DO NOT EDIT.
+# format is <lastModified> <length> <SHA-1> <path>
+# Encoding is UTF-8
+1378229802000 413 f6082a6c98c52851e7f81367a7c99a52e7f8de99 /Users/NachoSoto/Development/MindSnacks/JavaZinc/JavaZinc/build/classes/debug/com/mindsnacks/javazinc/R$string.class
+1378229802000 422 f7e14a004e274468de306bbb328cff6e3985d73a /Users/NachoSoto/Development/MindSnacks/JavaZinc/JavaZinc/build/classes/debug/com/mindsnacks/javazinc/R$drawable.class
+1378229802000 355 c4aff090dd8934006fc183b1602cbc9ee26eb4d4 /Users/NachoSoto/Development/MindSnacks/JavaZinc/JavaZinc/build/classes/debug/com/mindsnacks/javazinc/R$attr.class
+1378229802000 521 e7cbe34b8cf3e69e005f945fbf4fb4e8ae7c2455 /Users/NachoSoto/Development/MindSnacks/JavaZinc/JavaZinc/build/classes/debug/com/mindsnacks/javazinc/R.class
+1378229802000 446 0a3e176e09d899b2279cc4fd82f5960e83ab7244 /Users/NachoSoto/Development/MindSnacks/JavaZinc/JavaZinc/build/classes/debug/com/mindsnacks/javazinc/R$style.class
+1378229802000 355 145b0e7e122b509d6a643877835decadb854518f /Users/NachoSoto/Development/MindSnacks/JavaZinc/JavaZinc/build/classes/debug/com/mindsnacks/javazinc/BuildConfig.class
+1376935425000 563264 44ec51e9d395a47aab135e5e1b556c0007442156 /Users/NachoSoto/Development/Android/sdk/extras/android/m2repository/com/android/support/support-v4/18.0.0/support-v4-18.0.0.jar

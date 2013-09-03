@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger>
+
+    <dataSet config="main" >
+        <source path="/Users/NachoSoto/Development/MindSnacks/JavaZinc/JavaZinc/src/main/assets" />
+    </dataSet>
+    <dataSet config="debug" >
+        <source path="/Users/NachoSoto/Development/MindSnacks/JavaZinc/JavaZinc/src/debug/assets" />
+    </dataSet>
+
+</merger>
