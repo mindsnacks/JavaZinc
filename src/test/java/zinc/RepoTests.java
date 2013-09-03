@@ -10,13 +10,14 @@ import utils.DirectExecutor;
 import zinc.classes.Repo;
 import zinc.classes.RepoIndex;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.concurrent.Executor;
 
+import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -31,7 +32,6 @@ public class RepoTests extends BaseTest {
     @Rule
     public final TemporaryFolder rootFolder = new TemporaryFolder();
 
-
     @Before
     public void setUp() throws Exception {
         mExecutor = new DirectExecutor();
@@ -41,16 +41,43 @@ public class RepoTests extends BaseTest {
     }
 
     @Test
-    public void addingSourceURLAddsItToIndexFile() throws MalformedURLException, FileNotFoundException {
+    public void addingSourceURLCreatesIndexFile() throws MalformedURLException, FileNotFoundException {
         final URL sourceURL = new URL("http://www.google.com");
 
         // run
         mRepo.addSourceURL(sourceURL);
 
         // check
-        final FileReader fileReader = new FileReader(new File(rootFolder.getRoot(), "repo.json"));
-        final RepoIndex index = mGson.fromJson(fileReader, RepoIndex.class);
+        assertTrue(readRepoIndex().getSources().contains(sourceURL));
+    }
 
-        assertTrue(index.getSources().contains(sourceURL));
+    @Test
+    public void addingSourceURLAddsItToIndexFile() throws IOException {
+        final URL sourceURL = new URL("https://www.mindsnacks.com"),
+                originalSourceURl = new URL("https://www.google.com");
+
+        final FileWriter fileWriter = new FileWriter(getIndexFile());
+
+        fileWriter.write("{\n" +
+                "  \"sources\": [\n" +
+                "    \"" + originalSourceURl + "\"\n" +
+                "  ]\n" +
+                "}");
+        fileWriter.close();
+
+        // run
+        mRepo.addSourceURL(sourceURL);
+
+        // check
+        assertEquals(new HashSet<URL>(Arrays.asList(originalSourceURl, sourceURL)), readRepoIndex().getSources());
+    }
+
+    private RepoIndex readRepoIndex() throws FileNotFoundException {
+        final FileReader fileReader = new FileReader(getIndexFile());
+        return mGson.fromJson(fileReader, RepoIndex.class);
+    }
+
+    private File getIndexFile() {
+        return new File(rootFolder.getRoot(), "repo.json");
     }
 }

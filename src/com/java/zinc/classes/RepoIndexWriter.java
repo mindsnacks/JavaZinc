@@ -13,16 +13,14 @@ public class RepoIndexWriter {
     private static final String REPO_INDEX_FILE = "repo.json";
 
     private final File mIndexFile;
-    private final RepoIndex mRepoIndex;
     private final Gson mGson;
 
+    private RepoIndex mRepoIndex;
     private FileWriter mFileWriter;
 
     public RepoIndexWriter(final File root, final Gson gson) {
         mGson = gson;
         mIndexFile = new File(root, REPO_INDEX_FILE);
-
-        mRepoIndex = initializeIndex();
     }
 
     private RepoIndex initializeIndex() {
@@ -64,6 +62,10 @@ public class RepoIndexWriter {
     }
 
     public RepoIndex getIndex() {
+        if (mRepoIndex == null) {
+            mRepoIndex = initializeIndex();
+        }
+
         return mRepoIndex;
     }
 }
