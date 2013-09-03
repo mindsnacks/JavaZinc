@@ -24,11 +24,11 @@ public class Catalog {
         return mIdentifier;
     }
 
-    public Info getInfoForBundleID(final String bundleID) {
-        return mBundles.get(bundleID);
+    public int getVersionForBundleID(final String bundleID, final String distribution) {
+        return mBundles.get(bundleID).getVersionForDistribution(distribution);
     }
 
-    public class Info {
+    private class Info {
         @SerializedName("distributions")
         private final Map<String, Integer> mDistributions;
 

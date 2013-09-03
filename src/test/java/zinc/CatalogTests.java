@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import zinc.Catalog;
 
 import static org.junit.Assert.assertEquals;
 
@@ -39,9 +38,9 @@ public class CatalogTests {
         Catalog catalog = gson.fromJson(json, Catalog.class);
 
         assertEquals("repo", catalog.getIdentifier());
-        assertEquals(1, catalog.getInfoForBundleID("bundleID1").getVersionForDistribution("master"));
-        assertEquals(2, catalog.getInfoForBundleID("bundleID1").getVersionForDistribution("develop"));
-        assertEquals(2, catalog.getInfoForBundleID("bundleID2").getVersionForDistribution("master"));
-        assertEquals(3, catalog.getInfoForBundleID("bundleID2").getVersionForDistribution("develop"));
+        assertEquals(1, catalog.getVersionForBundleID("bundleID1", "master"));
+        assertEquals(2, catalog.getVersionForBundleID("bundleID1", "develop"));
+        assertEquals(2, catalog.getVersionForBundleID("bundleID2", "master"));
+        assertEquals(3, catalog.getVersionForBundleID("bundleID2", "develop"));
     }
 }
