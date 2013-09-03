@@ -48,7 +48,6 @@ public class RepoTests extends BaseTest {
         mRepo.addSourceURL(sourceURL);
 
         // check
-
         final FileReader fileReader = new FileReader(new File(rootFolder.getRoot(), "repo.json"));
         final RepoIndex index = mGson.fromJson(fileReader, RepoIndex.class);
 
