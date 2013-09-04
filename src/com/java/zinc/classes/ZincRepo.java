@@ -41,8 +41,11 @@ public class ZincRepo {
     private void downloadCatalog(final URL catalogURL, final String catalogIdentifier) {
         final ZincJob job = mJobFactory.downloadCatalog(catalogURL, catalogIdentifier);
 
-        final FutureTask<ZincCatalog> catalog = new FutureTask<ZincCatalog>(job);
-        mExecutor.execute(catalog);
+        executeJob(job);
+    }
+
+    private <V> void executeJob(final ZincJob<V> job) {
+        mExecutor.execute(new FutureTask<V>(job));
     }
 
     public static interface ZincJobFactory {
