@@ -14,6 +14,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.concurrent.Executor;
 
+import static org.mockito.Mockito.mock;
+
 /**
  * User: NachoSoto
  * Date: 9/3/13
@@ -22,6 +24,7 @@ public abstract class RepoBaseTest extends BaseTest {
     protected ZincRepo mRepo;
 
     private Executor mExecutor;
+    private ZincRepo.ZincJobFactory mJobFactory;
     private Gson mGson;
 
     @Rule
@@ -32,7 +35,8 @@ public abstract class RepoBaseTest extends BaseTest {
         mExecutor = new DirectExecutor();
         mGson = createGson();
 
-        mRepo = new ZincRepo(mExecutor, mGson, rootFolder.getRoot().toURI());
+        mJobFactory = mock(ZincRepo.ZincJobFactory.class);
+        mRepo = new ZincRepo(mExecutor, mGson, rootFolder.getRoot().toURI(), mJobFactory);
     }
 
     protected ZincRepoIndex readRepoIndex() throws FileNotFoundException {

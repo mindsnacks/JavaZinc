@@ -25,21 +25,19 @@ public class ZincDownloadFileJob<V> extends ZincJob<V> {
 
     @Override
     public V call() throws Exception {
-        final InputStreamReader reader = mRequestFactory.get(mUrl);
-
-        return mGson.fromJson(reader, mClass);
+        return mGson.fromJson(mRequestFactory.get(mUrl), mClass);
     }
 
     public interface RequestFactory {
         InputStreamReader get(URL url);
     }
 
-    public class ZincDownloadFileJobFactory<V> {
-        ZincDownloadFileJob createJob(final URL url, final Gson gson, final Class<V> theClass) {
+    public static class JobFactory<V> {
+        ZincDownloadFileJob<V> createJob(final URL url, final Gson gson, final Class<V> theClass) {
               return new ZincDownloadFileJob<V>(new RequestFactory() {
                   @Override
                   public InputStreamReader get(final URL url) {
-                    return HttpRequest.get(mUrl).acceptGzipEncoding().uncompress(true).reader();
+                    return HttpRequest.get(url).acceptGzipEncoding().uncompress(true).reader();
                   }
               }, url, gson, theClass);
         }
