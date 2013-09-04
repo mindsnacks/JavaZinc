@@ -30,13 +30,13 @@ public class ZincRepo {
         mIndexWriter = new ZincRepoIndexWriter(mRoot, gson);
     }
 
-    public void addSourceURL(final URL sourceURL) {
-        mIndexWriter.getIndex().addSourceURL(sourceURL);
+    public void addSourceURL(final URL catalogURL, final String catalogIdentifier) {
+        mIndexWriter.getIndex().addSourceURL(catalogURL, catalogIdentifier);
 
         mIndexWriter.saveIndex();
     }
 
     public static interface ZincJobFactory {
-        ZincJob<ZincCatalog> downloadCatalog(final URL sourceURL, final String catalogID);
+        ZincJob<ZincCatalog> downloadCatalog(final URL catalogURL, final String catalogIdentifier);
     }
 }

@@ -1,7 +1,9 @@
 package zinc.classes;
 
 import com.google.gson.annotations.SerializedName;
+import zinc.exceptions.ZincRuntimeException;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,8 +20,16 @@ public class ZincRepoIndex {
         return mSources;
     }
 
-    public void addSourceURL(URL url) {
-        mSources.add(url);
+    public void addSourceURL(final URL catalogURL, final String catalogIdentifier) {
+        try {
+            addSourceURL(new URL(catalogURL, catalogIdentifier));
+        } catch (MalformedURLException e) {
+            throw new ZincRuntimeException("Invalid url (catalogURL: " + catalogURL + ", catalogID: " + catalogIdentifier, e);
+        }
+    }
+
+    public void addSourceURL(final URL sourceURL) {
+        mSources.add(sourceURL);
     }
 
     @Override
