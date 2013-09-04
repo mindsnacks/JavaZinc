@@ -40,6 +40,7 @@ public class ZincRepo {
 
     private void downloadCatalog(final URL catalogURL, final String catalogIdentifier) {
         final Future<ZincCatalog> future = executeJob(mJobFactory.downloadCatalog(catalogURL, catalogIdentifier));
+
     }
 
     private <V> Future<V> executeJob(final ZincJob<V> job) {

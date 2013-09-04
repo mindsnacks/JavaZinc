@@ -19,7 +19,6 @@ import java.util.concurrent.ExecutorService;
 
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -31,9 +30,10 @@ public abstract class RepoBaseTest extends BaseTest {
 
     @Mock
     protected ZincRepo.ZincJobFactory mJobFactory;
+    @Mock
+    private ZincJob<ZincCatalog> catalogDownloadJob;
 
     private ExecutorService mExecutor;
-
     private Gson mGson;
 
     @Rule
@@ -46,7 +46,7 @@ public abstract class RepoBaseTest extends BaseTest {
 
         mRepo = new ZincRepo(mExecutor, mJobFactory, mGson, rootFolder.getRoot().toURI());
 
-        when(mJobFactory.downloadCatalog((URL)anyObject(), anyString())).thenReturn((ZincJob<ZincCatalog>)mock(ZincJob.class));
+        when(mJobFactory.downloadCatalog((URL)anyObject(), anyString())).thenReturn(catalogDownloadJob);
     }
 
     protected ZincRepoIndex readRepoIndex() throws FileNotFoundException {
