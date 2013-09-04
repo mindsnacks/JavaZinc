@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.Mock;
 import utils.BaseTest;
+import zinc.classes.ZincCatalog;
 import zinc.classes.ZincRepo;
 import zinc.classes.ZincRepoIndex;
 import zinc.classes.jobs.ZincJob;
@@ -26,6 +28,8 @@ import static org.mockito.Mockito.when;
  */
 public abstract class RepoBaseTest extends BaseTest {
     protected ZincRepo mRepo;
+
+    @Mock
     protected ZincRepo.ZincJobFactory mJobFactory;
 
     private ExecutorService mExecutor;
@@ -40,10 +44,9 @@ public abstract class RepoBaseTest extends BaseTest {
         mExecutor = createExecutorService();
         mGson = createGson();
 
-        mJobFactory = mock(ZincRepo.ZincJobFactory.class);
         mRepo = new ZincRepo(mExecutor, mJobFactory, mGson, rootFolder.getRoot().toURI());
 
-        when(mJobFactory.downloadCatalog((URL)anyObject(), anyString())).thenReturn(mock(ZincJob.class));
+        when(mJobFactory.downloadCatalog((URL)anyObject(), anyString())).thenReturn((ZincJob<ZincCatalog>)mock(ZincJob.class));
     }
 
     protected ZincRepoIndex readRepoIndex() throws FileNotFoundException {

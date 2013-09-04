@@ -3,6 +3,7 @@ package zinc.jobs;
 import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import utils.BaseTest;
 import utils.MockFactory;
 import zinc.classes.ZincCatalog;
@@ -13,7 +14,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -21,12 +21,13 @@ import static org.mockito.Mockito.when;
  * Date: 9/3/13
  */
 public class ZincDownloadFileJobTest extends BaseTest {
+    @Mock
     private ZincDownloadFileJob.RequestFactory mRequestFactory;
+
     private Gson mGson;
 
     @Before
     public void setUp() {
-        mRequestFactory = mock(ZincDownloadFileJob.RequestFactory.class);
         mGson = createGson();
     }
 
