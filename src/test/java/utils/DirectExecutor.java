@@ -7,8 +7,11 @@ import java.util.concurrent.Executor;
  * Date: 9/3/13
  */
 public class DirectExecutor implements Executor {
+public class DirectExecutor implements Executor{
     @Override
     public void execute(final Runnable command) {
-        command.run();
+        if (command != null) {
+            command.run();
+        }
     }
 }
