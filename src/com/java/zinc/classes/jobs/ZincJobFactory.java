@@ -24,7 +24,7 @@ public class ZincJobFactory implements ZincRepo.ZincJobFactory {
     }
 
     @Override
-    public ZincJob<ZincCatalog> downloadCatalog(final URL sourceURL, final String catalogID) {
+    public AbstractZincJob<ZincCatalog> downloadCatalog(final URL sourceURL, final String catalogID) {
         final URL url;
         try {
             url = new URL(sourceURL, catalogID + "/" + CATALOG_FILENAME);

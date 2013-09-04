@@ -6,7 +6,7 @@ import org.mockito.Mock;
 import zinc.classes.ZincCatalog;
 import zinc.classes.ZincRepoIndex;
 import zinc.classes.ZincRepoIndexWriter;
-import zinc.classes.jobs.ZincJob;
+import zinc.classes.jobs.AbstractZincJob;
 
 import java.net.URL;
 
@@ -22,7 +22,7 @@ import static utils.MockFactory.randomString;
  */
 public class RepoJobTests extends RepoBaseTest {
     @Mock
-    private ZincJob<ZincCatalog> mZincCatalogDownloadJob;
+    private AbstractZincJob<ZincCatalog> mZincCatalogDownloadJob;
 
     @Mock
     private ZincRepoIndex mRepoIndex;

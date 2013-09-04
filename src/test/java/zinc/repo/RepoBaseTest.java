@@ -10,7 +10,7 @@ import zinc.classes.ZincCatalog;
 import zinc.classes.ZincRepo;
 import zinc.classes.ZincRepoIndex;
 import zinc.classes.ZincRepoIndexWriter;
-import zinc.classes.jobs.ZincJob;
+import zinc.classes.jobs.AbstractZincJob;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,7 +35,7 @@ public abstract class RepoBaseTest extends ZincBaseTest {
     protected ZincRepoIndexWriter mIndexWriter;
 
     @Mock
-    private ZincJob<ZincCatalog> catalogDownloadJob;
+    private AbstractZincJob<ZincCatalog> catalogDownloadJob;
 
     private ExecutorService mExecutor;
     private Gson mGson;

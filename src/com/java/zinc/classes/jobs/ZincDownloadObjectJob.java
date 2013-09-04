@@ -8,7 +8,7 @@ import java.net.URL;
  * User: NachoSoto
  * Date: 9/4/13
  */
-public class ZincDownloadObjectJob<V> extends ZincDownloadJob<V> {
+public class ZincDownloadObjectJob<V> extends AbstractZincDownloadJob<V> {
     private final Gson mGson;
 
     public ZincDownloadObjectJob(final ZincRequestExecutor requestFactory, final URL url, final Gson gson, final Class<V> theClass) {
