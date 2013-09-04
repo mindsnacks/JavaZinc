@@ -2,6 +2,8 @@ package utils;
 
 import zinc.classes.ZincCatalog;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.HashMap;
@@ -31,5 +33,9 @@ public final class MockFactory {
         bundles.put("bundle1", new ZincCatalog.Info(distributions));
 
         return new ZincCatalog(identifier, bundles);
+    }
+
+    public static InputStreamReader inputStreamReaderWithString(final String string) {
+        return new InputStreamReader(new ByteArrayInputStream(string.getBytes()));
     }
 }

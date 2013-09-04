@@ -2,7 +2,7 @@ package zinc;
 
 import org.junit.Before;
 import org.junit.Test;
-import utils.BaseTest;
+import utils.ZincBaseTest;
 import zinc.classes.ZincRepoIndex;
 
 import java.net.URL;
@@ -15,7 +15,7 @@ import static junit.framework.Assert.assertEquals;
  * User: NachoSoto
  * Date: 9/4/13
  */
-public class RepoIndexTest extends BaseTest {
+public class RepoIndexTest extends ZincBaseTest {
     private ZincRepoIndex index;
 
     @Before

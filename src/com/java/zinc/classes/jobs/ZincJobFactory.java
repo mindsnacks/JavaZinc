@@ -1,10 +1,12 @@
 package zinc.classes.jobs;
 
+import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
 import zinc.classes.ZincCatalog;
 import zinc.classes.ZincRepo;
 import zinc.exceptions.ZincRuntimeException;
 
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -30,6 +32,19 @@ public class ZincJobFactory implements ZincRepo.ZincJobFactory {
             throw new ZincRuntimeException("Invalid URL", e);
         }
 
-        return new ZincDownloadFileJob.JobFactory<ZincCatalog>().createJob(url, mGson, ZincCatalog.class);
+        return new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class);
+    }
+
+    private ZincRequestExecutor createRequestExecutor() {
+        return new ZincRequestExecutor() {
+            @Override
+            public InputStreamReader get(final URL url) {
+                return getRequest(url).reader();
+            }
+
+            private HttpRequest getRequest(final URL url) {
+                return HttpRequest.get(url).acceptGzipEncoding().uncompress(true);
+            }
+        };
     }
 }

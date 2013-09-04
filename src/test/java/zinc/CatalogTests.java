@@ -3,12 +3,12 @@ package zinc;
 import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
-import utils.BaseTest;
+import utils.ZincBaseTest;
 import zinc.classes.ZincCatalog;
 
 import static org.junit.Assert.assertEquals;
 
-public class CatalogTests extends BaseTest {
+public class CatalogTests extends ZincBaseTest {
     private Gson gson;
 
     @Before

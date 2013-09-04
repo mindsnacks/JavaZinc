@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public abstract class BaseTest {
+public abstract class ZincBaseTest {
     @Before
     public void setUpMocks() {
         MockitoAnnotations.initMocks(this);
