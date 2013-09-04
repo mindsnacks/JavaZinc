@@ -1,6 +1,8 @@
 package zinc.repo;
 
+import org.junit.Assert;
 import org.junit.Test;
+import zinc.classes.ZincRepoIndex;
 
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -38,7 +40,6 @@ public class RepoInitializationTests extends RepoBaseTest {
         final String newCatalogID = "catalog";
         final URL newSourceURL = new URL(newCatalogURL, newCatalogID);
 
-
         final FileWriter fileWriter = new FileWriter(getIndexFile());
 
         fileWriter.write(String.format("{\"sources\": [\"%s\"]}", originalSourceURL));
@@ -49,5 +50,18 @@ public class RepoInitializationTests extends RepoBaseTest {
 
         // check
         assertEquals(new HashSet<URL>(Arrays.asList(originalSourceURL, newSourceURL)), readRepoIndex().getSources());
+    }
+
+    @Test
+    public void addingTrackingRequestAddsItToIndexFile() throws FileNotFoundException {
+        // run
+        final String bundleID = "com.mindsnacks.games.swell",
+                     distribution = "master";
+
+        mRepo.startTrackingBundle(bundleID, distribution);
+
+        // verify
+        final ZincRepoIndex.TrackingInfo trackingInfo = readRepoIndex().getTrackingInfo(bundleID);
+        Assert.assertEquals(distribution, trackingInfo.getDistribution());
     }
 }

@@ -38,9 +38,13 @@ public class ZincRepo {
         mIndexWriter.saveIndex();
     }
 
+    public void startTrackingBundle(final String bundleID, final String distribution) {
+        mIndexWriter.getIndex().trackBundle(bundleID, distribution);
+        mIndexWriter.saveIndex();
+    }
+
     private void downloadCatalog(final URL catalogURL, final String catalogIdentifier) {
         final Future<ZincCatalog> future = executeJob(mJobFactory.downloadCatalog(catalogURL, catalogIdentifier));
-
     }
 
     private <V> Future<V> executeJob(final ZincJob<V> job) {

@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class DirectExecutorService extends AbstractExecutorService {
     private volatile boolean shutdown = false;
 
-    public void execute(Runnable command) {
+    public void execute(final Runnable command) {
         command.run();
     }
 

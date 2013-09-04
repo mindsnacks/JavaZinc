@@ -5,7 +5,9 @@ import zinc.exceptions.ZincRuntimeException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -15,6 +17,9 @@ import java.util.Set;
 public class ZincRepoIndex {
     @SerializedName("sources")
     final private Set<URL> mSources = new HashSet<URL>();
+
+    @SerializedName("bundles")
+    final private Map<String, TrackingInfo> mBundles = new HashMap<String, TrackingInfo>();
 
     public Set<URL> getSources() {
         return mSources;
@@ -32,10 +37,33 @@ public class ZincRepoIndex {
         mSources.add(sourceURL);
     }
 
+    public void trackBundle(final String bundleID, final String distribution) {
+        // TODO: edit?
+
+        mBundles.put(bundleID, new TrackingInfo(distribution));
+    }
+
     @Override
     public String toString() {
         return "ZincRepoIndex{" +
                 "mSources=" + mSources +
                 '}';
+    }
+
+    public TrackingInfo getTrackingInfo(final String bundleID) {
+        return mBundles.get(bundleID);
+    }
+
+    public static class TrackingInfo {
+        @SerializedName("distribution")
+        final private String mDistribution;
+
+        public TrackingInfo(final String distribution) {
+            mDistribution = distribution;
+        }
+
+        public String getDistribution() {
+            return mDistribution;
+        }
     }
 }
