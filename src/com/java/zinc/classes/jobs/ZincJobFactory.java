@@ -38,8 +38,12 @@ public class ZincJobFactory implements ZincRepo.ZincJobFactory {
     private ZincRequestExecutor createRequestExecutor() {
         return new ZincRequestExecutor() {
             @Override
-            public InputStreamReader get(final URL url) {
-                return getRequest(url).reader();
+            public InputStreamReader get(final URL url) throws AbstractZincDownloadJob.DownloadFileError {
+                try {
+                    return getRequest(url).reader();
+                } catch (HttpRequest.HttpRequestException e) {
+                    throw new AbstractZincDownloadJob.DownloadFileError("Error downloading file at url '" + url + "'", e);
+                }
             }
 
             private HttpRequest getRequest(final URL url) {
