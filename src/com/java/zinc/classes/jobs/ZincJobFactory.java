@@ -13,6 +13,8 @@ import java.net.URL;
  * Date: 9/3/13
  */
 public class ZincJobFactory implements ZincRepo.ZincJobFactory {
+    private static final String CATALOG_FILENAME = "catalog.json";
+
     private final Gson mGson;
 
     public ZincJobFactory(final Gson gson) {
@@ -23,7 +25,7 @@ public class ZincJobFactory implements ZincRepo.ZincJobFactory {
     public ZincJob<ZincCatalog> downloadCatalog(final URL sourceURL, final String catalogID) {
         final URL url;
         try {
-            url = new URL(sourceURL, catalogID);
+            url = new URL(sourceURL, catalogID + "/" + CATALOG_FILENAME);
         } catch (MalformedURLException e) {
             throw new ZincRuntimeException("Invalid URL", e);
         }

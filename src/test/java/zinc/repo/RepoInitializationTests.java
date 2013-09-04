@@ -20,19 +20,24 @@ import static org.junit.Assert.assertTrue;
 public class RepoInitializationTests extends RepoBaseTest {
     @Test
     public void addingSourceURLCreatesIndexFile() throws MalformedURLException, FileNotFoundException {
-        final URL sourceURL = new URL("http://www.google.com");
+        final URL catalogURL = new URL("http://www.google.com");
+        final String catalogID = "catalog";
 
         // run
-        mRepo.addSourceURL(sourceURL);
+        mRepo.addSourceURL(catalogURL, catalogID);
 
         // check
-        assertTrue(readRepoIndex().getSources().contains(sourceURL));
+        assertTrue(readRepoIndex().getSources().contains(new URL(catalogURL, catalogID)));
     }
 
     @Test
     public void addingSourceURLAddsItToIndexFile() throws IOException {
-        final URL sourceURL = new URL("https://www.mindsnacks.com"),
-                originalSourceURL = new URL("https://www.google.com");
+        final URL originalSourceURL = new URL("https://www.google.com/test");
+
+        final URL newCatalogURL = new URL("https://www.mindsnacks.com/");
+        final String newCatalogID = "catalog";
+        final URL newSourceURL = new URL(newCatalogURL, newCatalogID);
+
 
         final FileWriter fileWriter = new FileWriter(getIndexFile());
 
@@ -40,9 +45,9 @@ public class RepoInitializationTests extends RepoBaseTest {
         fileWriter.close();
 
         // run
-        mRepo.addSourceURL(sourceURL);
+        mRepo.addSourceURL(newCatalogURL, newCatalogID);
 
         // check
-        assertEquals(new HashSet<URL>(Arrays.asList(originalSourceURL, sourceURL)), readRepoIndex().getSources());
+        assertEquals(new HashSet<URL>(Arrays.asList(originalSourceURL, newSourceURL)), readRepoIndex().getSources());
     }
 }

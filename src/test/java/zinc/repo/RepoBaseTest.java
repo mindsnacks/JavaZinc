@@ -22,9 +22,10 @@ import static org.mockito.Mockito.mock;
  */
 public abstract class RepoBaseTest extends BaseTest {
     protected ZincRepo mRepo;
+    protected ZincRepo.ZincJobFactory mJobFactory;
 
     private Executor mExecutor;
-    private ZincRepo.ZincJobFactory mJobFactory;
+
     private Gson mGson;
 
     @Rule
@@ -36,7 +37,7 @@ public abstract class RepoBaseTest extends BaseTest {
         mGson = createGson();
 
         mJobFactory = mock(ZincRepo.ZincJobFactory.class);
-        mRepo = new ZincRepo(mExecutor, mGson, rootFolder.getRoot().toURI(), mJobFactory);
+        mRepo = new ZincRepo(mExecutor, mJobFactory, mGson, rootFolder.getRoot().toURI());
     }
 
     protected ZincRepoIndex readRepoIndex() throws FileNotFoundException {

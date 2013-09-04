@@ -4,14 +4,13 @@ import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
 import utils.BaseTest;
+import utils.MockFactory;
 import zinc.classes.ZincCatalog;
 import zinc.classes.jobs.ZincDownloadFileJob;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -33,7 +32,7 @@ public class ZincDownloadFileJobTest extends BaseTest {
 
     @Test
     public void testCall() throws Exception {
-        final ZincCatalog catalog = createCatalog();
+        final ZincCatalog catalog = MockFactory.createCatalog();
         final URL url = new URL("http://zinc2.mindsnacks.com.s3.amazonaws.com/com.mindsnacks.misc/index.json");
 
         final ZincDownloadFileJob<ZincCatalog> mJob = new ZincDownloadFileJob<ZincCatalog>(mRequestFactory, url, mGson, ZincCatalog.class);
@@ -48,16 +47,5 @@ public class ZincDownloadFileJobTest extends BaseTest {
 
         // verify
         assertEquals(catalog, result);
-    }
-
-    private ZincCatalog createCatalog() {
-        final Map<String, Integer> distributions = new HashMap<String, Integer>();
-        distributions.put("master", 2);
-        distributions.put("develop", 1);
-
-        final Map<String, ZincCatalog.Info> bundles = new HashMap<String, ZincCatalog.Info>();
-        bundles.put("bundle1", new ZincCatalog.Info(distributions));
-
-        return new ZincCatalog("com.mindsnacks.test", bundles);
     }
 }
