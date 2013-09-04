@@ -23,6 +23,26 @@ public class ZincRepoIndexWriter {
         mIndexFile = new File(root, REPO_INDEX_FILE);
     }
 
+    public void saveIndex() {
+        final FileWriter fileWriter = getFileWriter();
+
+        mGson.toJson(mRepoIndex, fileWriter);
+
+        try {
+            fileWriter.flush();
+        } catch (IOException e) {
+            throw new ZincRuntimeException("Error writing to index file", e);
+        }
+    }
+
+    public ZincRepoIndex getIndex() {
+        if (mRepoIndex == null) {
+            mRepoIndex = initializeIndex();
+        }
+
+        return mRepoIndex;
+    }
+
     private ZincRepoIndex initializeIndex() {
         try {
             return mGson.fromJson(new FileReader(mIndexFile), ZincRepoIndex.class);
@@ -47,25 +67,5 @@ public class ZincRepoIndexWriter {
         }
 
         return mFileWriter;
-    }
-
-    public void saveIndex() {
-        final FileWriter fileWriter = getFileWriter();
-
-        mGson.toJson(mRepoIndex, fileWriter);
-
-        try {
-            fileWriter.flush();
-        } catch (IOException e) {
-            throw new ZincRuntimeException("Error writing to index file", e);
-        }
-    }
-
-    public ZincRepoIndex getIndex() {
-        if (mRepoIndex == null) {
-            mRepoIndex = initializeIndex();
-        }
-
-        return mRepoIndex;
     }
 }

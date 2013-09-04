@@ -1,14 +1,18 @@
 package zinc.repo;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import zinc.classes.ZincCatalog;
+import zinc.classes.ZincRepoIndex;
+import zinc.classes.ZincRepoIndexWriter;
 import zinc.classes.jobs.ZincJob;
 
 import java.net.URL;
 
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static utils.MockFactory.createCatalogWithIdentifier;
 import static utils.MockFactory.randomString;
 
@@ -19,6 +23,24 @@ import static utils.MockFactory.randomString;
 public class RepoJobTests extends RepoBaseTest {
     @Mock
     private ZincJob<ZincCatalog> mZincCatalogDownloadJob;
+
+    @Mock
+    private ZincRepoIndex mRepoIndex;
+    @Mock
+    private ZincRepoIndexWriter mRepoIndexWriter;
+
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+
+        when(mRepoIndexWriter.getIndex()).thenReturn(mRepoIndex);
+    }
+
+    @Override
+    protected ZincRepoIndexWriter newRepoIndexWriter() {
+        return mRepoIndexWriter;
+    }
 
     @Test
     public void catalogGetsDownloadedWhenAddingTheSource() throws Exception {
@@ -32,6 +54,20 @@ public class RepoJobTests extends RepoBaseTest {
         // run
         mRepo.addSourceURL(catalogURL, catalogID);
 
+        // verify
+        verify(mRepoIndex).addSourceURL(eq(catalogURL), eq(catalogID));
         verify(mJobFactory).downloadCatalog(eq(catalogURL), eq(catalogID));
+    }
+
+    @Test
+    public void trackingBundleAddsItToTheIndex() throws Exception {
+        final String bundleID = "com.mindsnacks.games.swell";
+        final String distribution = "master";
+
+        // run
+        mRepo.startTrackingBundle(bundleID, distribution);
+
+        // verify
+        verify(mRepoIndex).trackBundle(eq(bundleID), eq(distribution));
     }
 }
