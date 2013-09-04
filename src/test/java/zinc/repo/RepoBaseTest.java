@@ -9,6 +9,7 @@ import utils.BaseTest;
 import zinc.classes.ZincCatalog;
 import zinc.classes.ZincRepo;
 import zinc.classes.ZincRepoIndex;
+import zinc.classes.ZincRepoIndexWriter;
 import zinc.classes.jobs.ZincJob;
 
 import java.io.File;
@@ -30,6 +31,9 @@ public abstract class RepoBaseTest extends BaseTest {
 
     @Mock
     protected ZincRepo.ZincJobFactory mJobFactory;
+
+    protected ZincRepoIndexWriter mIndexWriter;
+
     @Mock
     private ZincJob<ZincCatalog> catalogDownloadJob;
 
@@ -44,17 +48,22 @@ public abstract class RepoBaseTest extends BaseTest {
         mExecutor = createExecutorService();
         mGson = createGson();
 
-        mRepo = new ZincRepo(mExecutor, mJobFactory, mGson, rootFolder.getRoot().toURI());
+        mIndexWriter = newRepoIndexWriter();
+        mRepo = new ZincRepo(mExecutor, mJobFactory, rootFolder.getRoot().toURI(), mIndexWriter);
 
         when(mJobFactory.downloadCatalog((URL)anyObject(), anyString())).thenReturn(catalogDownloadJob);
     }
 
-    protected ZincRepoIndex readRepoIndex() throws FileNotFoundException {
+    protected ZincRepoIndexWriter newRepoIndexWriter() {
+        return new ZincRepoIndexWriter(rootFolder.getRoot(), mGson);
+    }
+
+    protected final ZincRepoIndex readRepoIndex() throws FileNotFoundException {
         final FileReader fileReader = new FileReader(getIndexFile());
         return mGson.fromJson(fileReader, ZincRepoIndex.class);
     }
 
-    protected File getIndexFile() {
+    protected final File getIndexFile() {
         return new File(rootFolder.getRoot(), "repo.json");
     }
 }

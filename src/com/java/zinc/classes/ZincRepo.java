@@ -1,6 +1,5 @@
 package zinc.classes;
 
-import com.google.gson.Gson;
 import zinc.classes.jobs.ZincJob;
 
 import java.io.File;
@@ -24,11 +23,11 @@ public class ZincRepo {
 
     private final ZincRepoIndexWriter mIndexWriter;
 
-    public ZincRepo(final ExecutorService executorService, final ZincJobFactory jobFactory, final Gson gson, final URI root) {
+    public ZincRepo(final ExecutorService executorService, final ZincJobFactory jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter) {
         mExecutorService = executorService;
         mJobFactory = jobFactory;
         mRoot = new File(root);
-        mIndexWriter = new ZincRepoIndexWriter(mRoot, gson);
+        mIndexWriter = repoIndexWriter;
     }
 
     public void addSourceURL(final URL catalogURL, final String catalogIdentifier) {
