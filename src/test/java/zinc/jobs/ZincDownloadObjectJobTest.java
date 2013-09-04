@@ -40,7 +40,7 @@ public class ZincDownloadObjectJobTest extends ZincBaseTest {
 
         // expectations
         final String catalogJSON = mGson.toJson(catalog);
-        when(mRequestExecutor.get(url)).thenReturn(MockFactory.inputStreamReaderWithString(catalogJSON));
+        when(mRequestExecutor.get(url)).thenReturn(MockFactory.inputStreamWithString(catalogJSON));
 
         // run
         final ZincCatalog result = mJob.call();

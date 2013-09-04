@@ -2,7 +2,7 @@ package zinc.classes.jobs;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
@@ -19,7 +19,7 @@ public abstract class AbstractZincDownloadFileJob extends AbstractZincDownloadJo
 
     @Override
     public final File call() throws DownloadFileError {
-        final InputStreamReader inputStream = mRequestExecutor.get(mUrl);
+        final InputStream inputStream = mRequestExecutor.get(mUrl);
 
         try {
             writeFile(inputStream, mFile);
@@ -30,5 +30,5 @@ public abstract class AbstractZincDownloadFileJob extends AbstractZincDownloadJo
         return mFile;
     }
 
-    abstract protected void writeFile(final InputStreamReader inputStream, final File file) throws IOException;
+    abstract protected void writeFile(final InputStream inputStream, final File file) throws IOException;
 }

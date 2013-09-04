@@ -6,7 +6,7 @@ import zinc.classes.ZincCatalog;
 import zinc.classes.ZincRepo;
 import zinc.exceptions.ZincRuntimeException;
 
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -38,9 +38,9 @@ public class ZincJobFactory implements ZincRepo.ZincJobFactory {
     private ZincRequestExecutor createRequestExecutor() {
         return new ZincRequestExecutor() {
             @Override
-            public InputStreamReader get(final URL url) throws AbstractZincDownloadJob.DownloadFileError {
+            public InputStream get(final URL url) throws HttpRequest.HttpRequestException {
                 try {
-                    return getRequest(url).reader();
+                    return getRequest(url).stream();
                 } catch (HttpRequest.HttpRequestException e) {
                     throw new AbstractZincDownloadJob.DownloadFileError("Error downloading file at url '" + url + "'", e);
                 }

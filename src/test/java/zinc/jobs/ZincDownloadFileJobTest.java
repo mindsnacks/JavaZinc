@@ -11,7 +11,7 @@ import zinc.classes.jobs.ZincDownloadFileJob;
 import zinc.classes.jobs.ZincRequestExecutor;
 
 import java.io.File;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -81,7 +81,7 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
     }
 
     private void setURLContents(final String contents) {
-        final InputStreamReader reader = MockFactory.inputStreamReaderWithString(contents);
+        final InputStream reader = MockFactory.inputStreamWithString(contents);
 
         when(mRequestExecutor.get(mUrl)).thenReturn(reader);
     }
