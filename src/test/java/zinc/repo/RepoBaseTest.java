@@ -8,13 +8,18 @@ import utils.BaseTest;
 import utils.DirectExecutor;
 import zinc.classes.ZincRepo;
 import zinc.classes.ZincRepoIndex;
+import zinc.classes.jobs.ZincJob;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.net.URL;
 import java.util.concurrent.Executor;
 
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * User: NachoSoto
@@ -38,6 +43,8 @@ public abstract class RepoBaseTest extends BaseTest {
 
         mJobFactory = mock(ZincRepo.ZincJobFactory.class);
         mRepo = new ZincRepo(mExecutor, mJobFactory, mGson, rootFolder.getRoot().toURI());
+
+        when(mJobFactory.downloadCatalog((URL)anyObject(), anyString())).thenReturn(mock(ZincJob.class));
     }
 
     protected ZincRepoIndex readRepoIndex() throws FileNotFoundException {
