@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import utils.BaseTest;
-import utils.DirectExecutor;
 import zinc.classes.ZincRepo;
 import zinc.classes.ZincRepoIndex;
 import zinc.classes.jobs.ZincJob;
@@ -14,7 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -29,7 +28,7 @@ public abstract class RepoBaseTest extends BaseTest {
     protected ZincRepo mRepo;
     protected ZincRepo.ZincJobFactory mJobFactory;
 
-    private Executor mExecutor;
+    private ExecutorService mExecutor;
 
     private Gson mGson;
 
@@ -38,7 +37,7 @@ public abstract class RepoBaseTest extends BaseTest {
 
     @Before
     public void setUp() throws Exception {
-        mExecutor = new DirectExecutor();
+        mExecutor = createExecutorService();
         mGson = createGson();
 
         mJobFactory = mock(ZincRepo.ZincJobFactory.class);
