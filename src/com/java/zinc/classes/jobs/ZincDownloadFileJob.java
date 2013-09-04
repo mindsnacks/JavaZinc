@@ -19,7 +19,7 @@ public class ZincDownloadFileJob extends AbstractZincDownloadFileJob {
         final FileWriter outputStream = new FileWriter(file);
 
         int read = 0;
-        char[] bytes = new char[BUFFER_SIZE];
+        final char[] bytes = new char[BUFFER_SIZE];
 
         while ((read = inputStream.read(bytes, 0, BUFFER_SIZE)) != -1) {
             outputStream.write(bytes, 0, read);

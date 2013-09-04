@@ -11,20 +11,15 @@ import zinc.classes.jobs.ZincDownloadFileJob;
 import zinc.classes.jobs.ZincRequestExecutor;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static zinc.jobs.TestUtils.readFile;
 
 /**
  * User: NachoSoto
@@ -82,17 +77,12 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
 
         final File file = run();
 
-        assertEquals(contents, readFile(file.getPath(), StandardCharsets.UTF_8));
+        assertEquals(contents, readFile(file.getPath()));
     }
 
     private void setURLContents(final String contents) {
         final InputStreamReader reader = MockFactory.inputStreamReaderWithString(contents);
 
         when(mRequestExecutor.get(mUrl)).thenReturn(reader);
-    }
-
-    private static String readFile(String path, Charset encoding) throws IOException {
-        final byte[] encoded = Files.readAllBytes(Paths.get(path));
-        return encoding.decode(ByteBuffer.wrap(encoded)).toString();
     }
 }

@@ -18,7 +18,7 @@ public abstract class AbstractZincDownloadFileJob extends AbstractZincDownloadJo
     }
 
     @Override
-    public File call() throws DownloadFileError {
+    public final File call() throws DownloadFileError {
         final InputStreamReader inputStream = mRequestExecutor.get(mUrl);
 
         try {
