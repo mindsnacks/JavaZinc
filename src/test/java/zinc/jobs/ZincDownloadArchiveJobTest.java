@@ -7,6 +7,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import utils.MockFactory;
 import utils.ZincBaseTest;
 import zinc.jobs.TestUtils;
 
@@ -16,6 +19,9 @@ import java.net.URL;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 /**
@@ -62,7 +68,8 @@ public class ZincDownloadArchiveJobTest extends ZincBaseTest {
 
         final File tar = createTar(filesToTar);
 
-        when(mRequestExecutor.get(mUrl)).thenReturn(new InputStreamReader(new FileInputStream(tar)));
+        final InputStream inputStream = new FileInputStream(tar);
+        when(mRequestExecutor.get(mUrl)).thenReturn(inputStream);
 
         run();
 

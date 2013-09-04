@@ -1,10 +1,9 @@
 package zinc.classes.jobs;
 
+import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 
 /**
@@ -17,9 +16,31 @@ public class ZincDownloadArchiveJob extends AbstractZincDownloadFileJob {
     }
 
     @Override
-    protected void writeFile(final InputStreamReader inputStream, final File file) throws IOException {
-        final TarInputStream tar = new TarInputStream(inputStream);
+    protected void writeFile(final InputStream inputStream, final File file) throws IOException {
+        if (!file.exists()) {
+            if (!file.mkdir()) {
+                throw new DownloadFileError("Error creating folder: " + file.getAbsolutePath());
+            }
+        }
+
+        final TarInputStream tis = new TarInputStream(new BufferedInputStream(inputStream));
+
+        TarEntry entry;
+        while ((entry = tis.getNextEntry()) != null) {
+            int count;
+            byte data[] = new byte[2048];
+
+            final FileOutputStream fos = new FileOutputStream(file.getPath() + "/" + entry.getName());
+            final BufferedOutputStream dest = new BufferedOutputStream(fos);
+
+            while ((count = tis.read(data)) != -1) {
+                dest.write(data, 0, count);
+            }
+
+            dest.flush();
+            dest.close();
+        }
+
+        tis.close();
     }
-
-
 }
