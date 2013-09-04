@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
-import utils.BaseTest;
+import utils.ZincBaseTest;
 import zinc.classes.ZincCatalog;
 import zinc.classes.ZincRepo;
 import zinc.classes.ZincRepoIndex;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public abstract class RepoBaseTest extends BaseTest {
+public abstract class RepoBaseTest extends ZincBaseTest {
     protected ZincRepo mRepo;
 
     @Mock

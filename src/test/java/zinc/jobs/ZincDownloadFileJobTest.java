@@ -1,52 +1,42 @@
 package zinc.jobs;
 
-import com.google.gson.Gson;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
-import utils.BaseTest;
-import utils.MockFactory;
-import zinc.classes.ZincCatalog;
+import utils.ZincBaseTest;
 import zinc.classes.jobs.ZincDownloadFileJob;
+import zinc.classes.jobs.ZincRequestExecutor;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
-
-import static junit.framework.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 /**
  * User: NachoSoto
- * Date: 9/3/13
+ * Date: 9/4/13
  */
-public class ZincDownloadFileJobTest extends BaseTest {
+public class ZincDownloadFileJobTest extends ZincBaseTest {
     @Mock
-    private ZincDownloadFileJob.RequestFactory mRequestFactory;
+    private ZincRequestExecutor mRequestExecutor;
 
-    private Gson mGson;
+    @Rule
+    public final TemporaryFolder rootFolder = new TemporaryFolder();
+
+    private final URL mUrl;
+    private ZincDownloadFileJob mJob;
+
+    public ZincDownloadFileJobTest() throws MalformedURLException {
+        mUrl = new URL("http://mindsnacks.com");
+    }
 
     @Before
-    public void setUp() {
-        mGson = createGson();
+    public void setUp() throws Exception {
+        mJob = new ZincDownloadFileJob(mRequestExecutor, mUrl, rootFolder.getRoot());
     }
 
     @Test
-    public void testCall() throws Exception {
-        final ZincCatalog catalog = MockFactory.createCatalog();
-        final URL url = new URL("http://zinc2.mindsnacks.com.s3.amazonaws.com/com.mindsnacks.misc/index.json");
+    public void testCreatesFolder() throws Exception {
 
-        final ZincDownloadFileJob<ZincCatalog> mJob = new ZincDownloadFileJob<ZincCatalog>(mRequestFactory, url, mGson, ZincCatalog.class);
-
-        // expectations
-        final String catalogJSON = mGson.toJson(catalog);
-        final InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(catalogJSON.getBytes()));
-        when(mRequestFactory.get(url)).thenReturn(reader);
-
-        // run
-        final ZincCatalog result = mJob.call();
-
-        // verify
-        assertEquals(catalog, result);
     }
 }
