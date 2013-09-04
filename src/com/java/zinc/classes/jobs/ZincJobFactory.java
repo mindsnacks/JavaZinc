@@ -29,7 +29,7 @@ public class ZincJobFactory implements ZincRepo.ZincJobFactory {
         try {
             url = new URL(sourceURL, catalogID + "/" + CATALOG_FILENAME);
         } catch (MalformedURLException e) {
-            throw new ZincRuntimeException("Invalid URL", e);
+            throw new ZincRuntimeException("Invalid URL: " + sourceURL + "/" + catalogID, e);
         }
 
         return new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class);

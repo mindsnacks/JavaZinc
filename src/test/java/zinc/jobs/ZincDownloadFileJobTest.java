@@ -52,7 +52,7 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
         mJob = new ZincDownloadFileJob(mRequestExecutor, mUrl, rootFolder.getRoot(), mFilename);
     }
 
-    private File run() throws IOException {
+    private File run() {
         return mJob.call();
     }
 
@@ -91,7 +91,7 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
         when(mRequestExecutor.get(mUrl)).thenReturn(reader);
     }
 
-    static String readFile(String path, Charset encoding) throws IOException {
+    private static String readFile(String path, Charset encoding) throws IOException {
         final byte[] encoded = Files.readAllBytes(Paths.get(path));
         return encoding.decode(ByteBuffer.wrap(encoded)).toString();
     }
