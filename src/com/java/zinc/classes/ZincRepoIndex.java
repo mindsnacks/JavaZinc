@@ -38,8 +38,6 @@ public class ZincRepoIndex {
     }
 
     public void trackBundle(final String bundleID, final String distribution) {
-        // TODO: edit?
-
         mBundles.put(bundleID, new TrackingInfo(distribution));
     }
 
