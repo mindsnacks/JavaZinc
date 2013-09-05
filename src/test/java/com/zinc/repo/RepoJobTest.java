@@ -20,7 +20,7 @@ import static com.zinc.utils.MockFactory.randomString;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public class RepoJobTests extends RepoBaseTest {
+public class RepoJobTest extends RepoBaseTest {
     @Mock
     private AbstractZincJob<ZincCatalog> mZincCatalogDownloadJob;
 

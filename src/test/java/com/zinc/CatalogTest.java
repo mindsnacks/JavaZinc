@@ -8,7 +8,7 @@ import com.zinc.classes.ZincCatalog;
 
 import static org.junit.Assert.assertEquals;
 
-public class CatalogTests extends ZincBaseTest {
+public class CatalogTest extends ZincBaseTest {
     private Gson gson;
 
     @Before

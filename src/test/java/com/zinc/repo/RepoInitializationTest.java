@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public class RepoInitializationTests extends RepoBaseTest {
+public class RepoInitializationTest extends RepoBaseTest {
     @Test
     public void addingSourceURLCreatesIndexFile() throws MalformedURLException, FileNotFoundException {
         final URL catalogURL = new URL("http://www.google.com");
