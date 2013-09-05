@@ -1,10 +1,8 @@
 package com.zinc.jobs;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * User: NachoSoto
@@ -12,7 +10,13 @@ import java.nio.file.Paths;
  */
 public class TestUtils {
     public static String readFile(String path) throws IOException {
-        final byte[] encoded = Files.readAllBytes(Paths.get(path));
-        return StandardCharsets.UTF_8.decode(ByteBuffer.wrap(encoded)).toString();
+        final File file = new File(path);
+        final FileInputStream fis = new FileInputStream(file);
+
+        final byte[] bytes = new byte[(int)file.length()];
+
+        fis.read(bytes);
+
+        return new String(bytes);
     }
 }
