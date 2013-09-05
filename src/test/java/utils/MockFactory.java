@@ -1,6 +1,6 @@
 package utils;
 
-import zinc.classes.ZincCatalog;
+import com.zinc.classes.ZincCatalog;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
