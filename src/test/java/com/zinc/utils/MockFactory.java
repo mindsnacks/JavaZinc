@@ -1,4 +1,4 @@
-package utils;
+package com.zinc.utils;
 
 import com.zinc.classes.ZincCatalog;
 

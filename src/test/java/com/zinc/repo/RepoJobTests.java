@@ -13,8 +13,8 @@ import java.net.URL;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static utils.MockFactory.createCatalogWithIdentifier;
-import static utils.MockFactory.randomString;
+import static com.zinc.utils.MockFactory.createCatalogWithIdentifier;
+import static com.zinc.utils.MockFactory.randomString;
 
 /**
  * User: NachoSoto
@@ -69,5 +69,17 @@ public class RepoJobTests extends RepoBaseTest {
 
         // verify
         verify(mRepoIndex).trackBundle(eq(bundleID), eq(distribution));
+    }
+
+    @Test
+    public void trackingBundleDownloadsTar() throws Exception {
+        final String bundleID = "com.mindsnacks.games.swell";
+        final String distribution = "master";
+
+        // run
+        mRepo.startTrackingBundle(bundleID, distribution);
+
+        // verify
+//        verify(mJobFactory).downloadArchive( bundleID)
     }
 }

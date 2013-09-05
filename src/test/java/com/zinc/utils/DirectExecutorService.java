@@ -1,4 +1,4 @@
-package utils;
+package com.zinc.utils;
 
 import java.util.Collections;
 import java.util.List;

@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
-import utils.ZincBaseTest;
+import com.zinc.utils.ZincBaseTest;
 import com.zinc.classes.ZincCatalog;
 import com.zinc.classes.ZincRepo;
 import com.zinc.classes.ZincRepoIndex;

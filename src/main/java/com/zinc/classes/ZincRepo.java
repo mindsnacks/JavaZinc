@@ -13,9 +13,6 @@ import java.util.concurrent.Future;
  * Date: 9/3/13
  */
 public class ZincRepo {
-//    private static final String BUNDLES_DIR = "bundles";
-//    private static final String CATALOGS_DIR = "catalogs";
-
     private final ExecutorService mExecutorService;
     private final ZincJobFactory mJobFactory;
     

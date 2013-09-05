@@ -2,7 +2,7 @@ package com.zinc;
 
 import org.junit.Before;
 import org.junit.Test;
-import utils.ZincBaseTest;
+import com.zinc.utils.ZincBaseTest;
 import com.zinc.classes.ZincRepoIndex;
 
 import java.net.URL;

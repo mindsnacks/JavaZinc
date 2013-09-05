@@ -9,7 +9,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
-import utils.ZincBaseTest;
+import com.zinc.utils.ZincBaseTest;
 
 import java.io.*;
 import java.net.MalformedURLException;

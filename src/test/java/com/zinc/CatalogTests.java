@@ -3,7 +3,7 @@ package com.zinc;
 import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
-import utils.ZincBaseTest;
+import com.zinc.utils.ZincBaseTest;
 import com.zinc.classes.ZincCatalog;
 
 import static org.junit.Assert.assertEquals;
