@@ -16,6 +16,7 @@ public class TestUtils {
         final byte[] bytes = new byte[(int)file.length()];
 
         fis.read(bytes);
+        fis.close();
 
         return new String(bytes);
     }

@@ -21,10 +21,6 @@ public final class MockFactory {
     }
 
     public static ZincCatalog createCatalog() {
-        return createCatalogWithIdentifier(randomString());
-    }
-
-    public static ZincCatalog createCatalogWithIdentifier(String identifier) {
         final Map<String, Integer> distributions = new HashMap<String, Integer>();
         distributions.put("master", 2);
         distributions.put("develop", 1);
@@ -32,7 +28,7 @@ public final class MockFactory {
         final Map<String, ZincCatalog.Info> bundles = new HashMap<String, ZincCatalog.Info>();
         bundles.put("bundle1", new ZincCatalog.Info(distributions));
 
-        return new ZincCatalog(identifier, bundles);
+        return new ZincCatalog(randomString(), bundles);
     }
 
     public static InputStream inputStreamWithString(final String string) {

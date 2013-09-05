@@ -36,7 +36,7 @@ public class CatalogTest extends ZincBaseTest {
                 "  \"id\": \"repo\"\n" +
                 "}";
 
-        ZincCatalog catalog = gson.fromJson(json, ZincCatalog.class);
+        final ZincCatalog catalog = gson.fromJson(json, ZincCatalog.class);
 
         assertEquals("repo", catalog.getIdentifier());
         assertEquals(1, catalog.getVersionForBundleID("bundleID1", "master"));

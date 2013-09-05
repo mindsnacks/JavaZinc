@@ -1,20 +1,18 @@
 package com.zinc.repo;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 import com.zinc.classes.ZincCatalog;
 import com.zinc.classes.ZincRepoIndex;
 import com.zinc.classes.ZincRepoIndexWriter;
 import com.zinc.classes.jobs.AbstractZincJob;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
 
 import java.net.URL;
 
+import static com.zinc.utils.MockFactory.createCatalog;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static com.zinc.utils.MockFactory.createCatalogWithIdentifier;
-import static com.zinc.utils.MockFactory.randomString;
+import static org.mockito.Mockito.*;
 
 /**
  * User: NachoSoto
@@ -44,19 +42,30 @@ public class RepoJobTest extends RepoBaseTest {
 
     @Test
     public void catalogGetsDownloadedWhenAddingTheSource() throws Exception {
-        final URL catalogURL = new URL("https://mindsnacks.com");
-        final String catalogID = randomString();
-        final ZincCatalog catalog = createCatalogWithIdentifier(catalogID);
+        final URL sourceURL = new URL("https://mindsnacks.com");
+        final ZincCatalog catalog = createCatalog();
 
         when(mZincCatalogDownloadJob.call()).thenReturn(catalog);
-        when(mJobFactory.downloadCatalog(eq(catalogURL), eq(catalogID))).thenReturn(mZincCatalogDownloadJob);
+        when(mJobFactory.downloadCatalog(eq(sourceURL))).thenReturn(mZincCatalogDownloadJob);
 
         // run
-        mRepo.addSourceURL(catalogURL, catalogID);
+        mRepo.addSourceURL(sourceURL);
 
         // verify
-        verify(mRepoIndex).addSourceURL(eq(catalogURL), eq(catalogID));
-        verify(mJobFactory).downloadCatalog(eq(catalogURL), eq(catalogID));
+        verify(mRepoIndex).addSourceURL(eq(sourceURL));
+        verify(mJobFactory).downloadCatalog(eq(sourceURL));
+    }
+
+    @Test
+    public void catalogDoesntGetDownloadedTwiceWhenAddingTheSameSourceTwice() throws Exception {
+        final URL catalogURL = new URL("https://mindsnacks.com");
+
+        // run
+        mRepo.addSourceURL(catalogURL);
+        mRepo.addSourceURL(catalogURL);
+
+        // verify
+        verify(mJobFactory, times(1)).downloadCatalog(eq(catalogURL));
     }
 
     @Test
@@ -69,17 +78,5 @@ public class RepoJobTest extends RepoBaseTest {
 
         // verify
         verify(mRepoIndex).trackBundle(eq(bundleID), eq(distribution));
-    }
-
-    @Test
-    public void trackingBundleDownloadsTar() throws Exception {
-        final String bundleID = "com.mindsnacks.games.swell";
-        final String distribution = "master";
-
-        // run
-        mRepo.startTrackingBundle(bundleID, distribution);
-
-        // verify
-//        verify(mJobFactory).downloadArchive( bundleID)
     }
 }

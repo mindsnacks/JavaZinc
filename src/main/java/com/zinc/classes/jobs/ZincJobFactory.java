@@ -24,12 +24,12 @@ public class ZincJobFactory implements ZincRepo.ZincJobFactory {
     }
 
     @Override
-    public AbstractZincJob<ZincCatalog> downloadCatalog(final URL sourceURL, final String catalogID) {
+    public AbstractZincJob<ZincCatalog> downloadCatalog(final URL sourceURL) {
         final URL url;
         try {
-            url = new URL(sourceURL, catalogID + "/" + CATALOG_FILENAME);
+            url = new URL(sourceURL, CATALOG_FILENAME);
         } catch (MalformedURLException e) {
-            throw new ZincRuntimeException("Invalid URL: " + sourceURL + "/" + catalogID, e);
+            throw new ZincRuntimeException("Invalid URL: " + sourceURL + "/" + CATALOG_FILENAME, e);
         }
 
         return new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class);

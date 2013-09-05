@@ -23,22 +23,18 @@ public class RepoInitializationTest extends RepoBaseTest {
     @Test
     public void addingSourceURLCreatesIndexFile() throws MalformedURLException, FileNotFoundException {
         final URL catalogURL = new URL("http://www.google.com");
-        final String catalogID = "catalog";
 
         // run
-        mRepo.addSourceURL(catalogURL, catalogID);
+        mRepo.addSourceURL(catalogURL);
 
         // check
-        assertTrue(readRepoIndex().getSources().contains(new URL(catalogURL, catalogID)));
+        assertTrue(readRepoIndex().getSources().contains(catalogURL));
     }
 
     @Test
     public void addingSourceURLAddsItToIndexFile() throws IOException {
-        final URL originalSourceURL = new URL("https://www.google.com/test");
-
-        final URL newCatalogURL = new URL("https://www.mindsnacks.com/");
-        final String newCatalogID = "catalog";
-        final URL newSourceURL = new URL(newCatalogURL, newCatalogID);
+        final URL originalSourceURL = new URL("https://www.google.com/test"),
+                  newSourceURL = new URL("https://www.mindsnacks.com/");
 
         final FileWriter fileWriter = new FileWriter(getIndexFile());
 
@@ -46,7 +42,7 @@ public class RepoInitializationTest extends RepoBaseTest {
         fileWriter.close();
 
         // run
-        mRepo.addSourceURL(newCatalogURL, newCatalogID);
+        mRepo.addSourceURL(newSourceURL);
 
         // check
         assertEquals(new HashSet<URL>(Arrays.asList(originalSourceURL, newSourceURL)), readRepoIndex().getSources());
