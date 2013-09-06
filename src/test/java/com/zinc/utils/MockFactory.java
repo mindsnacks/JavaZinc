@@ -34,4 +34,12 @@ public final class MockFactory {
     public static InputStream inputStreamWithString(final String string) {
         return new ByteArrayInputStream(string.getBytes());
     }
+
+    public static int randomInt(int min, int max) {
+        return random.nextInt(max) + min;
+    }
+
+    public static int randomInt() {
+        return random.nextInt();
+    }
 }

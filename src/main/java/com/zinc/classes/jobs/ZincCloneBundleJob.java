@@ -42,7 +42,7 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
         final ZincCatalog catalog = mZincCatalog.get();
         final int version = catalog.getVersionForBundleID(mBundleID, mDistribution);
 
-        final ZincJob<File> job = mJobCreator.downloadArchive(mSourceURLs.get(0), mRepoFolder, ARCHIVES_FOLDER + "/" + mBundleID);
+        final ZincJob<File> job = mJobCreator.downloadArchive(mSourceURLs.get(0), mRepoFolder, ARCHIVES_FOLDER + "/" + mBundleID + "-" + version);
 
         return new ZincBundle(job.call(), mBundleID);
     }

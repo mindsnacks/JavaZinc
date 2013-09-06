@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.Future;
 
+import static com.zinc.utils.MockFactory.randomInt;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -84,12 +85,17 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     @Test
     @SuppressWarnings("unchecked")
     public void downloadsArchive() throws Exception {
-        when(mDownloadArchiveJob.call()).thenReturn(mResult);
+        final int version = randomInt(1, 100);
 
+        when(mDownloadArchiveJob.call()).thenReturn(mResult);
+        when(mZincCatalog.getVersionForBundleID(anyString(), anyString())).thenReturn(version);
+
+        // run
         final ZincBundle result = run();
 
+        // verify
         verify(mDownloadArchiveJob).call();
-        verify(mJobCreator).downloadArchive(eq(mSourceURL), eq(mRepoFolder), eq("archives/" + mBundleID));
+        verify(mJobCreator).downloadArchive(eq(mSourceURL), eq(mRepoFolder), eq("archives/" + mBundleID + "-" + version));
         assertEquals(mResultPath, result.getPath());
         assertEquals(mBundleID, result.getBundleID());
     }
