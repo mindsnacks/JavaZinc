@@ -1,6 +1,7 @@
 package com.zinc.classes;
 
 import com.google.gson.annotations.SerializedName;
+import com.zinc.exceptions.ZincException;
 
 import java.util.Map;
 
@@ -24,13 +25,19 @@ public class ZincCatalog {
         return mIdentifier;
     }
 
-    public int getVersionForBundleID(final String bundleID, final String distribution) {
-        return mBundles.get(bundleID).getVersionForDistribution(distribution);
+    public int getVersionForBundleID(final String bundleID, final String distribution) throws DistributionNotFoundException {
+        try {
+            return mBundles.get(bundleID).getVersionForDistribution(distribution);
+        } catch (DistributionNotFoundException e) {
+            throw new DistributionNotFoundException(distribution, bundleID);
+        } catch (NullPointerException e) {
+            throw new DistributionNotFoundException(distribution, bundleID);
+        }
     }
 
     @Override
     public String toString() {
-        return "ZincCatalog{" +
+        return "ZincCatalog {" +
                 "mIdentifier='" + mIdentifier + '\'' +
                 ", mBundles=" + mBundles +
                 '}';
@@ -55,13 +62,17 @@ public class ZincCatalog {
             mDistributions = distributions;
         }
 
-        public int getVersionForDistribution(String distribution) {
-            return mDistributions.get(distribution);
+        public int getVersionForDistribution(String distribution) throws DistributionNotFoundException {
+            if (mDistributions.containsKey(distribution)) {
+                return mDistributions.get(distribution);
+            } else {
+                throw new DistributionNotFoundException(distribution);
+            }
         }
 
         @Override
         public String toString() {
-            return "Info{" +
+            return "Info {" +
                     "mDistributions=" + mDistributions +
                     '}';
         }
@@ -72,6 +83,16 @@ public class ZincCatalog {
             if (o == null || getClass() != o.getClass()) return false;
 
             return mDistributions.equals(((Info)o).mDistributions);
+        }
+    }
+
+    public static class DistributionNotFoundException extends ZincException {
+        public DistributionNotFoundException(final String distribution) {
+            super(String.format("Distribution '%s' not found", distribution));
+        }
+
+        public DistributionNotFoundException(final String distribution, final String bundleID) {
+            super(String.format("Distribution '%s' not found in bundle ''%s", distribution, bundleID));
         }
     }
 }
