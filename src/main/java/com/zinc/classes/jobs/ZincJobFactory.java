@@ -44,7 +44,7 @@ public class ZincJobFactory implements ZincJobCreator {
     private ZincRequestExecutor createRequestExecutor() {
         return new ZincRequestExecutor() {
             @Override
-            public InputStream get(final URL url) throws HttpRequest.HttpRequestException {
+            public InputStream get(final URL url) throws AbstractZincDownloadJob.DownloadFileError {
                 try {
                     return getRequest(url).stream();
                 } catch (HttpRequest.HttpRequestException e) {
