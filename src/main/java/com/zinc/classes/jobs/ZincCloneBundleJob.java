@@ -2,12 +2,13 @@ package com.zinc.classes.jobs;
 
 import com.zinc.classes.ZincBundle;
 import com.zinc.classes.ZincCatalog;
-import com.zinc.classes.ZincJobCreator;
+import com.zinc.classes.ZincFutureFactory;
 
 import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -21,20 +22,20 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
     private final String mBundleID;
     private final String mDistribution;
     private final Future<ZincCatalog> mZincCatalog;
-    private final ZincJobCreator mJobCreator;
+    private final ZincFutureFactory mFutureFactory;
     private final File mRepoFolder;
 
     public ZincCloneBundleJob(final List<URL> sourceURLs,
                               final String bundleID,
                               final String distribution,
                               final Future<ZincCatalog> zincCatalog,
-                              final ZincJobCreator jobCreator,
+                              final ZincFutureFactory futureFactory,
                               final File repoFolder) {
         mSourceURLs = sourceURLs;
         mBundleID = bundleID;
         mDistribution = distribution;
         mZincCatalog = zincCatalog;
-        mJobCreator = jobCreator;
+        mFutureFactory = futureFactory;
         mRepoFolder = repoFolder;
     }
 
@@ -49,11 +50,11 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
 
         while (iter.hasNext()) {
             final URL sourceURL = iter.next();
-            final ZincJob<File> job = mJobCreator.downloadArchive(sourceURL, mRepoFolder, ARCHIVES_FOLDER + "/" + mBundleID + "-" + version);
+            final Future<File> job = mFutureFactory.downloadArchive(sourceURL, mRepoFolder, ARCHIVES_FOLDER + "/" + mBundleID + "-" + version);
 
             try {
-                return new ZincBundle(job.call(), mBundleID);
-            } catch (AbstractZincDownloadJob.DownloadFileError e) {
+                return new ZincBundle(job.get(), mBundleID);
+            } catch (ExecutionException e) {
                 if (!iter.hasNext()) {
                      throw e;
                 }

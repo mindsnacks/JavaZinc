@@ -8,6 +8,11 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * User: NachoSoto
@@ -15,10 +20,6 @@ import java.util.Map;
  */
 public final class MockFactory {
     private static final SecureRandom random = new SecureRandom();
-
-    public static String randomString() {
-        return new BigInteger(130, random).toString(32);
-    }
 
     public static ZincCatalog createCatalog() {
         final Map<String, Integer> distributions = new HashMap<String, Integer>();
@@ -35,8 +36,40 @@ public final class MockFactory {
         return new ByteArrayInputStream(string.getBytes());
     }
 
+    public static <V> Future<V> createFutureWithResult(V result) {
+        final Future<V> mock = futureMock();
+        try {
+            when(mock.get()).thenReturn(result);
+        }
+        catch (InterruptedException thisIsJustAMock) {}
+        catch (ExecutionException thisIsJustAMock) {}
+
+        return mock;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <V> Future<V> createFutureWithExecutionException() {
+        final Future<V> mock = futureMock();
+        try {
+            when(mock.get()).thenThrow(ExecutionException.class);
+        }
+        catch (InterruptedException thisIsJustAMock) {}
+        catch (ExecutionException thisIsJustAMock) {}
+
+        return mock;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <V> Future<V> futureMock() {
+        return mock(Future.class);
+    }
+
     public static int randomInt(int min, int max) {
         return random.nextInt(max) + min;
+    }
+
+    public static String randomString() {
+        return new BigInteger(130, random).toString(32);
     }
 
     public static int randomInt() {

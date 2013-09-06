@@ -3,12 +3,12 @@ package com.zinc.repo;
 import com.zinc.classes.ZincCatalog;
 import com.zinc.classes.ZincRepoIndex;
 import com.zinc.classes.ZincRepoIndexWriter;
-import com.zinc.classes.jobs.ZincJob;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
 import java.net.URL;
+import java.util.concurrent.Future;
 
 import static com.zinc.utils.MockFactory.createCatalog;
 import static org.mockito.Matchers.eq;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
  */
 public class RepoJobTest extends RepoBaseTest {
     @Mock
-    private ZincJob<ZincCatalog> mZincCatalogDownloadJob;
+    private Future<ZincCatalog> mZincCatalogFuture;
 
     @Mock
     private ZincRepoIndex mRepoIndex;
@@ -45,8 +45,8 @@ public class RepoJobTest extends RepoBaseTest {
         final URL sourceURL = new URL("https://mindsnacks.com");
         final ZincCatalog catalog = createCatalog();
 
-        when(mZincCatalogDownloadJob.call()).thenReturn(catalog);
-        when(mJobFactory.downloadCatalog(eq(sourceURL))).thenReturn(mZincCatalogDownloadJob);
+        when(mZincCatalogFuture.get()).thenReturn(catalog);
+        when(mJobFactory.downloadCatalog(eq(sourceURL))).thenReturn(mZincCatalogFuture);
 
         // run
         mRepo.addSourceURL(sourceURL);

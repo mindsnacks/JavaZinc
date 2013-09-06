@@ -5,8 +5,6 @@ import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.mockito.MockitoAnnotations;
 
-import java.util.concurrent.ExecutorService;
-
 /**
  * User: NachoSoto
  * Date: 9/3/13
@@ -19,9 +17,5 @@ public abstract class ZincBaseTest {
 
     protected Gson createGson() {
         return new GsonBuilder().setPrettyPrinting().serializeNulls().setVersion(1.0).create();
-    }
-
-    protected ExecutorService createExecutorService() {
-        return new DirectExecutorService();
     }
 }

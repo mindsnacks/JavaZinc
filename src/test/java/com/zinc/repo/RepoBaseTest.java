@@ -2,7 +2,6 @@ package com.zinc.repo;
 
 import com.google.gson.Gson;
 import com.zinc.classes.*;
-import com.zinc.classes.jobs.ZincJob;
 import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Rule;
@@ -13,7 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -26,14 +25,13 @@ public abstract class RepoBaseTest extends ZincBaseTest {
     protected ZincRepo mRepo;
 
     @Mock
-    protected ZincJobCreator mJobFactory;
+    protected ZincFutureFactory mJobFactory;
 
     protected ZincRepoIndexWriter mIndexWriter;
 
     @Mock
-    private ZincJob<ZincCatalog> catalogDownloadJob;
+    private Future<ZincCatalog> futureCatalog;
 
-    private ExecutorService mExecutor;
     private Gson mGson;
 
     @Rule
@@ -41,13 +39,12 @@ public abstract class RepoBaseTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        mExecutor = createExecutorService();
         mGson = createGson();
 
         mIndexWriter = newRepoIndexWriter();
-        mRepo = new ZincRepo(mExecutor, mJobFactory, rootFolder.getRoot().toURI(), mIndexWriter);
+        mRepo = new ZincRepo(mJobFactory, rootFolder.getRoot().toURI(), mIndexWriter);
 
-        when(mJobFactory.downloadCatalog(any(URL.class))).thenReturn(catalogDownloadJob);
+        when(mJobFactory.downloadCatalog(any(URL.class))).thenReturn(futureCatalog);
     }
 
     protected ZincRepoIndexWriter newRepoIndexWriter() {
@@ -55,8 +52,7 @@ public abstract class RepoBaseTest extends ZincBaseTest {
     }
 
     protected final ZincRepoIndex readRepoIndex() throws FileNotFoundException {
-        final FileReader fileReader = new FileReader(getIndexFile());
-        return mGson.fromJson(fileReader, ZincRepoIndex.class);
+        return mGson.fromJson(new FileReader(getIndexFile()), ZincRepoIndex.class);
     }
 
     protected final File getIndexFile() {
