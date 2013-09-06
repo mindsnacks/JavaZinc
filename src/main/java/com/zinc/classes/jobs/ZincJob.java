@@ -6,6 +6,6 @@ import java.util.concurrent.Callable;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public abstract class AbstractZincJob<V> implements Callable<V> {
+public interface ZincJob<V> extends Callable<V> {
 
 }
