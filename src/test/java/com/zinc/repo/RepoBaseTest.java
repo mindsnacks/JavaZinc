@@ -1,10 +1,7 @@
 package com.zinc.repo;
 
 import com.google.gson.Gson;
-import com.zinc.classes.ZincCatalog;
-import com.zinc.classes.ZincRepo;
-import com.zinc.classes.ZincRepoIndex;
-import com.zinc.classes.ZincRepoIndexWriter;
+import com.zinc.classes.*;
 import com.zinc.classes.jobs.ZincJob;
 import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
@@ -18,7 +15,7 @@ import java.io.FileReader;
 import java.net.URL;
 import java.util.concurrent.ExecutorService;
 
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -29,7 +26,7 @@ public abstract class RepoBaseTest extends ZincBaseTest {
     protected ZincRepo mRepo;
 
     @Mock
-    protected ZincRepo.ZincJobFactory mJobFactory;
+    protected ZincJobCreator mJobFactory;
 
     protected ZincRepoIndexWriter mIndexWriter;
 
@@ -50,7 +47,7 @@ public abstract class RepoBaseTest extends ZincBaseTest {
         mIndexWriter = newRepoIndexWriter();
         mRepo = new ZincRepo(mExecutor, mJobFactory, rootFolder.getRoot().toURI(), mIndexWriter);
 
-        when(mJobFactory.downloadCatalog((URL)anyObject())).thenReturn(catalogDownloadJob);
+        when(mJobFactory.downloadCatalog(any(URL.class))).thenReturn(catalogDownloadJob);
     }
 
     protected ZincRepoIndexWriter newRepoIndexWriter() {
