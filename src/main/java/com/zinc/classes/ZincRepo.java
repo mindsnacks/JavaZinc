@@ -16,7 +16,7 @@ import java.util.concurrent.Future;
  */
 public class ZincRepo {
     private final ExecutorService mExecutorService;
-    private final ZincJobFactory mJobFactory;
+    private final ZincJobCreator mJobFactory;
     
     private final File mRoot;
 
@@ -24,7 +24,7 @@ public class ZincRepo {
 
     private final Map<URL, Future<ZincCatalog>> mCatalogs;
 
-    public ZincRepo(final ExecutorService executorService, final ZincJobFactory jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter) {
+    public ZincRepo(final ExecutorService executorService, final ZincJobCreator jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter) {
         mExecutorService = executorService;
         mJobFactory = jobFactory;
         mRoot = new File(root);
@@ -55,7 +55,4 @@ public class ZincRepo {
         return mExecutorService.submit(job);
     }
 
-    public static interface ZincJobFactory {
-        ZincJob<ZincCatalog> downloadCatalog(final URL sourceURL);
-    }
 }

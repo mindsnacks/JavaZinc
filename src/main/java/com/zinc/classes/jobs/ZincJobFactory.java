@@ -3,9 +3,10 @@ package com.zinc.classes.jobs;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
 import com.zinc.classes.ZincCatalog;
-import com.zinc.classes.ZincRepo;
+import com.zinc.classes.ZincJobCreator;
 import com.zinc.exceptions.ZincRuntimeException;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -14,7 +15,7 @@ import java.net.URL;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public class ZincJobFactory implements ZincRepo.ZincJobFactory {
+public class ZincJobFactory implements ZincJobCreator {
     private static final String CATALOG_FILENAME = "catalog.json";
 
     private final Gson mGson;
@@ -33,6 +34,11 @@ public class ZincJobFactory implements ZincRepo.ZincJobFactory {
         }
 
         return new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class);
+    }
+
+    @Override
+    public ZincJob<File> downloadArchive(final URL url, final File root, final String child) {
+        return new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child);
     }
 
     private ZincRequestExecutor createRequestExecutor() {

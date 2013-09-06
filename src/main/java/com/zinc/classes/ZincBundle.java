@@ -15,6 +15,12 @@ public class ZincBundle extends File {
         mBundleID = bundleID;
     }
 
+    public ZincBundle(final File file, final String bundleID) {
+        super(file.getPath());
+
+        mBundleID = bundleID;
+    }
+
     public String getBundleID() {
         return mBundleID;
     }
