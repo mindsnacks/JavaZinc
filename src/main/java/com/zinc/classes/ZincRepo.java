@@ -13,19 +13,16 @@ import java.util.concurrent.Future;
  */
 public class ZincRepo {
     private final ZincFutureFactory mJobFactory;
-    
-    private final File mRoot;
-
     private final ZincRepoIndexWriter mIndexWriter;
 
-    private final Map<URL, Future<ZincCatalog>> mCatalogs;
+    private final File mRoot;
+
+    private final Map<URL, Future<ZincCatalog>> mCatalogs = new HashMap<URL, Future<ZincCatalog>>();
 
     public ZincRepo(final ZincFutureFactory jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter) {
         mJobFactory = jobFactory;
         mRoot = new File(root);
         mIndexWriter = repoIndexWriter;
-
-        mCatalogs = new HashMap<URL, Future<ZincCatalog>>();
     }
 
     public void addSourceURL(final URL sourceURL) {
@@ -40,9 +37,9 @@ public class ZincRepo {
         mIndexWriter.saveIndex();
     }
 
-    private void downloadCatalog(final URL url) {
-        if (!mCatalogs.containsKey(url)) {
-            mCatalogs.put(url, mJobFactory.downloadCatalog(url));
+    private void downloadCatalog(final URL sourceURL) {
+        if (!mCatalogs.containsKey(sourceURL)) {
+            mCatalogs.put(sourceURL, mJobFactory.downloadCatalog(sourceURL));
         }
     }
 }

@@ -19,13 +19,10 @@ import static org.mockito.Mockito.*;
  * Date: 9/3/13
  */
 public class RepoJobTest extends RepoBaseTest {
-    @Mock
-    private Future<ZincCatalog> mZincCatalogFuture;
+    @Mock private Future<ZincCatalog> mCatalogFuture;
 
-    @Mock
-    private ZincRepoIndex mRepoIndex;
-    @Mock
-    private ZincRepoIndexWriter mRepoIndexWriter;
+    @Mock private ZincRepoIndex mRepoIndex;
+    @Mock private ZincRepoIndexWriter mRepoIndexWriter;
 
     @Override
     @Before
@@ -45,8 +42,8 @@ public class RepoJobTest extends RepoBaseTest {
         final URL sourceURL = new URL("https://mindsnacks.com");
         final ZincCatalog catalog = createCatalog();
 
-        when(mZincCatalogFuture.get()).thenReturn(catalog);
-        when(mJobFactory.downloadCatalog(eq(sourceURL))).thenReturn(mZincCatalogFuture);
+        when(mCatalogFuture.get()).thenReturn(catalog);
+        when(mJobFactory.downloadCatalog(eq(sourceURL))).thenReturn(mCatalogFuture);
 
         // run
         mRepo.addSourceURL(sourceURL);
@@ -81,7 +78,7 @@ public class RepoJobTest extends RepoBaseTest {
     }
 
 //    @Test
-//    public void trackingBundleDownloadsTar() throws Exception {
+//    public void trackingBundleClonesBundle() throws Exception {
 //        final String bundleID = "com.mindsnacks.games.swell";
 //        final String distribution = "master";
 //
@@ -89,6 +86,6 @@ public class RepoJobTest extends RepoBaseTest {
 //        mRepo.startTrackingBundle(bundleID, distribution);
 //
 //        // verify
-////        verify(mJobFactory).downloadArchive( bundleID)
+//        verify(mJobFactory).cloneBundle(Matchers.<List<URL>>any(), eq(bundleID), eq(distribution), eq(mCatalogFuture), eq(rootFolder.getRoot()));
 //    }
 }

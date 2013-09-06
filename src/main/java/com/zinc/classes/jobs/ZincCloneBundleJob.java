@@ -6,8 +6,8 @@ import com.zinc.classes.ZincFutureFactory;
 
 import java.io.File;
 import java.net.URL;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -18,23 +18,23 @@ import java.util.concurrent.Future;
 public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
     private static final String ARCHIVES_FOLDER = "archives";
 
-    private final List<URL> mSourceURLs;
+    private final Set<URL> mSourceURLs;
     private final String mBundleID;
     private final String mDistribution;
-    private final Future<ZincCatalog> mZincCatalog;
+    private final Future<ZincCatalog> mCatalog;
     private final ZincFutureFactory mFutureFactory;
     private final File mRepoFolder;
 
-    public ZincCloneBundleJob(final List<URL> sourceURLs,
+    public ZincCloneBundleJob(final Set<URL> sourceURLs,
                               final String bundleID,
                               final String distribution,
-                              final Future<ZincCatalog> zincCatalog,
+                              final Future<ZincCatalog> catalogFuture,
                               final ZincFutureFactory futureFactory,
                               final File repoFolder) {
         mSourceURLs = sourceURLs;
         mBundleID = bundleID;
         mDistribution = distribution;
-        mZincCatalog = zincCatalog;
+        mCatalog = catalogFuture;
         mFutureFactory = futureFactory;
         mRepoFolder = repoFolder;
     }
@@ -43,14 +43,14 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
     public ZincBundle call() throws Exception {
         assert (mSourceURLs.size() > 0);
 
-        final ZincCatalog catalog = mZincCatalog.get();
+        final ZincCatalog catalog = mCatalog.get();
         final int version = catalog.getVersionForBundleID(mBundleID, mDistribution);
 
-        final ListIterator<URL> iter = mSourceURLs.listIterator();
+        final Iterator<URL> iter = mSourceURLs.iterator();
 
         while (iter.hasNext()) {
             final URL sourceURL = iter.next();
-            final Future<File> job = mFutureFactory.downloadArchive(sourceURL, mRepoFolder, ARCHIVES_FOLDER + "/" + mBundleID + "-" + version);
+            final Future<File> job = mFutureFactory.downloadArchive(sourceURL, mRepoFolder, String.format("%s/%s-%d", ARCHIVES_FOLDER, mBundleID, version));
 
             try {
                 return new ZincBundle(job.get(), mBundleID);

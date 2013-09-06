@@ -14,6 +14,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -101,7 +102,6 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void triesDownloadingArchiveFromAllSources() throws Exception {
         final URL validSourceURL = new URL("http://zinc.mindsnacks.com");
         mJob = initializeJob(Arrays.asList(mSourceURL, validSourceURL));
@@ -118,8 +118,6 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         final ZincBundle result = run();
 
         // verify
-        verify(resultFuture).get();
-        verifyDownloadArchiveJobCreation(mSourceURL, version);
         verifyDownloadArchiveJobCreation(validSourceURL, version);
         checkResult(result);
     }
@@ -130,7 +128,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     }
 
     private ZincCloneBundleJob initializeJob(final List<URL> sourceURLs) {
-        return new ZincCloneBundleJob(sourceURLs, mBundleID, mDistribution, mZincCatalogFuture, mFutureFactory, mRepoFolder);
+        return new ZincCloneBundleJob(new HashSet<URL>(sourceURLs), mBundleID, mDistribution, mZincCatalogFuture, mFutureFactory, mRepoFolder);
     }
 
     private void verifyDownloadArchiveJobCreation(final URL validSourceURL, final int version) {

@@ -2,6 +2,7 @@ package com.zinc.classes.jobs;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
+import com.zinc.classes.ZincBundle;
 import com.zinc.classes.ZincCatalog;
 import com.zinc.classes.ZincFutureFactory;
 import com.zinc.exceptions.ZincRuntimeException;
@@ -10,6 +11,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -43,6 +45,15 @@ public class ZincDownloader implements ZincFutureFactory {
     @Override
     public Future<File> downloadArchive(final URL url, final File root, final String child) {
         return submitJob(new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child));
+    }
+
+    @Override
+    public Future<ZincBundle> cloneBundle(final Set<URL> sourceURLs,
+                                          final String bundleID,
+                                          final String distribution,
+                                          final Future<ZincCatalog> catalog,
+                                          final File repoFolder) {
+        return submitJob(new ZincCloneBundleJob(sourceURLs, bundleID, distribution, catalog, this, repoFolder));
     }
 
     private ZincRequestExecutor createRequestExecutor() {

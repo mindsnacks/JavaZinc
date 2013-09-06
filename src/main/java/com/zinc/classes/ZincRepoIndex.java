@@ -31,15 +31,15 @@ public class ZincRepoIndex {
         mBundles.put(bundleID, new TrackingInfo(distribution));
     }
 
+    public TrackingInfo getTrackingInfo(final String bundleID) {
+        return mBundles.get(bundleID);
+    }
+
     @Override
     public String toString() {
         return "ZincRepoIndex{" +
                 "mSources=" + mSources +
                 '}';
-    }
-
-    public TrackingInfo getTrackingInfo(final String bundleID) {
-        return mBundles.get(bundleID);
     }
 
     public static class TrackingInfo {
