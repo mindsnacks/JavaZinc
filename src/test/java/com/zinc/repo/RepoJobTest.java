@@ -3,7 +3,7 @@ package com.zinc.repo;
 import com.zinc.classes.ZincCatalog;
 import com.zinc.classes.ZincRepoIndex;
 import com.zinc.classes.ZincRepoIndexWriter;
-import com.zinc.classes.jobs.AbstractZincJob;
+import com.zinc.classes.jobs.ZincJob;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
  */
 public class RepoJobTest extends RepoBaseTest {
     @Mock
-    private AbstractZincJob<ZincCatalog> mZincCatalogDownloadJob;
+    private ZincJob<ZincCatalog> mZincCatalogDownloadJob;
 
     @Mock
     private ZincRepoIndex mRepoIndex;

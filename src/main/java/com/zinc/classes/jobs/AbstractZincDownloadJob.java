@@ -8,7 +8,7 @@ import java.net.URL;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public abstract class AbstractZincDownloadJob<V> extends AbstractZincJob<V> {
+public abstract class AbstractZincDownloadJob<V> implements ZincJob<V> {
     protected final ZincRequestExecutor mRequestExecutor;
     protected final URL mUrl;
     protected final Class<V> mClass;

@@ -1,6 +1,6 @@
 package com.zinc.classes;
 
-import com.zinc.classes.jobs.AbstractZincJob;
+import com.zinc.classes.jobs.ZincJob;
 
 import java.io.File;
 import java.net.URI;
@@ -51,11 +51,11 @@ public class ZincRepo {
         }
     }
 
-    private <V> Future<V> executeJob(final AbstractZincJob<V> job) {
+    private <V> Future<V> executeJob(final ZincJob<V> job) {
         return mExecutorService.submit(job);
     }
 
     public static interface ZincJobFactory {
-        AbstractZincJob<ZincCatalog> downloadCatalog(final URL sourceURL);
+        ZincJob<ZincCatalog> downloadCatalog(final URL sourceURL);
     }
 }

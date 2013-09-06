@@ -5,7 +5,7 @@ import com.zinc.classes.ZincCatalog;
 import com.zinc.classes.ZincRepo;
 import com.zinc.classes.ZincRepoIndex;
 import com.zinc.classes.ZincRepoIndexWriter;
-import com.zinc.classes.jobs.AbstractZincJob;
+import com.zinc.classes.jobs.ZincJob;
 import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,7 +34,7 @@ public abstract class RepoBaseTest extends ZincBaseTest {
     protected ZincRepoIndexWriter mIndexWriter;
 
     @Mock
-    private AbstractZincJob<ZincCatalog> catalogDownloadJob;
+    private ZincJob<ZincCatalog> catalogDownloadJob;
 
     private ExecutorService mExecutor;
     private Gson mGson;
