@@ -3,29 +3,33 @@ package com.zinc.classes.jobs;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
 import com.zinc.classes.ZincCatalog;
-import com.zinc.classes.ZincJobCreator;
+import com.zinc.classes.ZincFutureFactory;
 import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /**
  * User: NachoSoto
  * Date: 9/3/13
  */
-public class ZincJobFactory implements ZincJobCreator {
+public class ZincDownloader implements ZincFutureFactory {
     private static final String CATALOG_FILENAME = "catalog.json";
 
     private final Gson mGson;
+    private final ExecutorService mExecutorService;
 
-    public ZincJobFactory(final Gson gson) {
+    public ZincDownloader(final Gson gson, final ExecutorService executorService) {
         mGson = gson;
+        mExecutorService = executorService;
     }
 
     @Override
-    public ZincJob<ZincCatalog> downloadCatalog(final URL sourceURL) {
+    public Future<ZincCatalog> downloadCatalog(final URL sourceURL) {
         final URL url;
         try {
             url = new URL(sourceURL, CATALOG_FILENAME);
@@ -33,12 +37,12 @@ public class ZincJobFactory implements ZincJobCreator {
             throw new ZincRuntimeException("Invalid URL: " + sourceURL + "/" + CATALOG_FILENAME, e);
         }
 
-        return new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class);
+        return submitJob(new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class));
     }
 
     @Override
-    public ZincJob<File> downloadArchive(final URL url, final File root, final String child) {
-        return new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child);
+    public Future<File> downloadArchive(final URL url, final File root, final String child) {
+        return submitJob(new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child));
     }
 
     private ZincRequestExecutor createRequestExecutor() {
@@ -56,5 +60,9 @@ public class ZincJobFactory implements ZincJobCreator {
                 return HttpRequest.get(url).acceptGzipEncoding().uncompress(true);
             }
         };
+    }
+
+    private <V> Future<V> submitJob(final ZincJob<V> job) {
+        return mExecutorService.submit(job);
     }
 }

@@ -1,13 +1,10 @@
 package com.zinc.classes;
 
-import com.zinc.classes.jobs.ZincJob;
-
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 /**
@@ -15,8 +12,7 @@ import java.util.concurrent.Future;
  * Date: 9/3/13
  */
 public class ZincRepo {
-    private final ExecutorService mExecutorService;
-    private final ZincJobCreator mJobFactory;
+    private final ZincFutureFactory mJobFactory;
     
     private final File mRoot;
 
@@ -24,8 +20,7 @@ public class ZincRepo {
 
     private final Map<URL, Future<ZincCatalog>> mCatalogs;
 
-    public ZincRepo(final ExecutorService executorService, final ZincJobCreator jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter) {
-        mExecutorService = executorService;
+    public ZincRepo(final ZincFutureFactory jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter) {
         mJobFactory = jobFactory;
         mRoot = new File(root);
         mIndexWriter = repoIndexWriter;
@@ -47,12 +42,7 @@ public class ZincRepo {
 
     private void downloadCatalog(final URL url) {
         if (!mCatalogs.containsKey(url)) {
-            mCatalogs.put(url, executeJob(mJobFactory.downloadCatalog(url)));
+            mCatalogs.put(url, mJobFactory.downloadCatalog(url));
         }
     }
-
-    private <V> Future<V> executeJob(final ZincJob<V> job) {
-        return mExecutorService.submit(job);
-    }
-
 }
