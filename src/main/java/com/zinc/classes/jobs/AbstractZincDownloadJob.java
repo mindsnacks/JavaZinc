@@ -19,7 +19,7 @@ public abstract class AbstractZincDownloadJob<V> implements ZincJob<V> {
         mClass = theClass;
     }
 
-    protected static class DownloadFileError extends ZincRuntimeException {
+    public static class DownloadFileError extends ZincRuntimeException {
         public DownloadFileError(final String message) {
             super(message);
         }

@@ -7,6 +7,7 @@ import com.zinc.classes.ZincJobCreator;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.Future;
 
 /**
@@ -39,11 +40,27 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
 
     @Override
     public ZincBundle call() throws Exception {
+        assert (mSourceURLs.size() > 0);
+
         final ZincCatalog catalog = mZincCatalog.get();
         final int version = catalog.getVersionForBundleID(mBundleID, mDistribution);
 
-        final ZincJob<File> job = mJobCreator.downloadArchive(mSourceURLs.get(0), mRepoFolder, ARCHIVES_FOLDER + "/" + mBundleID + "-" + version);
+        final ListIterator<URL> iter = mSourceURLs.listIterator();
 
-        return new ZincBundle(job.call(), mBundleID);
+        while (iter.hasNext()) {
+            final URL sourceURL = iter.next();
+            final ZincJob<File> job = mJobCreator.downloadArchive(sourceURL, mRepoFolder, ARCHIVES_FOLDER + "/" + mBundleID + "-" + version);
+
+            try {
+                return new ZincBundle(job.call(), mBundleID);
+            } catch (AbstractZincDownloadJob.DownloadFileError e) {
+                if (!iter.hasNext()) {
+                     throw e;
+                }
+            }
+        }
+
+        assert false; // should never get here
+        return null;
     }
 }

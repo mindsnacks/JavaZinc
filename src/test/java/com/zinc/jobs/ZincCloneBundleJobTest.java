@@ -3,6 +3,7 @@ package com.zinc.jobs;
 import com.zinc.classes.ZincBundle;
 import com.zinc.classes.ZincCatalog;
 import com.zinc.classes.ZincJobCreator;
+import com.zinc.classes.jobs.AbstractZincDownloadJob;
 import com.zinc.classes.jobs.ZincCloneBundleJob;
 import com.zinc.classes.jobs.ZincJob;
 import com.zinc.utils.ZincBaseTest;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import static com.zinc.utils.MockFactory.randomInt;
@@ -38,8 +40,8 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     @Mock private Future<ZincCatalog> mZincCatalogFuture;
     @Mock private ZincCatalog mZincCatalog;
     @Mock private ZincJobCreator mJobCreator;
-    @Mock private File mRepoFolder;
     @Mock private ZincJob<File> mDownloadArchiveJob;
+    @Mock private File mRepoFolder;
     @Mock private File mResult;
 
     public ZincCloneBundleJobTest() throws MalformedURLException {
@@ -48,7 +50,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        mJob = new ZincCloneBundleJob(Arrays.asList(mSourceURL), mBundleID, mDistribution, mZincCatalogFuture, mJobCreator, mRepoFolder);
+        mJob = initializeJob(Arrays.asList(mSourceURL));
 
         when(mZincCatalogFuture.get()).thenReturn(mZincCatalog);
         when(mJobCreator.downloadArchive(any(URL.class), any(File.class), anyString())).thenReturn(mDownloadArchiveJob);
@@ -95,8 +97,46 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
         // verify
         verify(mDownloadArchiveJob).call();
-        verify(mJobCreator).downloadArchive(eq(mSourceURL), eq(mRepoFolder), eq("archives/" + mBundleID + "-" + version));
+        verifyDownloadArchiveJobCreation(mSourceURL, version);
+        checkResult(result);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void triesDownloadingArchiveFromAllSources() throws Exception {
+        final URL validSourceURL = new URL("http://zinc.mindsnacks.com");
+
+        mJob = initializeJob(Arrays.asList(mSourceURL, validSourceURL));
+        final ZincJob<File> downloadArchiveJob = mock(ZincJob.class);
+
+        when(mJobCreator.downloadArchive(eq(validSourceURL), any(File.class), anyString())).thenReturn(downloadArchiveJob);
+
+        when(mDownloadArchiveJob.call()).thenThrow(AbstractZincDownloadJob.DownloadFileError.class);
+        when(downloadArchiveJob.call()).thenReturn(mResult);
+
+        final int version = randomInt(1, 100);
+        when(mZincCatalog.getVersionForBundleID(anyString(), anyString())).thenReturn(version);
+
+        // run
+        final ZincBundle result = run();
+
+        // verify
+        verify(mDownloadArchiveJob).call();
+        verifyDownloadArchiveJobCreation(mSourceURL, version);
+        verifyDownloadArchiveJobCreation(validSourceURL, version);
+        checkResult(result);
+    }
+
+    private void checkResult(final ZincBundle result) {
         assertEquals(mResultPath, result.getPath());
         assertEquals(mBundleID, result.getBundleID());
+    }
+
+    private ZincCloneBundleJob initializeJob(final List<URL> sourceURLs) {
+        return new ZincCloneBundleJob(sourceURLs, mBundleID, mDistribution, mZincCatalogFuture, mJobCreator, mRepoFolder);
+    }
+
+    private void verifyDownloadArchiveJobCreation(final URL validSourceURL, final int version) {
+        verify(mJobCreator).downloadArchive(eq(validSourceURL), eq(mRepoFolder), eq("archives/" + mBundleID + "-" + version));
     }
 }
