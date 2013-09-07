@@ -9,6 +9,7 @@ import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
@@ -61,7 +62,14 @@ public class ZincDownloader implements ZincFutureFactory {
             @Override
             public InputStream get(final URL url) throws AbstractZincDownloadJob.DownloadFileError {
                 try {
-                    return getRequest(url).stream();
+                    final HttpRequest request = getRequest(url);
+                    final int code = request.code();
+
+                    if (code == HttpURLConnection.HTTP_OK) {
+                        return request.buffer();
+                    } else {
+                        throw new AbstractZincDownloadJob.DownloadFileError(String.format("Error downloading file at url '%s'. Status code: %d", url, code));
+                    }
                 } catch (HttpRequest.HttpRequestException e) {
                     throw new AbstractZincDownloadJob.DownloadFileError("Error downloading file at url '" + url + "'", e);
                 }
