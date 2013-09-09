@@ -1,12 +1,14 @@
 package com.zinc.repo;
 
+import com.zinc.classes.ZincRepoIndexWriter;
+import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincCatalog;
 import com.zinc.classes.data.ZincRepoIndex;
-import com.zinc.classes.ZincRepoIndexWriter;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Future;
 
@@ -24,6 +26,12 @@ public class RepoJobTest extends RepoBaseTest {
     @Mock private ZincRepoIndex mRepoIndex;
     @Mock private ZincRepoIndexWriter mRepoIndexWriter;
 
+    private final SourceURL mSourceURL;
+
+    public RepoJobTest() throws MalformedURLException {
+        mSourceURL = new SourceURL(new URL("https://mindsnacks.com"), "com.mindsnacks.lessons");
+    }
+
     @Override
     @Before
     public void setUp() throws Exception {
@@ -39,30 +47,27 @@ public class RepoJobTest extends RepoBaseTest {
 
     @Test
     public void catalogGetsDownloadedWhenAddingTheSource() throws Exception {
-        final URL sourceURL = new URL("https://mindsnacks.com");
         final ZincCatalog catalog = createCatalog();
 
         when(mCatalogFuture.get()).thenReturn(catalog);
-        when(mJobFactory.downloadCatalog(eq(sourceURL))).thenReturn(mCatalogFuture);
+        when(mJobFactory.downloadCatalog(eq(mSourceURL))).thenReturn(mCatalogFuture);
 
         // run
-        mRepo.addSourceURL(sourceURL);
+        mRepo.addSourceURL(mSourceURL);
 
         // verify
-        verify(mRepoIndex).addSourceURL(eq(sourceURL));
-        verify(mJobFactory).downloadCatalog(eq(sourceURL));
+        verify(mRepoIndex).addSourceURL(eq(mSourceURL));
+        verify(mJobFactory).downloadCatalog(eq(mSourceURL));
     }
 
     @Test
     public void catalogDoesntGetDownloadedTwiceWhenAddingTheSameSourceTwice() throws Exception {
-        final URL catalogURL = new URL("https://mindsnacks.com");
-
         // run
-        mRepo.addSourceURL(catalogURL);
-        mRepo.addSourceURL(catalogURL);
+        mRepo.addSourceURL(mSourceURL);
+        mRepo.addSourceURL(mSourceURL);
 
         // verify
-        verify(mJobFactory, times(1)).downloadCatalog(eq(catalogURL));
+        verify(mJobFactory, times(1)).downloadCatalog(eq(mSourceURL));
     }
 
     @Test

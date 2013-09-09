@@ -2,7 +2,6 @@ package com.zinc.classes.data;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,16 +14,16 @@ import java.util.Set;
  */
 public class ZincRepoIndex {
     @SerializedName("sources")
-    final private Set<URL> mSources = new HashSet<URL>();
+    final private Set<SourceURL> mSources = new HashSet<SourceURL>();
 
     @SerializedName("bundles")
     final private Map<String, TrackingInfo> mBundles = new HashMap<String, TrackingInfo>();
 
-    public Set<URL> getSources() {
+    public Set<SourceURL> getSources() {
         return mSources;
     }
 
-    public void addSourceURL(final URL sourceURL) {
+    public void addSourceURL(final SourceURL sourceURL) {
         mSources.add(sourceURL);
     }
 
@@ -38,7 +37,7 @@ public class ZincRepoIndex {
 
     @Override
     public String toString() {
-        return "ZincRepoIndex{" +
+        return "ZincRepoIndex {" +
                 "mSources=" + mSources +
                 '}';
     }

@@ -1,5 +1,6 @@
 package com.zinc.repo;
 
+import com.zinc.classes.data.SourceURL;
 import org.junit.Assert;
 import org.junit.Test;
 import com.zinc.classes.data.ZincRepoIndex;
@@ -20,46 +21,48 @@ import static org.junit.Assert.assertTrue;
  * Date: 9/3/13
  */
 public class RepoInitializationTest extends RepoBaseTest {
+    private final SourceURL mSourceURL;
+
+    public RepoInitializationTest() throws MalformedURLException {
+        mSourceURL = new SourceURL(new URL("https://mindsnacks.com"), "com.mindsnacks.lessons");
+    }
+
     @Test
     public void addingSourceURLCreatesIndexFile() throws MalformedURLException, FileNotFoundException {
-        final URL catalogURL = new URL("http://www.google.com");
-
         // run
-        mRepo.addSourceURL(catalogURL);
+        mRepo.addSourceURL(mSourceURL);
 
         // check
-        assertTrue(readRepoIndex().getSources().contains(catalogURL));
+        assertTrue(readRepoIndex().getSources().contains(mSourceURL));
     }
 
     @Test
     public void addingSourceURLsAddsAllOfThem() throws MalformedURLException, FileNotFoundException {
-        final URL catalogURL1 = new URL("http://www.google.com"),
-                  catalogURL2 = new URL("http://www.mindsnacks.com");
+        final SourceURL sourceURL2 = new SourceURL(new URL("https://mindsnacks.com"), "com.mindsnacks.lessons");
 
         // run
-        mRepo.addSourceURL(catalogURL1);
-        mRepo.addSourceURL(catalogURL2);
+        mRepo.addSourceURL(mSourceURL);
+        mRepo.addSourceURL(sourceURL2);
 
         // check
-        assertTrue(readRepoIndex().getSources().contains(catalogURL1));
-        assertTrue(readRepoIndex().getSources().contains(catalogURL2));
+        assertTrue(readRepoIndex().getSources().contains(mSourceURL));
+        assertTrue(readRepoIndex().getSources().contains(sourceURL2));
     }
 
     @Test
     public void addingSourceURLAddsItToIndexFile() throws IOException {
-        final URL originalSourceURL = new URL("https://www.google.com/test"),
-                  newSourceURL = new URL("https://www.mindsnacks.com/");
+        final SourceURL newSourceURL = new SourceURL(new URL("https://mindsnacks.com"), "com.mindsnacks.lessons");
 
         final FileWriter fileWriter = new FileWriter(getIndexFile());
 
-        fileWriter.write(String.format("{\"sources\": [\"%s\"]}", originalSourceURL));
+        fileWriter.write(String.format("{\"sources\": [\"%s\"]}", newSourceURL.getUrl()));
         fileWriter.close();
 
         // run
         mRepo.addSourceURL(newSourceURL);
 
         // check
-        assertEquals(new HashSet<URL>(Arrays.asList(originalSourceURL, newSourceURL)), readRepoIndex().getSources());
+        assertEquals(new HashSet<SourceURL>(Arrays.asList(mSourceURL, newSourceURL)), readRepoIndex().getSources());
     }
 
     @Test

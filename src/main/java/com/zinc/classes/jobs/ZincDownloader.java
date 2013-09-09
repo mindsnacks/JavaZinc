@@ -2,6 +2,7 @@ package com.zinc.classes.jobs;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
+import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.classes.data.ZincCatalog;
 import com.zinc.classes.ZincFutureFactory;
@@ -21,8 +22,6 @@ import java.util.concurrent.Future;
  * Date: 9/3/13
  */
 public class ZincDownloader implements ZincFutureFactory {
-    private static final String CATALOG_FILENAME = "catalog.json";
-
     private final Gson mGson;
     private final ExecutorService mExecutorService;
 
@@ -32,12 +31,12 @@ public class ZincDownloader implements ZincFutureFactory {
     }
 
     @Override
-    public Future<ZincCatalog> downloadCatalog(final URL sourceURL) {
+    public Future<ZincCatalog> downloadCatalog(final SourceURL sourceURL) {
         final URL url;
         try {
-            url = new URL(sourceURL, CATALOG_FILENAME);
+            url = sourceURL.getCatalogFileURL();
         } catch (MalformedURLException e) {
-            throw new ZincRuntimeException("Invalid URL: " + sourceURL + "/" + CATALOG_FILENAME, e);
+            throw new ZincRuntimeException("Error getting catalog file URL for source: " + sourceURL, e);
         }
 
         return submitJob(new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class));

@@ -1,9 +1,10 @@
 package com.zinc.data;
 
+import com.zinc.classes.data.SourceURL;
+import com.zinc.classes.data.ZincRepoIndex;
+import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Test;
-import com.zinc.utils.ZincBaseTest;
-import com.zinc.classes.data.ZincRepoIndex;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -26,13 +27,13 @@ public class ZincRepoIndexTest extends ZincBaseTest {
 
     @Test
     public void addSourceURL() throws Exception {
-        final URL url = new URL("http://mindsnacks.com");
+        final SourceURL url = new SourceURL(new URL("http://mindsnacks.com"), "com.mindsnacks.test");
 
         // run
         index.addSourceURL(url);
 
         // verify
-        assertEquals(new HashSet<URL>(Arrays.asList(url)), index.getSources());
+        assertEquals(new HashSet<SourceURL>(Arrays.asList(url)), index.getSources());
     }
 
     @Test

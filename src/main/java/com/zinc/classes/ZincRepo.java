@@ -1,10 +1,10 @@
 package com.zinc.classes;
 
+import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincCatalog;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -19,7 +19,7 @@ public class ZincRepo {
 
     private final File mRoot;
 
-    private final Map<URL, Future<ZincCatalog>> mCatalogs = new HashMap<URL, Future<ZincCatalog>>();
+    private final Map<SourceURL, Future<ZincCatalog>> mCatalogs = new HashMap<SourceURL, Future<ZincCatalog>>();
 
     public ZincRepo(final ZincFutureFactory jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter) {
         mJobFactory = jobFactory;
@@ -30,7 +30,7 @@ public class ZincRepo {
     /**
      * @todo remove all cached bundle promises that failed?
      */
-    public void addSourceURL(final URL sourceURL) {
+    public void addSourceURL(final SourceURL sourceURL) {
         mIndexWriter.getIndex().addSourceURL(sourceURL);
         mIndexWriter.saveIndex();
 
@@ -42,7 +42,7 @@ public class ZincRepo {
         mIndexWriter.saveIndex();
     }
 
-    private void downloadCatalog(final URL sourceURL) {
+    private void downloadCatalog(final SourceURL sourceURL) {
         if (!mCatalogs.containsKey(sourceURL)) {
             mCatalogs.put(sourceURL, mJobFactory.downloadCatalog(sourceURL));
         }
