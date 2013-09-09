@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * User: NachoSoto
@@ -37,11 +38,11 @@ public class SourceURLTest extends ZincBaseTest {
 
     @Test
     public void initializeWithHostAndCatalogNameSavesTheURL() throws Exception {
-        assertEquals(new URL(zincURL, catalogID), new SourceURL(zincURL, catalogID).getUrl());
+        assertEquals(new URL(zincURL.toString() + catalogID + "/"), new SourceURL(zincURL, catalogID).getUrl());
     }
 
     @Test
-    public void initializeWithSourceURLSavesTheURL() throws Exception {
+    public void initializeWithSourceURLPreservesTheURL() throws Exception {
         final URL url = new URL(zincURL, catalogID);
         assertEquals(url, new SourceURL(url).getUrl());
     }
@@ -63,5 +64,13 @@ public class SourceURLTest extends ZincBaseTest {
 
         assertEquals(catalogID, sourceURL.getCatalogID());
         assertEquals(url, sourceURL.getUrl());
+    }
+
+    @Test
+    public void catalogFileURL() throws Exception {
+        final URL result = new SourceURL(zincURL, catalogID).getCatalogFileURL();
+
+        assertTrue(result.toString().contains(catalogID));
+        assertTrue(result.getFile().endsWith(".json"));
     }
 }

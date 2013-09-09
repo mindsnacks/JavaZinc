@@ -11,16 +11,19 @@ import java.net.URL;
  * Date: 9/9/13
  */
 public class SourceURL {
+    private static final String CATALOG_FILENAME = "catalog.json";
+
     private final URL mUrl;
     private transient final String mCatalogID;
 
     public SourceURL(final URL host, final String catalogID) throws MalformedURLException {
-        mUrl = new URL(host, catalogID);
+        mUrl = new URL(host, catalogID + "/");
         mCatalogID = catalogID;
     }
 
     public SourceURL(final URL sourceURL) throws MalformedURLException {
-        this(sourceURL, extractCatalogID(sourceURL));
+        mUrl = sourceURL;
+        mCatalogID = extractCatalogID(sourceURL);
     }
 
     public String getCatalogID() {
@@ -29,6 +32,10 @@ public class SourceURL {
 
     public URL getUrl() {
         return mUrl;
+    }
+
+    public URL getCatalogFileURL() throws MalformedURLException {
+        return new URL(getUrl(), CATALOG_FILENAME);
     }
 
     @Override
