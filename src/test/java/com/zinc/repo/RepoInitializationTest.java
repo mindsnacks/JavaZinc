@@ -1,11 +1,11 @@
 package com.zinc.repo;
 
+import com.zinc.classes.data.BundleID;
 import com.zinc.classes.data.SourceURL;
+import com.zinc.classes.data.ZincRepoIndex;
 import org.junit.Assert;
 import org.junit.Test;
-import com.zinc.classes.data.ZincRepoIndex;
 
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -28,7 +28,7 @@ public class RepoInitializationTest extends RepoBaseTest {
     }
 
     @Test
-    public void addingSourceURLCreatesIndexFile() throws MalformedURLException, FileNotFoundException {
+    public void addingSourceURLCreatesIndexFile() throws IOException {
         // run
         mRepo.addSourceURL(mSourceURL);
 
@@ -37,7 +37,7 @@ public class RepoInitializationTest extends RepoBaseTest {
     }
 
     @Test
-    public void addingSourceURLsAddsAllOfThem() throws MalformedURLException, FileNotFoundException {
+    public void addingSourceURLsAddsAllOfThem() throws IOException {
         final SourceURL sourceURL2 = new SourceURL(new URL("https://mindsnacks.com"), "com.mindsnacks.lessons");
 
         // run
@@ -66,10 +66,10 @@ public class RepoInitializationTest extends RepoBaseTest {
     }
 
     @Test
-    public void addingTrackingRequestAddsItToIndexFile() throws FileNotFoundException {
+    public void addingTrackingRequestAddsItToIndexFile() throws IOException {
         // run
-        final String bundleID = "com.mindsnacks.games.swell",
-                     distribution = "master";
+        final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
+        final String distribution = "master";
 
         mRepo.startTrackingBundle(bundleID, distribution);
 

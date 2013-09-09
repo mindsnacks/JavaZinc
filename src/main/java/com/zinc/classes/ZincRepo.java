@@ -1,5 +1,6 @@
 package com.zinc.classes;
 
+import com.zinc.classes.data.BundleID;
 import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincCatalog;
 
@@ -37,7 +38,7 @@ public class ZincRepo {
         downloadCatalog(sourceURL);
     }
 
-    public void startTrackingBundle(final String bundleID, final String distribution) {
+    public void startTrackingBundle(final BundleID bundleID, final String distribution) {
         mIndexWriter.getIndex().trackBundle(bundleID, distribution);
         mIndexWriter.saveIndex();
     }

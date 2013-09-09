@@ -1,6 +1,7 @@
 package com.zinc.repo;
 
 import com.zinc.classes.ZincRepoIndexWriter;
+import com.zinc.classes.data.BundleID;
 import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincCatalog;
 import com.zinc.classes.data.ZincRepoIndex;
@@ -72,7 +73,7 @@ public class RepoJobTest extends RepoBaseTest {
 
     @Test
     public void trackingBundleAddsItToTheIndex() throws Exception {
-        final String bundleID = "com.mindsnacks.games.swell";
+        final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
         final String distribution = "master";
 
         // run

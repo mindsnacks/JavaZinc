@@ -27,6 +27,24 @@ public class BundleID {
         return mBundleName;
     }
 
+    @Override
+    public String toString() {
+        return getCatalogID() + SEPARATOR + getBundleName();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        return o.toString().equals(toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
     private static String extractBundleName(final String bundleID) {
         return bundleID.substring(bundleID.lastIndexOf(SEPARATOR) + 1);
     }

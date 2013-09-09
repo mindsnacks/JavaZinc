@@ -27,12 +27,12 @@ public class ZincRepoIndex {
         mSources.add(sourceURL);
     }
 
-    public void trackBundle(final String bundleID, final String distribution) {
-        mBundles.put(bundleID, new TrackingInfo(distribution));
+    public void trackBundle(final BundleID bundleID, final String distribution) {
+        mBundles.put(bundleID.toString(), new TrackingInfo(distribution));
     }
 
-    public TrackingInfo getTrackingInfo(final String bundleID) {
-        return mBundles.get(bundleID);
+    public TrackingInfo getTrackingInfo(final BundleID bundleID) {
+        return mBundles.get(bundleID.toString());
     }
 
     @Override

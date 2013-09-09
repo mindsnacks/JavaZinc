@@ -27,6 +27,14 @@ public class BundleIDTest extends ZincBaseTest {
     }
 
     @Test
+    public void testToString() throws Exception {
+        final String catalogID = "com.mindsnacks.misc",
+                     bundleName = "first-lesson";
+
+        assertEquals(catalogID + "." + bundleName, new BundleID(catalogID, bundleName).toString());
+    }
+
+    @Test
     public void bundleNameIsCorrectWhenInitializingWithBundleID() throws Exception {
         final String bundleName = "some-lesson",
                      bundleID = "com.mindsnacks.misc." + bundleName;

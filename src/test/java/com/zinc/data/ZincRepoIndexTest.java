@@ -1,5 +1,6 @@
 package com.zinc.data;
 
+import com.zinc.classes.data.BundleID;
 import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincRepoIndex;
 import com.zinc.utils.ZincBaseTest;
@@ -38,7 +39,7 @@ public class ZincRepoIndexTest extends ZincBaseTest {
 
     @Test
     public void trackBundleAddsTrackingInfo() throws Exception {
-        final String bundleID = "com.mindsnacks.games.swell";
+        final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
         final String distribution = "master";
 
         // run
@@ -50,7 +51,7 @@ public class ZincRepoIndexTest extends ZincBaseTest {
 
     @Test
     public void trackBundleUpdatesDistribution() throws Exception {
-        final String bundleID = "com.mindsnacks.games.swell";
+        final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
         final String oldDistribution = "master",
                      newDistribution = "develop";
 
