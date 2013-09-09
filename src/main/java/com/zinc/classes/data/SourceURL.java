@@ -31,13 +31,33 @@ public class SourceURL {
         return mUrl;
     }
 
+    @Override
+    public String toString() {
+        return "SourceURL {" +
+                "url=" + mUrl +
+                ", catalogID='" + mCatalogID + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        return mUrl.equals(((SourceURL) o).getUrl());
+    }
+
+    @Override
+    public int hashCode() {
+        return mUrl.hashCode();
+    }
+
     private static String extractCatalogID(final URL sourceURL) {
         final String path = sourceURL.getPath();
         return path.substring(path.lastIndexOf("/") + 1);
     }
 
-    public static class Serializer implements JsonSerializer<SourceURL>
-    {
+    public static class Serializer implements JsonSerializer<SourceURL> {
         @Override
         public JsonElement serialize(final SourceURL sourceURL,
                                      final Type type,
@@ -47,7 +67,6 @@ public class SourceURL {
     }
 
     public static class Deserializer implements JsonDeserializer<SourceURL> {
-
         @Override
         public SourceURL deserialize(final JsonElement jsonElement,
                                      final Type type,
