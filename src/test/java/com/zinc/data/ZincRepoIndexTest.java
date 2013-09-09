@@ -1,9 +1,9 @@
-package com.zinc;
+package com.zinc.data;
 
 import org.junit.Before;
 import org.junit.Test;
 import com.zinc.utils.ZincBaseTest;
-import com.zinc.classes.ZincRepoIndex;
+import com.zinc.classes.data.ZincRepoIndex;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -14,6 +14,7 @@ import static junit.framework.Assert.assertEquals;
 /**
  * User: NachoSoto
  * Date: 9/4/13
+ * @todo: serialization tests
  */
 public class ZincRepoIndexTest extends ZincBaseTest {
     private ZincRepoIndex index;
@@ -59,6 +60,4 @@ public class ZincRepoIndexTest extends ZincBaseTest {
         // verify
         assertEquals(newDistribution, index.getTrackingInfo(bundleID).getDistribution());
     }
-
-    // TODO: serialization tests
 }

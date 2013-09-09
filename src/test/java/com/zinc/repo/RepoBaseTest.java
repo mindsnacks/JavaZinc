@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.zinc.classes.ZincFutureFactory;
 import com.zinc.classes.ZincRepo;
-import com.zinc.classes.ZincRepoIndex;
+import com.zinc.classes.data.ZincRepoIndex;
 import com.zinc.classes.ZincRepoIndexWriter;
 import com.zinc.exceptions.ZincRuntimeException;
 import com.zinc.utils.ZincBaseTest;

@@ -1,8 +1,10 @@
 package com.zinc.classes;
 
+import com.zinc.classes.data.ZincBundle;
+import com.zinc.classes.data.ZincCatalog;
+
 import java.io.File;
 import java.net.URL;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 

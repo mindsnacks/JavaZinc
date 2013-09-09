@@ -1,4 +1,4 @@
-package com.zinc.classes;
+package com.zinc.classes.data;
 
 import com.google.gson.annotations.SerializedName;
 import com.zinc.exceptions.ZincException;

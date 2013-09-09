@@ -1,5 +1,7 @@
 package com.zinc.classes;
 
+import com.zinc.classes.data.ZincCatalog;
+
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
@@ -25,6 +27,9 @@ public class ZincRepo {
         mIndexWriter = repoIndexWriter;
     }
 
+    /**
+     * @todo remove all cached bundle promises that failed?
+     */
     public void addSourceURL(final URL sourceURL) {
         mIndexWriter.getIndex().addSourceURL(sourceURL);
         mIndexWriter.saveIndex();

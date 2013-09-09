@@ -1,4 +1,4 @@
-package com.zinc.classes;
+package com.zinc.classes.data;
 
 import java.io.File;
 

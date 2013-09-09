@@ -1,7 +1,7 @@
 package com.zinc.repo;
 
-import com.zinc.classes.ZincCatalog;
-import com.zinc.classes.ZincRepoIndex;
+import com.zinc.classes.data.ZincCatalog;
+import com.zinc.classes.data.ZincRepoIndex;
 import com.zinc.classes.ZincRepoIndexWriter;
 import org.junit.Before;
 import org.junit.Test;

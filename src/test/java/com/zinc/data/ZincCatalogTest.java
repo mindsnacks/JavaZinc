@@ -1,7 +1,7 @@
-package com.zinc;
+package com.zinc.data;
 
 import com.google.gson.Gson;
-import com.zinc.classes.ZincCatalog;
+import com.zinc.classes.data.ZincCatalog;
 import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Test;

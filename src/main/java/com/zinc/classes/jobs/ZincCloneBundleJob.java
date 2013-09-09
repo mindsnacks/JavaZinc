@@ -1,7 +1,7 @@
 package com.zinc.classes.jobs;
 
-import com.zinc.classes.ZincBundle;
-import com.zinc.classes.ZincCatalog;
+import com.zinc.classes.data.ZincBundle;
+import com.zinc.classes.data.ZincCatalog;
 import com.zinc.classes.ZincFutureFactory;
 
 import java.io.File;

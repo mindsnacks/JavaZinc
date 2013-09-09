@@ -1,6 +1,7 @@
 package com.zinc.classes;
 
 import com.google.gson.Gson;
+import com.zinc.classes.data.ZincRepoIndex;
 import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.*;

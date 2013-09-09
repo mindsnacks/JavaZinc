@@ -2,7 +2,7 @@ package com.zinc.repo;
 
 import org.junit.Assert;
 import org.junit.Test;
-import com.zinc.classes.ZincRepoIndex;
+import com.zinc.classes.data.ZincRepoIndex;
 
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
