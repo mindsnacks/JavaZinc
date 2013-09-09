@@ -4,9 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.zinc.classes.ZincFutureFactory;
 import com.zinc.classes.ZincRepo;
-import com.zinc.classes.data.ZincRepoIndex;
 import com.zinc.classes.ZincRepoIndexWriter;
+import com.zinc.classes.data.ZincRepoIndex;
 import com.zinc.exceptions.ZincRuntimeException;
+import com.zinc.utils.TestUtils;
 import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Rule;
@@ -14,8 +15,8 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * User: NachoSoto
@@ -42,11 +43,13 @@ public abstract class RepoBaseTest extends ZincBaseTest {
         return new ZincRepoIndexWriter(rootFolder.getRoot(), mGson);
     }
 
-    protected final ZincRepoIndex readRepoIndex() throws FileNotFoundException {
+    protected final ZincRepoIndex readRepoIndex() throws IOException {
+        final File indexFile = getIndexFile();
+
         try {
-            return mGson.fromJson(new FileReader(getIndexFile()), ZincRepoIndex.class);
+            return mGson.fromJson(new FileReader(indexFile), ZincRepoIndex.class);
         } catch (JsonSyntaxException e) {
-            throw new ZincRuntimeException("Invalid JSON", e);
+            throw new ZincRuntimeException("Invalid JSON: " + TestUtils.readFile(indexFile), e);
         }
     }
 
