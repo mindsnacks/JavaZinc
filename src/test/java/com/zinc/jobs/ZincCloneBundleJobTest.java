@@ -1,8 +1,9 @@
 package com.zinc.jobs;
 
+import com.zinc.classes.ZincFutureFactory;
+import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.classes.data.ZincCatalog;
-import com.zinc.classes.ZincFutureFactory;
 import com.zinc.classes.jobs.ZincCloneBundleJob;
 import com.zinc.utils.MockFactory;
 import com.zinc.utils.ZincBaseTest;
@@ -13,9 +14,6 @@ import org.mockito.Mock;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.Future;
 
 import static com.zinc.utils.MockFactory.randomInt;
@@ -31,10 +29,10 @@ import static org.mockito.Mockito.*;
 public class ZincCloneBundleJobTest extends ZincBaseTest {
     private ZincCloneBundleJob mJob;
 
-    final private String mBundleID = "com.mindsnacks.games.swell";
+    final private String mBundleName = "swell";
     final private String mDistribution = "master";
 
-    final private URL mSourceURL;
+    final private SourceURL mSourceURL;
     final private String mResultPath = "result path";
 
     @Mock private ZincCatalog mZincCatalog;
@@ -45,7 +43,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     private Future<File> mResultFuture;
 
     public ZincCloneBundleJobTest() throws MalformedURLException {
-        mSourceURL = new URL("https://mindsnacks.com");
+        mSourceURL = new SourceURL(new URL("https://mindsnacks.com/"), "com.mindsnacks.games");
     }
 
     @Before
@@ -56,7 +54,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         when(mFutureFactory.downloadArchive(any(URL.class), any(File.class), anyString())).thenReturn(mResultFuture);
         when(mResult.getPath()).thenReturn(mResultPath);
 
-        mJob = initializeJob(Arrays.asList(mSourceURL));
+        mJob = initializeJob(mSourceURL);
     }
 
     private ZincBundle run() throws Exception {
@@ -74,13 +72,13 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     public void getsDistributionVersionFromCatalog() throws Exception {
         run();
 
-        verify(mZincCatalog).getVersionForBundleID(mBundleID, mDistribution);
+        verify(mZincCatalog).getVersionForBundleName(mBundleName, mDistribution);
     }
 
     @Test(expected = ZincCatalog.DistributionNotFoundException.class)
     @SuppressWarnings("unchecked")
     public void throwsIfDistributionIsNotFound() throws Exception {
-        when(mZincCatalog.getVersionForBundleID(anyString(), anyString())).thenThrow(ZincCatalog.DistributionNotFoundException.class);
+        when(mZincCatalog.getVersionForBundleName(anyString(), anyString())).thenThrow(ZincCatalog.DistributionNotFoundException.class);
 
         run();
     }
@@ -90,48 +88,27 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     public void downloadsArchive() throws Exception {
         final int version = randomInt(1, 100);
 
-        when(mZincCatalog.getVersionForBundleID(anyString(), anyString())).thenReturn(version);
+        when(mZincCatalog.getVersionForBundleName(anyString(), anyString())).thenReturn(version);
 
         // run
         final ZincBundle result = run();
 
         // verify
         verify(mResultFuture).get();
-        verifyDownloadArchiveJobCreation(mSourceURL, version);
-        checkResult(result);
-    }
-
-    @Test
-    public void triesDownloadingArchiveFromAllSources() throws Exception {
-        final URL validSourceURL = new URL("http://zinc.mindsnacks.com");
-        mJob = initializeJob(Arrays.asList(mSourceURL, validSourceURL));
-
-        final Future<File> resultFuture = MockFactory.createFutureWithExecutionException();
-
-        when(mFutureFactory.downloadArchive(eq(mSourceURL), any(File.class), anyString())).thenReturn(resultFuture);
-        when(mFutureFactory.downloadArchive(eq(validSourceURL), any(File.class), anyString())).thenReturn(mResultFuture);
-
-        final int version = randomInt(1, 100);
-        when(mZincCatalog.getVersionForBundleID(anyString(), anyString())).thenReturn(version);
-
-        // run
-        final ZincBundle result = run();
-
-        // verify
-        verifyDownloadArchiveJobCreation(validSourceURL, version);
+        verifyDownloadArchiveJobCreation(new URL(mSourceURL.getUrl(), "archives/" + mBundleName + "-" + version + ".tar"), version);
         checkResult(result);
     }
 
     private void checkResult(final ZincBundle result) {
         assertEquals(mResultPath, result.getPath());
-        assertEquals(mBundleID, result.getBundleID());
+        assertEquals(mBundleName, result.getBundleID());
     }
 
-    private ZincCloneBundleJob initializeJob(final List<URL> sourceURLs) {
-        return new ZincCloneBundleJob(new HashSet<URL>(sourceURLs), mBundleID, mDistribution, mZincCatalogFuture, mFutureFactory, mRepoFolder);
+    private ZincCloneBundleJob initializeJob(final SourceURL sourceURL) {
+        return new ZincCloneBundleJob(sourceURL, mBundleName, mDistribution, mZincCatalogFuture, mFutureFactory, mRepoFolder);
     }
 
-    private void verifyDownloadArchiveJobCreation(final URL validSourceURL, final int version) {
-        verify(mFutureFactory).downloadArchive(eq(validSourceURL), eq(mRepoFolder), eq("archives/" + mBundleID + "-" + version));
+    private void verifyDownloadArchiveJobCreation(final URL url, final int version) {
+        verify(mFutureFactory).downloadArchive(eq(url), eq(mRepoFolder), eq("archives/" + mBundleName + "-" + version));
     }
 }

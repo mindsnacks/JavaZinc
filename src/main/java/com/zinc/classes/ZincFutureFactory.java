@@ -6,7 +6,6 @@ import com.zinc.classes.data.ZincCatalog;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Set;
 import java.util.concurrent.Future;
 
 /**
@@ -16,7 +15,7 @@ import java.util.concurrent.Future;
 public interface ZincFutureFactory {
     Future<ZincCatalog> downloadCatalog(final SourceURL sourceURL);
     Future<File> downloadArchive(URL url, File root, String child);
-    Future<ZincBundle> cloneBundle(Set<URL> sourceURLs,
+    Future<ZincBundle> cloneBundle(SourceURL sourceURL,
                                    String bundleID,
                                    String distribution,
                                    Future<ZincCatalog> catalog,
