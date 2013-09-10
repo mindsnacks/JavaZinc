@@ -52,11 +52,11 @@ public class RepoInitializationTest extends RepoBaseTest {
 
     @Test
     public void addingSourceURLAddsItToIndexFile() throws IOException {
-        final SourceURL newSourceURL = new SourceURL(new URL("https://mindsnacks.com"), "com.mindsnacks.games");
-
         writeSourceURLsToIndexFile(Arrays.asList(mSourceURL));
+        initializeRepo();
 
         // run
+        final SourceURL newSourceURL = new SourceURL(new URL("https://mindsnacks.com"), "com.mindsnacks.games");
         mRepo.addSourceURL(newSourceURL);
 
         // check

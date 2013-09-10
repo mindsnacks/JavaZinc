@@ -26,6 +26,14 @@ public class ZincRepo {
         mJobFactory = jobFactory;
         mRoot = new File(root);
         mIndexWriter = repoIndexWriter;
+
+        downloadCatalogsForTrackedSources();
+    }
+
+    private void downloadCatalogsForTrackedSources() {
+        for (final SourceURL sourceURL : mIndexWriter.getIndex().getSources()) {
+            downloadCatalog(sourceURL);
+        }
     }
 
     /**

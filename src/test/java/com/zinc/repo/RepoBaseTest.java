@@ -27,7 +27,7 @@ public abstract class RepoBaseTest extends ZincBaseTest {
     protected ZincRepoIndexWriter mIndexWriter;
     @Mock protected ZincFutureFactory mJobFactory;
 
-    private Gson mGson;
+    protected Gson mGson;
 
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
 
@@ -35,6 +35,10 @@ public abstract class RepoBaseTest extends ZincBaseTest {
     public void setUp() throws Exception {
         mGson = createGson();
 
+        initializeRepo();
+    }
+
+    protected void initializeRepo() {
         mIndexWriter = newRepoIndexWriter();
         mRepo = new ZincRepo(mJobFactory, rootFolder.getRoot().toURI(), mIndexWriter);
     }

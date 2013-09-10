@@ -11,6 +11,8 @@ import org.mockito.Mock;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.concurrent.Future;
 
 import static com.zinc.utils.MockFactory.createCatalog;
@@ -36,9 +38,10 @@ public class RepoJobTest extends RepoBaseTest {
     @Override
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-
         when(mRepoIndexWriter.getIndex()).thenReturn(mRepoIndex);
+        when(mRepoIndex.getSources()).thenReturn(new HashSet<SourceURL>());
+
+        super.setUp();
     }
 
     @Override
@@ -66,6 +69,17 @@ public class RepoJobTest extends RepoBaseTest {
         // run
         mRepo.addSourceURL(mSourceURL);
         mRepo.addSourceURL(mSourceURL);
+
+        // verify
+        verify(mJobFactory, times(1)).downloadCatalog(eq(mSourceURL));
+    }
+
+    @Test
+    public void catalogsAreDownloadedForExistingSourceURLs() throws Exception {
+        when(mRepoIndex.getSources()).thenReturn(new HashSet<SourceURL>(Arrays.asList(mSourceURL)));
+
+        // run
+        initializeRepo();
 
         // verify
         verify(mJobFactory, times(1)).downloadCatalog(eq(mSourceURL));
