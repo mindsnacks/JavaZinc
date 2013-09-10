@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
  * Date: 9/10/13
  */
 public final class ZincRepoFactory {
-    public ZincRepo createRepo(final File root) {
+    public ZincRepo createRepo(final File root, final String flavorName) {
         // TODO: disable pretty printing
         final GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting().serializeNulls().setVersion(1.0);
         gsonBuilder.registerTypeAdapter(SourceURL.class, new SourceURL.Serializer());
@@ -27,6 +27,6 @@ public final class ZincRepoFactory {
         final ZincFutureFactory jobFactory = new ZincDownloader(gson, executorService);
         final ZincRepoIndexWriter indexWriter = new ZincRepoIndexWriter(root, gson);
 
-        return new ZincRepo(jobFactory, root.toURI(), indexWriter);
+        return new ZincRepo(jobFactory, root.toURI(), indexWriter, flavorName);
     }
 }
