@@ -20,7 +20,7 @@ public class ZincDownloadArchiveJob extends AbstractZincDownloadFileJob {
     @Override
     protected void writeFile(final InputStream inputStream, final File file) throws IOException {
         if (!file.exists()) {
-            if (!file.mkdir()) {
+            if (!file.mkdirs()) {
                 throw new DownloadFileError("Error creating folder: " + file.getAbsolutePath());
             }
         }
