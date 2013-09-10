@@ -15,8 +15,6 @@ import java.util.concurrent.Future;
  * Date: 9/4/13
  */
 public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
-    private static final String ARCHIVES_FOLDER = "archives";
-    private static final String ARCHIVES_FORMAT = ".tar";
 
     private final SourceURL mSourceURL;
     private final BundleID mBundleID;
@@ -44,11 +42,14 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
     @Override
     public ZincBundle call() throws Exception {
         final ZincCatalog catalog = mCatalog.get();
-        final int version = catalog.getVersionForBundleName(mBundleID.getBundleName(), mDistribution);
 
-        final String filename = String.format("%s/%s-%d", ARCHIVES_FOLDER, mBundleID.getBundleName(), version);
+        final String bundleName = mBundleID.getBundleName();
+        final int version = catalog.getVersionForBundleName(bundleName, mDistribution);
 
-        final Future<File> job = mFutureFactory.downloadArchive(new URL(mSourceURL.getUrl(), filename + ARCHIVES_FORMAT), mRepoFolder, filename);
+        final URL archiveURL = mSourceURL.getArchiveURL(bundleName, version);
+        final String folderName = archiveURL.getFile().substring(0, archiveURL.getFile().lastIndexOf("."));
+
+        final Future<File> job = mFutureFactory.downloadArchive(archiveURL, mRepoFolder, folderName);
 
         return new ZincBundle(job.get(), mBundleID);
     }

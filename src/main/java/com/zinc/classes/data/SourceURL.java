@@ -12,6 +12,8 @@ import java.net.URL;
  */
 public class SourceURL {
     private static final String CATALOG_FILENAME = "catalog.json";
+    private static final String ARCHIVES_FOLDER = "archives";
+    private static final String ARCHIVES_FORMAT = "tar";
 
     private final URL mUrl;
     private transient final String mCatalogID;
@@ -36,6 +38,10 @@ public class SourceURL {
 
     public URL getCatalogFileURL() throws MalformedURLException {
         return new URL(getUrl(), CATALOG_FILENAME);
+    }
+
+    public URL getArchiveURL(final String bundleName, final int version) throws MalformedURLException {
+        return new URL(getUrl(), String.format("%s/%s-%d.%s", ARCHIVES_FOLDER, bundleName, version, ARCHIVES_FORMAT));
     }
 
     @Override

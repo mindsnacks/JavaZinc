@@ -112,6 +112,6 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     }
 
     private void verifyDownloadArchiveJobCreation(final URL url, final int version) {
-        verify(mFutureFactory).downloadArchive(eq(url), eq(mRepoFolder), eq("archives/" + mBundleName + "-" + version));
+        verify(mFutureFactory).downloadArchive(eq(url), eq(mRepoFolder), eq("/" + mCatalogID + "/archives/" + mBundleName + "-" + version));
     }
 }

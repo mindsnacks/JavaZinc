@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static com.zinc.utils.MockFactory.randomInt;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -81,5 +82,17 @@ public class SourceURLTest extends ZincBaseTest {
 
         assertTrue(result.toString().contains(catalogID));
         assertTrue(result.getFile().endsWith(".json"));
+    }
+
+    @Test
+    public void archiveURL() throws Exception {
+        final String bundleName = "swell";
+        final int version = randomInt(1, 1000);
+
+        final URL result = new SourceURL(zincURL, catalogID).getArchiveURL(bundleName, version);
+
+        assertTrue(result.getFile().endsWith(".tar"));
+        assertTrue(result.toString().contains(Integer.toString(version)));
+        assertTrue(result.toString().contains(bundleName));
     }
 }
