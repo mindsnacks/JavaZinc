@@ -40,6 +40,17 @@ public class ZincDownloader implements ZincFutureFactory {
     }
 
     @Override
+    public Future<ZincManifest> downloadManifest(final SourceURL sourceURL, final String bundleName, final int version) {
+        final URL manifestFileURL;
+        try {
+            manifestFileURL = sourceURL.getManifestFileURL(bundleName, version);
+        } catch (MalformedURLException e) {
+            throw new ZincRuntimeException("Invalid manifest URL: " + sourceURL, e);
+        }
+        return submitJob(new ZincDownloadObjectJob<ZincManifest>(createRequestExecutor(), manifestFileURL, mGson, ZincManifest.class));
+    }
+
+    @Override
     public Future<File> downloadArchive(final URL url, final File root, final String child, final boolean override) {
         return submitJob(new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child, override));
     }
