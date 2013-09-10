@@ -1,6 +1,7 @@
 package com.zinc.jobs;
 
 import com.zinc.classes.ZincFutureFactory;
+import com.zinc.classes.data.BundleID;
 import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.classes.data.ZincCatalog;
@@ -30,6 +31,8 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     private ZincCloneBundleJob mJob;
 
     final private String mBundleName = "swell";
+    final private String mCatalogID = "com.mindsnacks.games";
+    final private BundleID mBundleID = new BundleID(mCatalogID, mBundleName);
     final private String mDistribution = "master";
 
     final private SourceURL mSourceURL;
@@ -43,7 +46,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     private Future<File> mResultFuture;
 
     public ZincCloneBundleJobTest() throws MalformedURLException {
-        mSourceURL = new SourceURL(new URL("https://mindsnacks.com/"), "com.mindsnacks.games");
+        mSourceURL = new SourceURL(new URL("https://mindsnacks.com/"), mCatalogID);
     }
 
     @Before
@@ -101,11 +104,11 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
     private void checkResult(final ZincBundle result) {
         assertEquals(mResultPath, result.getPath());
-        assertEquals(mBundleName, result.getBundleID());
+        assertEquals(mBundleID, result.getBundleID());
     }
 
     private ZincCloneBundleJob initializeJob(final SourceURL sourceURL) {
-        return new ZincCloneBundleJob(sourceURL, mBundleName, mDistribution, mZincCatalogFuture, mFutureFactory, mRepoFolder);
+        return new ZincCloneBundleJob(sourceURL, mBundleID, mDistribution, mZincCatalogFuture, mFutureFactory, mRepoFolder);
     }
 
     private void verifyDownloadArchiveJobCreation(final URL url, final int version) {

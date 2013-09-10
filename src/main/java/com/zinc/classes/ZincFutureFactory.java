@@ -1,5 +1,6 @@
 package com.zinc.classes;
 
+import com.zinc.classes.data.BundleID;
 import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.classes.data.ZincCatalog;
@@ -16,7 +17,7 @@ public interface ZincFutureFactory {
     Future<ZincCatalog> downloadCatalog(final SourceURL sourceURL);
     Future<File> downloadArchive(URL url, File root, String child);
     Future<ZincBundle> cloneBundle(SourceURL sourceURL,
-                                   String bundleID,
+                                   BundleID bundleID,
                                    String distribution,
                                    Future<ZincCatalog> catalog,
                                    File repoFolder);

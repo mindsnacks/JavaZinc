@@ -3,6 +3,7 @@ package com.zinc.classes.jobs;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
 import com.zinc.classes.ZincFutureFactory;
+import com.zinc.classes.data.BundleID;
 import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.classes.data.ZincCatalog;
@@ -48,7 +49,7 @@ public class ZincDownloader implements ZincFutureFactory {
 
     @Override
     public Future<ZincBundle> cloneBundle(final SourceURL sourceURL,
-                                          final String bundleID,
+                                          final BundleID bundleID,
                                           final String distribution,
                                           final Future<ZincCatalog> catalog,
                                           final File repoFolder) {
