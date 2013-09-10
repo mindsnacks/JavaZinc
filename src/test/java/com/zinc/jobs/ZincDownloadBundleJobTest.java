@@ -2,7 +2,7 @@ package com.zinc.jobs;
 
 import com.zinc.classes.ZincFutureFactory;
 import com.zinc.classes.data.*;
-import com.zinc.classes.jobs.ZincCloneBundleJob;
+import com.zinc.classes.jobs.ZincDownloadBundleJob;
 import com.zinc.utils.MockFactory;
 import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
@@ -24,8 +24,8 @@ import static org.mockito.Mockito.*;
  * User: NachoSoto
  * Date: 9/5/13
  */
-public class ZincCloneBundleJobTest extends ZincBaseTest {
-    private ZincCloneBundleJob mJob;
+public class ZincDownloadBundleJobTest extends ZincBaseTest {
+    private ZincDownloadBundleJob mJob;
 
     final private String mBundleName = "swell";
     final private String mCatalogID = "com.mindsnacks.games";
@@ -44,7 +44,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     private Future<ZincCatalog> mZincCatalogFuture;
     private Future<File> mResultFuture;
 
-    public ZincCloneBundleJobTest() throws MalformedURLException {
+    public ZincDownloadBundleJobTest() throws MalformedURLException {
         mSourceHost = new URL("https://mindsnacks.com/");
         mArchiveURL = new URL(mSourceHost, mCatalogID + "/" + mBundleName + "-" + mDistribution + "-" + mFlavorName);
     }
@@ -111,8 +111,8 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         assertEquals(mBundleID, result.getBundleID());
     }
 
-    private ZincCloneBundleJob initializeJob(final SourceURL sourceURL) {
-        return new ZincCloneBundleJob(new ZincBundleCloneRequest(sourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder), mZincCatalogFuture, mFutureFactory);
+    private ZincDownloadBundleJob initializeJob(final SourceURL sourceURL) {
+        return new ZincDownloadBundleJob(new ZincBundleCloneRequest(sourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder), mZincCatalogFuture, mFutureFactory);
     }
 
     private void verifyDownloadArchiveJobCreation(final int version) {

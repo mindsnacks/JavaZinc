@@ -11,7 +11,7 @@ import java.util.concurrent.Future;
  * User: NachoSoto
  * Date: 9/4/13
  */
-public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
+public class ZincDownloadBundleJob implements ZincJob<ZincBundle> {
     private final SourceURL mSourceURL;
     private final BundleID mBundleID;
     private final String mDistribution;
@@ -21,9 +21,9 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
 
     protected final ZincFutureFactory mFutureFactory;
 
-    public ZincCloneBundleJob(final ZincBundleCloneRequest zincBundleCloneRequest,
-                              final Future<ZincCatalog> catalogFuture,
-                              final ZincFutureFactory futureFactory) {
+    public ZincDownloadBundleJob(final ZincBundleCloneRequest zincBundleCloneRequest,
+                                 final Future<ZincCatalog> catalogFuture,
+                                 final ZincFutureFactory futureFactory) {
         assert zincBundleCloneRequest.getSourceURL().getCatalogID().equals(zincBundleCloneRequest.getBundleID().getCatalogID());
 
         mSourceURL = zincBundleCloneRequest.getSourceURL();
