@@ -51,9 +51,10 @@ public class ZincDownloader implements ZincFutureFactory {
     public Future<ZincBundle> cloneBundle(final SourceURL sourceURL,
                                           final BundleID bundleID,
                                           final String distribution,
-                                          final Future<ZincCatalog> catalog,
-                                          final File repoFolder) {
-        return submitJob(new ZincCloneBundleJob(sourceURL, bundleID, distribution, catalog, this, repoFolder));
+                                          final String flavorName,
+                                          final File repoFolder,
+                                          final Future<ZincCatalog> catalog) {
+        return submitJob(new ZincCloneBundleJob(sourceURL, bundleID, distribution, flavorName, catalog, this, repoFolder));
     }
 
     private ZincRequestExecutor createRequestExecutor() {

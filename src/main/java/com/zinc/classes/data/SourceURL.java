@@ -13,6 +13,7 @@ import java.net.URL;
 public class SourceURL {
     private static final String CATALOG_FILENAME = "catalog.json";
     private static final String ARCHIVES_FOLDER = "archives";
+    private static final String FLAVOR_SEPARATOR = "~";
     private static final String ARCHIVES_FORMAT = "tar";
 
     private final URL mUrl;
@@ -40,8 +41,8 @@ public class SourceURL {
         return new URL(getUrl(), CATALOG_FILENAME);
     }
 
-    public URL getArchiveURL(final String bundleName, final int version) throws MalformedURLException {
-        return new URL(getUrl(), String.format("%s/%s-%d.%s", ARCHIVES_FOLDER, bundleName, version, ARCHIVES_FORMAT));
+    public URL getArchiveURL(final String bundleName, final int version, final String flavorName) throws MalformedURLException {
+        return new URL(getUrl(), String.format("%s/%s-%d%s%s.%s", ARCHIVES_FOLDER, bundleName, version, FLAVOR_SEPARATOR, flavorName, ARCHIVES_FORMAT));
     }
 
     @Override

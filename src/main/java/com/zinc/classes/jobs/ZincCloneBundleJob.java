@@ -19,6 +19,7 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
     private final SourceURL mSourceURL;
     private final BundleID mBundleID;
     private final String mDistribution;
+    private final String mFlavorName;
     private final Future<ZincCatalog> mCatalog;
     private final ZincFutureFactory mFutureFactory;
     private final File mRepoFolder;
@@ -26,6 +27,7 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
     public ZincCloneBundleJob(final SourceURL sourceURL,
                               final BundleID bundleID,
                               final String distribution,
+                              final String flavorName,
                               final Future<ZincCatalog> catalogFuture,
                               final ZincFutureFactory futureFactory,
                               final File repoFolder) {
@@ -34,6 +36,7 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
         mSourceURL = sourceURL;
         mBundleID = bundleID;
         mDistribution = distribution;
+        mFlavorName = flavorName;
         mCatalog = catalogFuture;
         mFutureFactory = futureFactory;
         mRepoFolder = repoFolder;
@@ -46,11 +49,15 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
         final String bundleName = mBundleID.getBundleName();
         final int version = catalog.getVersionForBundleName(bundleName, mDistribution);
 
-        final URL archiveURL = mSourceURL.getArchiveURL(bundleName, version);
-        final String folderName = archiveURL.getFile().substring(0, archiveURL.getFile().lastIndexOf("."));
+        final URL archiveURL = mSourceURL.getArchiveURL(bundleName, version, mFlavorName);
+        final String folderName = removeExtension(archiveURL.getFile());
 
         final Future<File> job = mFutureFactory.downloadArchive(archiveURL, mRepoFolder, folderName);
 
         return new ZincBundle(job.get(), mBundleID);
+    }
+
+    private static String removeExtension(final String filename) {
+        return filename.substring(0, filename.lastIndexOf("."));
     }
 }

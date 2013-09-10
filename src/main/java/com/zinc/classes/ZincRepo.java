@@ -93,6 +93,6 @@ public class ZincRepo {
             throw new ZincRuntimeException(String.format("No sources for catalog '%s'", catalogID));
         }
 
-        return mJobFactory.cloneBundle(sourceURL, bundleID, distribution, getCatalog(sourceURL), mRoot);
+        return mJobFactory.cloneBundle(sourceURL, bundleID, distribution, mFlavorName, mRoot, getCatalog(sourceURL));
     }
 }

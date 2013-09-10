@@ -70,12 +70,14 @@ public class SourceURLTest extends ZincBaseTest {
     public void archiveURL() throws Exception {
         final String bundleName = "swell";
         final int version = randomInt(1, 1000);
+        final String flavorName = "retina";
 
-        final URL result = new SourceURL(zincURL, catalogID).getArchiveURL(bundleName, version);
+        final URL result = new SourceURL(zincURL, catalogID).getArchiveURL(bundleName, version, flavorName);
 
         assertTrue(result.getFile().endsWith(".tar"));
         assertTrue(result.toString().contains(Integer.toString(version)));
         assertTrue(result.toString().contains(bundleName));
+        assertTrue(result.toString().contains(flavorName));
     }
 
     @Test

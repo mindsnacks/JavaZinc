@@ -19,6 +19,5 @@ public interface ZincFutureFactory {
     Future<ZincBundle> cloneBundle(SourceURL sourceURL,
                                    BundleID bundleID,
                                    String distribution,
-                                   Future<ZincCatalog> catalog,
-                                   File repoFolder);
+                                   final String flavorName, File repoFolder, Future<ZincCatalog> catalog);
 }
