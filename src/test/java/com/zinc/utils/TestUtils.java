@@ -1,4 +1,4 @@
-package com.zinc.jobs;
+package com.zinc.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,7 +16,12 @@ public class TestUtils {
         final byte[] bytes = new byte[(int)file.length()];
 
         fis.read(bytes);
+        fis.close();
 
         return new String(bytes);
+    }
+
+    public static String readFile(File file) throws IOException {
+        return readFile(file.getPath());
     }
 }

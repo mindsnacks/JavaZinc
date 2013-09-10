@@ -1,26 +1,22 @@
 package com.zinc.repo;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.zinc.classes.ZincFutureFactory;
+import com.zinc.classes.ZincRepo;
+import com.zinc.classes.ZincRepoIndexWriter;
+import com.zinc.classes.data.ZincRepoIndex;
+import com.zinc.exceptions.ZincRuntimeException;
+import com.zinc.utils.TestUtils;
+import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
-import com.zinc.utils.ZincBaseTest;
-import com.zinc.classes.ZincCatalog;
-import com.zinc.classes.ZincRepo;
-import com.zinc.classes.ZincRepoIndex;
-import com.zinc.classes.ZincRepoIndexWriter;
-import com.zinc.classes.jobs.AbstractZincJob;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.net.URL;
-import java.util.concurrent.ExecutorService;
-
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
+import java.io.IOException;
 
 /**
  * User: NachoSoto
@@ -28,39 +24,37 @@ import static org.mockito.Mockito.when;
  */
 public abstract class RepoBaseTest extends ZincBaseTest {
     protected ZincRepo mRepo;
-
-    @Mock
-    protected ZincRepo.ZincJobFactory mJobFactory;
-
     protected ZincRepoIndexWriter mIndexWriter;
+    @Mock protected ZincFutureFactory mJobFactory;
 
-    @Mock
-    private AbstractZincJob<ZincCatalog> catalogDownloadJob;
+    protected Gson mGson;
 
-    private ExecutorService mExecutor;
-    private Gson mGson;
-
-    @Rule
-    public final TemporaryFolder rootFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
 
     @Before
     public void setUp() throws Exception {
-        mExecutor = createExecutorService();
         mGson = createGson();
 
-        mIndexWriter = newRepoIndexWriter();
-        mRepo = new ZincRepo(mExecutor, mJobFactory, rootFolder.getRoot().toURI(), mIndexWriter);
+        initializeRepo();
+    }
 
-        when(mJobFactory.downloadCatalog((URL)anyObject(), anyString())).thenReturn(catalogDownloadJob);
+    protected void initializeRepo() {
+        mIndexWriter = newRepoIndexWriter();
+        mRepo = new ZincRepo(mJobFactory, rootFolder.getRoot().toURI(), mIndexWriter);
     }
 
     protected ZincRepoIndexWriter newRepoIndexWriter() {
         return new ZincRepoIndexWriter(rootFolder.getRoot(), mGson);
     }
 
-    protected final ZincRepoIndex readRepoIndex() throws FileNotFoundException {
-        final FileReader fileReader = new FileReader(getIndexFile());
-        return mGson.fromJson(fileReader, ZincRepoIndex.class);
+    protected final ZincRepoIndex readRepoIndex() throws IOException {
+        final File indexFile = getIndexFile();
+
+        try {
+            return mGson.fromJson(new FileReader(indexFile), ZincRepoIndex.class);
+        } catch (JsonSyntaxException e) {
+            throw new ZincRuntimeException("Invalid JSON: " + TestUtils.readFile(indexFile), e);
+        }
     }
 
     protected final File getIndexFile() {

@@ -1,6 +1,7 @@
 package com.zinc.classes;
 
 import com.google.gson.Gson;
+import com.zinc.classes.data.ZincRepoIndex;
 import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.*;
@@ -16,7 +17,6 @@ public class ZincRepoIndexWriter {
     private final Gson mGson;
 
     private ZincRepoIndex mRepoIndex;
-    private FileWriter mFileWriter;
 
     public ZincRepoIndexWriter(final File root, final Gson gson) {
         mGson = gson;
@@ -24,12 +24,12 @@ public class ZincRepoIndexWriter {
     }
 
     public void saveIndex() {
-        final FileWriter fileWriter = getFileWriter();
+        final Writer fileWriter = getFileWriter();
 
         mGson.toJson(mRepoIndex, fileWriter);
 
         try {
-            fileWriter.flush();
+            fileWriter.close();
         } catch (IOException e) {
             throw new ZincRuntimeException("Error writing to index file", e);
         }
@@ -57,15 +57,11 @@ public class ZincRepoIndexWriter {
         }
     }
 
-    private FileWriter getFileWriter() {
-        if (mFileWriter == null) {
-            try {
-                mFileWriter = new FileWriter(mIndexFile);
-            } catch (IOException e) {
-                throw new ZincRuntimeException("Cannot write to index file", e);
-            }
+    private Writer getFileWriter() {
+        try {
+            return new BufferedWriter(new FileWriter(mIndexFile));
+        } catch (IOException e) {
+            throw new ZincRuntimeException("Cannot write to index file", e);
         }
-
-        return mFileWriter;
     }
 }
