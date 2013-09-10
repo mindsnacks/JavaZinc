@@ -25,14 +25,16 @@ import static org.mockito.Mockito.*;
  */
 public class RepoJobTest extends RepoBaseTest {
     @Mock private Future<ZincCatalog> mCatalogFuture;
-
     @Mock private ZincRepoIndex mRepoIndex;
+
     @Mock private ZincRepoIndexWriter mRepoIndexWriter;
 
+    private final String mCatalogID;
     private final SourceURL mSourceURL;
 
     public RepoJobTest() throws MalformedURLException {
-        mSourceURL = new SourceURL(new URL("https://mindsnacks.com"), "com.mindsnacks.lessons");
+        mCatalogID = "com.mindsnacks.lessons";
+        mSourceURL = new SourceURL(new URL("https://mindsnacks.com"), mCatalogID);
     }
 
     @Override
@@ -54,7 +56,7 @@ public class RepoJobTest extends RepoBaseTest {
         final ZincCatalog catalog = createCatalog();
 
         when(mCatalogFuture.get()).thenReturn(catalog);
-        when(mJobFactory.downloadCatalog(eq(mSourceURL))).thenReturn(mCatalogFuture);
+        mockDownloadCatalog(eq(mSourceURL));
 
         // run
         mRepo.addSourceURL(mSourceURL);
@@ -71,7 +73,7 @@ public class RepoJobTest extends RepoBaseTest {
         mRepo.addSourceURL(mSourceURL);
 
         // verify
-        verify(mJobFactory, times(1)).downloadCatalog(eq(mSourceURL));
+        verifyCatalogIsDownloaded();
     }
 
     @Test
@@ -82,7 +84,7 @@ public class RepoJobTest extends RepoBaseTest {
         initializeRepo();
 
         // verify
-        verify(mJobFactory, times(1)).downloadCatalog(eq(mSourceURL));
+        verifyCatalogIsDownloaded();
     }
 
     @Test
@@ -99,16 +101,24 @@ public class RepoJobTest extends RepoBaseTest {
 
     @Test
     public void trackingBundleClonesBundle() throws Exception {
-        final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
+        final BundleID bundleID = new BundleID(mCatalogID, "swell");
         final String distribution = "master";
-        final SourceURL sourceURL = null;
 
-        when(mJobFactory.downloadCatalog(sourceURL)).thenReturn(mCatalogFuture);
+        mockDownloadCatalog(mSourceURL);
+        when(mRepoIndex.getSourceURLForCatalog(eq(mCatalogID))).thenReturn(mSourceURL);
 
         // run
         mRepo.startTrackingBundle(bundleID, distribution);
 
         // verify
-        verify(mJobFactory).cloneBundle(eq(sourceURL), eq(bundleID), eq(distribution), eq(mCatalogFuture), eq(rootFolder.getRoot()));
+        verify(mJobFactory).cloneBundle(eq(mSourceURL), eq(bundleID), eq(distribution), eq(mCatalogFuture), eq(rootFolder.getRoot()));
+    }
+
+    private void mockDownloadCatalog(final SourceURL sourceURL) {
+        when(mJobFactory.downloadCatalog(sourceURL)).thenReturn(mCatalogFuture);
+    }
+
+    private void verifyCatalogIsDownloaded() {
+        verify(mJobFactory, times(1)).downloadCatalog(eq(mSourceURL));
     }
 }
