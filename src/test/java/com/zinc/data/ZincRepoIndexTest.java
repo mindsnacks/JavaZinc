@@ -62,4 +62,28 @@ public class ZincRepoIndexTest extends ZincBaseTest {
         // verify
         assertEquals(newDistribution, index.getTrackingInfo(bundleID).getDistribution());
     }
+
+    @Test
+    public void sourceURLForCatalogID() throws Exception {
+        final URL host = new URL("http://mindsnacks.com");
+        final String catalogID = "com.mindsnacks.games";
+        final SourceURL correctSourceURL = new SourceURL(host, catalogID);
+
+        index.addSourceURL(new SourceURL(host, "com.mindsnacks.lessons"));
+        index.addSourceURL(correctSourceURL);
+        index.addSourceURL(new SourceURL(host, "com.mindsnacks.misc"));
+
+        // run
+        final SourceURL result = index.getSourceURLForCatalog(catalogID);
+
+        assertEquals(correctSourceURL, result);
+    }
+
+    @Test(expected = ZincRepoIndex.CatalogNotFoundException.class)
+    public void sourceURLNotFound() throws Exception {
+        index.addSourceURL(new SourceURL(new URL("http://mindsnacks.com"), "com.mindsnacks.lessons"));
+
+        // run
+        final SourceURL result = index.getSourceURLForCatalog("not-found");
+    }
 }

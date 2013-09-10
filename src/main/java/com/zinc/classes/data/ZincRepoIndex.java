@@ -1,6 +1,7 @@
 package com.zinc.classes.data;
 
 import com.google.gson.annotations.SerializedName;
+import com.zinc.exceptions.ZincException;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +43,16 @@ public class ZincRepoIndex {
                 '}';
     }
 
+    public SourceURL getSourceURLForCatalog(final String catalogID) throws CatalogNotFoundException {
+       for (final SourceURL url : mSources) {
+           if (url.getCatalogID().equals(catalogID)) {
+               return url;
+           }
+       }
+
+       throw new CatalogNotFoundException(catalogID);
+    }
+
     public static class TrackingInfo {
         @SerializedName("distribution")
         final private String mDistribution;
@@ -52,6 +63,12 @@ public class ZincRepoIndex {
 
         public String getDistribution() {
             return mDistribution;
+        }
+    }
+
+    public static class CatalogNotFoundException extends ZincException {
+        public CatalogNotFoundException(final String catalogID) {
+            super(String.format("Source URL for catalog '%s' not found", catalogID));
         }
     }
 }
