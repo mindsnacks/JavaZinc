@@ -1,6 +1,5 @@
 package com.zinc.classes;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.zinc.classes.data.SourceURL;
@@ -9,6 +8,7 @@ import com.zinc.classes.jobs.ZincDownloader;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * User: NachoSoto
@@ -23,11 +23,20 @@ public final class ZincRepoFactory {
 
         final Gson gson = gsonBuilder.create();
 
-        final ExecutorService executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).build());
+        final ExecutorService executorService = Executors.newCachedThreadPool(new DaemonThreadFactory());
 
         final ZincFutureFactory jobFactory = new ZincDownloader(gson, executorService);
         final ZincRepoIndexWriter indexWriter = new ZincRepoIndexWriter(root, gson);
 
         return new ZincRepo(jobFactory, root.toURI(), indexWriter, flavorName);
+    }
+
+    private class DaemonThreadFactory implements ThreadFactory {
+        @Override
+        public Thread newThread(final Runnable r) {
+            final Thread t = new Thread(r);
+            t.setDaemon(true);
+            return t;
+        }
     }
 }
