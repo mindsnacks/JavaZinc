@@ -23,13 +23,13 @@ public class ZincCatalogTest extends ZincBaseTest {
     public void createFromJSON() throws ZincCatalog.DistributionNotFoundException {
         String json = "{\n" +
                 "  \"bundles\": {\n" +
-                "    \"bundleID1\": {\n" +
+                "    \"bundleName1\": {\n" +
                 "      \"distributions\": {\n" +
                 "        \"master\": 1,\n" +
                 "        \"develop\": 2\n" +
                 "      }\n" +
                 "    },\n" +
-                "    \"bundleID2\": {\n" +
+                "    \"bundleName2\": {\n" +
                 "      \"distributions\": {\n" +
                 "        \"master\": 2,\n" +
                 "        \"develop\": 3\n" +
@@ -42,19 +42,19 @@ public class ZincCatalogTest extends ZincBaseTest {
         final ZincCatalog catalog = gson.fromJson(json, ZincCatalog.class);
 
         assertEquals("repo", catalog.getIdentifier());
-        assertEquals(1, catalog.getVersionForBundleID("bundleID1", "master"));
-        assertEquals(2, catalog.getVersionForBundleID("bundleID1", "develop"));
-        assertEquals(2, catalog.getVersionForBundleID("bundleID2", "master"));
-        assertEquals(3, catalog.getVersionForBundleID("bundleID2", "develop"));
+        assertEquals(1, catalog.getVersionForBundleName("bundleName1", "master"));
+        assertEquals(2, catalog.getVersionForBundleName("bundleName1", "develop"));
+        assertEquals(2, catalog.getVersionForBundleName("bundleName2", "master"));
+        assertEquals(3, catalog.getVersionForBundleName("bundleName2", "develop"));
     }
 
     @Test(expected = ZincCatalog.DistributionNotFoundException.class)
     public void throwsIfDistributionIsNotFound() throws ZincCatalog.DistributionNotFoundException {
-        final String bundleID = "com.mindsnacks.games.swell";
-        final ZincCatalog catalog = initializeSampleCatalog(bundleID);
+        final String bundleName = "swell";
+        final ZincCatalog catalog = initializeSampleCatalog(bundleName);
 
         // run
-        catalog.getVersionForBundleID(bundleID, "nonexistent distro");
+        catalog.getVersionForBundleName(bundleName, "nonexistent distro");
     }
 
     @Test(expected = ZincCatalog.DistributionNotFoundException.class)
@@ -62,15 +62,15 @@ public class ZincCatalogTest extends ZincBaseTest {
         final ZincCatalog catalog = initializeSampleCatalog("com.mindsnacks.games.swell");
 
         // run
-        catalog.getVersionForBundleID("some other bundle", "master");
+        catalog.getVersionForBundleName("some other bundle", "master");
     }
 
-    private ZincCatalog initializeSampleCatalog(final String bundleID) {
+    private ZincCatalog initializeSampleCatalog(final String bundleName) {
         final Map<String, Integer> distributions = new HashMap<String, Integer>();
         distributions.put("master", 2);
 
         final Map<String, ZincCatalog.Info> bundles = new HashMap<String, ZincCatalog.Info>();
-        bundles.put(bundleID, new ZincCatalog.Info(distributions));
+        bundles.put(bundleName, new ZincCatalog.Info(distributions));
 
         return new ZincCatalog("identifier", bundles);
     }

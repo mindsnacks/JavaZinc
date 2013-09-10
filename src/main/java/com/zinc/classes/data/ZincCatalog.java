@@ -25,13 +25,13 @@ public class ZincCatalog {
         return mIdentifier;
     }
 
-    public int getVersionForBundleID(final String bundleID, final String distribution) throws DistributionNotFoundException {
+    public int getVersionForBundleName(final String bundleName, final String distribution) throws DistributionNotFoundException {
         try {
-            return mBundles.get(bundleID).getVersionForDistribution(distribution);
+            return mBundles.get(bundleName).getVersionForDistribution(distribution);
         } catch (DistributionNotFoundException e) {
-            throw new DistributionNotFoundException(distribution, bundleID);
+            throw new DistributionNotFoundException(distribution, bundleName);
         } catch (NullPointerException e) {
-            throw new DistributionNotFoundException(distribution, bundleID);
+            throw new DistributionNotFoundException(distribution, bundleName);
         }
     }
 
@@ -91,8 +91,8 @@ public class ZincCatalog {
             super(String.format("Distribution '%s' not found", distribution));
         }
 
-        public DistributionNotFoundException(final String distribution, final String bundleID) {
-            super(String.format("Distribution '%s' not found in bundle ''%s", distribution, bundleID));
+        public DistributionNotFoundException(final String distribution, final String bundleName) {
+            super(String.format("Distribution '%s' not found in bundle ''%s", distribution, bundleName));
         }
     }
 }
