@@ -19,7 +19,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static com.zinc.jobs.TestUtils.readFile;
+import static com.zinc.utils.TestUtils.readFile;
 
 /**
  * User: NachoSoto

@@ -1,11 +1,12 @@
 package com.zinc.classes;
 
-import com.zinc.classes.jobs.AbstractZincJob;
+import com.zinc.classes.data.*;
+import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URL;
-import java.util.concurrent.ExecutorService;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
@@ -13,41 +14,83 @@ import java.util.concurrent.Future;
  * Date: 9/3/13
  */
 public class ZincRepo {
-    private final ExecutorService mExecutorService;
-    private final ZincJobFactory mJobFactory;
-    
-    private final File mRoot;
-
+    private final ZincFutureFactory mJobFactory;
     private final ZincRepoIndexWriter mIndexWriter;
 
-    public ZincRepo(final ExecutorService executorService, final ZincJobFactory jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter) {
-        mExecutorService = executorService;
+    private final File mRoot;
+
+    private final Map<SourceURL, Future<ZincCatalog>> mCatalogs = new HashMap<SourceURL, Future<ZincCatalog>>();
+    private final Map<BundleID, Future<ZincBundle>> mBundles = new HashMap<BundleID, Future<ZincBundle>>();
+
+    /**
+     * @todo remove cached promises that failed?
+     */
+    public ZincRepo(final ZincFutureFactory jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter) {
         mJobFactory = jobFactory;
         mRoot = new File(root);
         mIndexWriter = repoIndexWriter;
+
+        downloadCatalogsForTrackedSources();
+        downloadTrackedBundles();
     }
 
-    public void addSourceURL(final URL catalogURL, final String catalogIdentifier) {
-        mIndexWriter.getIndex().addSourceURL(catalogURL, catalogIdentifier);
+    private void downloadCatalogsForTrackedSources() {
+        for (final SourceURL sourceURL : mIndexWriter.getIndex().getSources()) {
+            getCatalog(sourceURL);
+        }
+    }
 
-        downloadCatalog(catalogURL, catalogIdentifier);
+    private void downloadTrackedBundles() {
+        final ZincRepoIndex index = mIndexWriter.getIndex();
+
+        for (final BundleID bundleID : index.getTrackedBundleIDs()) {
+            getBundle(bundleID);
+        }
+    }
+
+    public void addSourceURL(final SourceURL sourceURL) {
+        mIndexWriter.getIndex().addSourceURL(sourceURL);
         mIndexWriter.saveIndex();
+
+        getCatalog(sourceURL);
     }
 
-    public void startTrackingBundle(final String bundleID, final String distribution) {
+    public void startTrackingBundle(final BundleID bundleID, final String distribution) {
         mIndexWriter.getIndex().trackBundle(bundleID, distribution);
         mIndexWriter.saveIndex();
+
+        getBundle(bundleID);
     }
 
-    private void downloadCatalog(final URL catalogURL, final String catalogIdentifier) {
-        final Future<ZincCatalog> future = executeJob(mJobFactory.downloadCatalog(catalogURL, catalogIdentifier));
+    private Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
+        if (!mCatalogs.containsKey(sourceURL)) {
+            mCatalogs.put(sourceURL, mJobFactory.downloadCatalog(sourceURL));
+        }
+
+        return mCatalogs.get(sourceURL);
     }
 
-    private <V> Future<V> executeJob(final AbstractZincJob<V> job) {
-        return mExecutorService.submit(job);
+    /**
+     * Returns the existing promise for this bundle, or creates a new one if it was not being tracked.
+     */
+    public Future<ZincBundle> getBundle(final BundleID bundleID) {
+        if (!mBundles.containsKey(bundleID)) {
+            mBundles.put(bundleID, cloneBundle(bundleID, mIndexWriter.getIndex().getTrackingInfo(bundleID).getDistribution()));
+        }
+
+        return mBundles.get(bundleID);
     }
 
-    public static interface ZincJobFactory {
-        AbstractZincJob<ZincCatalog> downloadCatalog(final URL catalogURL, final String catalogIdentifier);
+    private Future<ZincBundle> cloneBundle(final BundleID bundleID, final String distribution) {
+        final String catalogID = bundleID.getCatalogID();
+        final SourceURL sourceURL;
+
+        try {
+            sourceURL = mIndexWriter.getIndex().getSourceURLForCatalog(catalogID);
+        } catch (ZincRepoIndex.CatalogNotFoundException e) {
+            throw new ZincRuntimeException(String.format("No sources for catalog '%s'", catalogID));
+        }
+
+        return mJobFactory.cloneBundle(sourceURL, bundleID, distribution, getCatalog(sourceURL), mRoot);
     }
 }

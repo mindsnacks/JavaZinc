@@ -4,6 +4,7 @@ import com.ice.tar.TarEntry;
 import com.ice.tar.TarOutputStream;
 import com.zinc.classes.jobs.ZincDownloadArchiveJob;
 import com.zinc.classes.jobs.ZincRequestExecutor;
+import com.zinc.utils.TestUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

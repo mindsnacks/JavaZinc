@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import com.zinc.utils.MockFactory;
 import com.zinc.utils.ZincBaseTest;
-import com.zinc.classes.ZincCatalog;
+import com.zinc.classes.data.ZincCatalog;
 import com.zinc.classes.jobs.AbstractZincDownloadJob;
 import com.zinc.classes.jobs.ZincDownloadObjectJob;
 import com.zinc.classes.jobs.ZincRequestExecutor;
