@@ -15,7 +15,6 @@ import java.util.concurrent.Future;
  * Date: 9/4/13
  */
 public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
-
     private final SourceURL mSourceURL;
     private final BundleID mBundleID;
     private final String mDistribution;
@@ -52,7 +51,7 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
         final URL archiveURL = mSourceURL.getArchiveURL(bundleName, version, mFlavorName);
         final String folderName = removeExtension(archiveURL.getFile());
 
-        final Future<File> job = mFutureFactory.downloadArchive(archiveURL, mRepoFolder, folderName);
+        final Future<File> job = mFutureFactory.downloadArchive(archiveURL, mRepoFolder, folderName, false);
 
         return new ZincBundle(job.get(), mBundleID);
     }

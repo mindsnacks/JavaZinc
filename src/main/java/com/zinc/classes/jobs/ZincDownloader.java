@@ -43,8 +43,8 @@ public class ZincDownloader implements ZincFutureFactory {
     }
 
     @Override
-    public Future<File> downloadArchive(final URL url, final File root, final String child) {
-        return submitJob(new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child, false));
+    public Future<File> downloadArchive(final URL url, final File root, final String child, final boolean override) {
+        return submitJob(new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child, override));
     }
 
     @Override

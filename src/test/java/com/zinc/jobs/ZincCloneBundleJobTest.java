@@ -61,7 +61,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         mZincCatalogFuture = MockFactory.createFutureWithResult(mZincCatalog);
         mResultFuture = MockFactory.createFutureWithResult(mResult);
 
-        when(mFutureFactory.downloadArchive(any(URL.class), any(File.class), anyString())).thenReturn(mResultFuture);
+        when(mFutureFactory.downloadArchive(any(URL.class), any(File.class), anyString(), eq(false))).thenReturn(mResultFuture);
         when(mResult.getPath()).thenReturn(mResultPath);
 
         mJob = initializeJob(mSourceURL);
@@ -119,6 +119,6 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     }
 
     private void verifyDownloadArchiveJobCreation(final int version) {
-        verify(mFutureFactory).downloadArchive(eq(mArchiveURL), eq(mRepoFolder), anyString());
+        verify(mFutureFactory).downloadArchive(eq(mArchiveURL), eq(mRepoFolder), anyString(), eq(false));
     }
 }

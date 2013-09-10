@@ -15,9 +15,11 @@ import java.util.concurrent.Future;
 */
 public interface ZincFutureFactory {
     Future<ZincCatalog> downloadCatalog(SourceURL sourceURL);
-    Future<File> downloadArchive(URL url, File root, String child);
+    Future<File> downloadArchive(URL url, File root, String child, boolean override);
     Future<ZincBundle> cloneBundle(SourceURL sourceURL,
                                    BundleID bundleID,
                                    String distribution,
-                                   final String flavorName, File repoFolder, Future<ZincCatalog> catalog);
+                                   String flavorName,
+                                   File repoFolder,
+                                   Future<ZincCatalog> catalog);
 }
