@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -51,12 +52,9 @@ public class RepoInitializationTest extends RepoBaseTest {
 
     @Test
     public void addingSourceURLAddsItToIndexFile() throws IOException {
-        final SourceURL newSourceURL = new SourceURL(new URL("https://mindsnacks.com"), "com.mindsnacks.lessons");
+        final SourceURL newSourceURL = new SourceURL(new URL("https://mindsnacks.com"), "com.mindsnacks.games");
 
-        final FileWriter fileWriter = new FileWriter(getIndexFile());
-
-        fileWriter.write(String.format("{\"sources\": [\"%s\"]}", newSourceURL.getUrl()));
-        fileWriter.close();
+        writeSourceURLsToIndexFile(Arrays.asList(mSourceURL));
 
         // run
         mRepo.addSourceURL(newSourceURL);
@@ -76,5 +74,11 @@ public class RepoInitializationTest extends RepoBaseTest {
         // verify
         final ZincRepoIndex.TrackingInfo trackingInfo = readRepoIndex().getTrackingInfo(bundleID);
         Assert.assertEquals(distribution, trackingInfo.getDistribution());
+    }
+
+    private void writeSourceURLsToIndexFile(final List<SourceURL> newSourceURL) throws IOException {
+        final FileWriter fileWriter = new FileWriter(getIndexFile());
+        fileWriter.write(String.format("{\"sources\": %s}", mGson.toJson(newSourceURL)));
+        fileWriter.close();
     }
 }
