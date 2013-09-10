@@ -32,6 +32,9 @@ public class ZincRepoIndex {
         mBundles.put(bundleID.toString(), new TrackingInfo(distribution));
     }
 
+    /**
+     * @todo throw exception?
+     */
     public TrackingInfo getTrackingInfo(final BundleID bundleID) {
         return mBundles.get(bundleID.toString());
     }

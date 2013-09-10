@@ -1,14 +1,12 @@
 package com.zinc.repo;
 
 import com.zinc.classes.ZincRepoIndexWriter;
-import com.zinc.classes.data.BundleID;
-import com.zinc.classes.data.SourceURL;
-import com.zinc.classes.data.ZincCatalog;
-import com.zinc.classes.data.ZincRepoIndex;
+import com.zinc.classes.data.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -18,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 import static com.zinc.utils.MockFactory.createCatalog;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -89,14 +88,12 @@ public class RepoJobsTest extends RepoBaseTest {
         verifyCatalogIsDownloaded();
     }
 
-    private void mockGetSources(List<SourceURL> sourceURLs) {
-        when(mRepoIndex.getSources()).thenReturn(new HashSet<SourceURL>(sourceURLs));
-    }
-
     @Test
     public void trackingBundleAddsItToTheIndex() throws Exception {
         final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
         final String distribution = "master";
+
+        mockGetTrackingInfo(bundleID, distribution);
 
         // run
         mRepo.startTrackingBundle(bundleID, distribution);
@@ -112,6 +109,7 @@ public class RepoJobsTest extends RepoBaseTest {
 
         mockDownloadCatalog(mSourceURL);
         mockSourceURLForCatalog();
+        mockGetTrackingInfo(bundleID, distribution);
 
         // run
         mRepo.startTrackingBundle(bundleID, distribution);
@@ -125,16 +123,68 @@ public class RepoJobsTest extends RepoBaseTest {
         final BundleID bundleID = new BundleID(mCatalogID, "swell");
         final String distribution = "master";
 
-        mockDownloadCatalog(mSourceURL);
-        mockSourceURLForCatalog();
-        when(mRepoIndex.getTrackedBundleIDs()).thenReturn(new HashSet<BundleID>(Arrays.asList(bundleID)));
-        when(mRepoIndex.getTrackingInfo(eq(bundleID))).thenReturn(new ZincRepoIndex.TrackingInfo(distribution));
+        setUpIndexWithTrackedBundleID(bundleID, distribution);
 
         // run
         initializeRepo();
 
         // verify
         verify(mJobFactory).cloneBundle(eq(mSourceURL), eq(bundleID), eq(distribution), eq(mCatalogFuture), eq(rootFolder.getRoot()));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void getBundleWithIDCreatesThePromise() throws Exception {
+        final BundleID bundleID = new BundleID(mCatalogID, "swell");
+        final String distribution = "develop";
+
+        final Future<ZincBundle> expectedResult = mock(Future.class);
+
+        mockGetTrackingInfo(bundleID, distribution);
+        mockCloneBundle(expectedResult);
+
+        // run
+        final Future<ZincBundle> result = mRepo.getBundle(bundleID);
+
+        verify(mJobFactory).cloneBundle(any(SourceURL.class), eq(bundleID), eq(distribution), any(Future.class), any(File.class));
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void getBundleWithIDReturnsExistingPromise() throws Exception {
+        final BundleID bundleID = new BundleID(mCatalogID, "swell");
+        final String distribution = "develop";
+        final Future<ZincBundle> expectedResult = mock(Future.class);
+
+        setUpIndexWithTrackedBundleID(bundleID, distribution);
+        mockCloneBundle(expectedResult);
+
+        // run
+        initializeRepo();
+
+        // run
+        final Future<ZincBundle> result = mRepo.getBundle(bundleID);
+
+        verify(mJobFactory, times(1)).cloneBundle(any(SourceURL.class), eq(bundleID), eq(distribution), any(Future.class), any(File.class));
+        assertEquals(expectedResult, result);
+    }
+
+    private void setUpIndexWithTrackedBundleID(final BundleID bundleID,
+                                               final String distribution) throws ZincRepoIndex.CatalogNotFoundException {
+        mockDownloadCatalog(mSourceURL);
+        mockSourceURLForCatalog();
+        mockGetTrackingInfo(bundleID, distribution);
+        when(mRepoIndex.getTrackedBundleIDs()).thenReturn(new HashSet<BundleID>(Arrays.asList(bundleID)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void mockCloneBundle(final Future<ZincBundle> expectedResult) {
+        when(mJobFactory.cloneBundle(any(SourceURL.class), any(BundleID.class), anyString(), any(Future.class), any(File.class))).thenReturn(expectedResult);
+    }
+
+    private void mockGetTrackingInfo(final BundleID bundleID, final String distribution) {
+        when(mRepoIndex.getTrackingInfo(eq(bundleID))).thenReturn(new ZincRepoIndex.TrackingInfo(distribution));
     }
 
     private void mockSourceURLForCatalog() throws ZincRepoIndex.CatalogNotFoundException {
@@ -147,5 +197,9 @@ public class RepoJobsTest extends RepoBaseTest {
 
     private void verifyCatalogIsDownloaded() {
         verify(mJobFactory, times(1)).downloadCatalog(eq(mSourceURL));
+    }
+
+    private void mockGetSources(List<SourceURL> sourceURLs) {
+        when(mRepoIndex.getSources()).thenReturn(new HashSet<SourceURL>(sourceURLs));
     }
 }

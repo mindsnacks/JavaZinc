@@ -1,9 +1,6 @@
 package com.zinc.classes;
 
-import com.zinc.classes.data.BundleID;
-import com.zinc.classes.data.SourceURL;
-import com.zinc.classes.data.ZincCatalog;
-import com.zinc.classes.data.ZincRepoIndex;
+import com.zinc.classes.data.*;
 import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
@@ -23,7 +20,11 @@ public class ZincRepo {
     private final File mRoot;
 
     private final Map<SourceURL, Future<ZincCatalog>> mCatalogs = new HashMap<SourceURL, Future<ZincCatalog>>();
+    private final Map<BundleID, Future<ZincBundle>> mBundles = new HashMap<BundleID, Future<ZincBundle>>();
 
+    /**
+     * @todo remove cached promises that failed?
+     */
     public ZincRepo(final ZincFutureFactory jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter) {
         mJobFactory = jobFactory;
         mRoot = new File(root);
@@ -43,13 +44,10 @@ public class ZincRepo {
         final ZincRepoIndex index = mIndexWriter.getIndex();
 
         for (final BundleID bundleID : index.getTrackedBundleIDs()) {
-            cloneBundle(bundleID, index.getTrackingInfo(bundleID).getDistribution());
+            getBundle(bundleID);
         }
     }
 
-    /**
-     * @todo remove all cached bundle promises that failed?
-     */
     public void addSourceURL(final SourceURL sourceURL) {
         mIndexWriter.getIndex().addSourceURL(sourceURL);
         mIndexWriter.saveIndex();
@@ -61,7 +59,7 @@ public class ZincRepo {
         mIndexWriter.getIndex().trackBundle(bundleID, distribution);
         mIndexWriter.saveIndex();
 
-        cloneBundle(bundleID, distribution);
+        getBundle(bundleID);
     }
 
     private Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
@@ -72,16 +70,27 @@ public class ZincRepo {
         return mCatalogs.get(sourceURL);
     }
 
-    private void cloneBundle(final BundleID bundleID, final String distribution) {
-        final String catalogID = bundleID.getCatalogID();
+    /**
+     * Returns the existing promise for this bundle, or creates a new one if it was not being tracked.
+     */
+    public Future<ZincBundle> getBundle(final BundleID bundleID) {
+        if (!mBundles.containsKey(bundleID)) {
+            mBundles.put(bundleID, cloneBundle(bundleID, mIndexWriter.getIndex().getTrackingInfo(bundleID).getDistribution()));
+        }
 
+        return mBundles.get(bundleID);
+    }
+
+    private Future<ZincBundle> cloneBundle(final BundleID bundleID, final String distribution) {
+        final String catalogID = bundleID.getCatalogID();
         final SourceURL sourceURL;
+
         try {
             sourceURL = mIndexWriter.getIndex().getSourceURLForCatalog(catalogID);
         } catch (ZincRepoIndex.CatalogNotFoundException e) {
             throw new ZincRuntimeException(String.format("No sources for catalog '%s'", catalogID));
         }
 
-        mJobFactory.cloneBundle(sourceURL, bundleID, distribution, getCatalog(sourceURL), mRoot);
+        return mJobFactory.cloneBundle(sourceURL, bundleID, distribution, getCatalog(sourceURL), mRoot);
     }
 }
