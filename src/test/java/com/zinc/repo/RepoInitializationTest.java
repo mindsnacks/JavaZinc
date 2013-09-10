@@ -66,9 +66,11 @@ public class RepoInitializationTest extends RepoBaseTest {
     @Test
     public void addingTrackingRequestAddsItToIndexFile() throws IOException {
         // run
-        final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
+        final String catalogID = "com.mindsnacks.games";
+        final BundleID bundleID = new BundleID(catalogID, "swell");
         final String distribution = "master";
 
+        mRepo.addSourceURL(new SourceURL(new URL("https://mindsnacks.com"), catalogID));
         mRepo.startTrackingBundle(bundleID, distribution);
 
         // verify

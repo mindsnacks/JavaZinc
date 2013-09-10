@@ -97,15 +97,18 @@ public class RepoJobTest extends RepoBaseTest {
         verify(mRepoIndex).trackBundle(eq(bundleID), eq(distribution));
     }
 
-//    @Test
-//    public void trackingBundleClonesBundle() throws Exception {
-//        final String bundleID = "com.mindsnacks.games.swell";
-//        final String distribution = "master";
-//
-//        // run
-//        mRepo.startTrackingBundle(bundleID, distribution);
-//
-//        // verify
-//        verify(mJobFactory).cloneBundle(Matchers.<List<URL>>any(), eq(bundleID), eq(distribution), eq(mCatalogFuture), eq(rootFolder.getRoot()));
-//    }
+    @Test
+    public void trackingBundleClonesBundle() throws Exception {
+        final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
+        final String distribution = "master";
+        final SourceURL sourceURL = null;
+
+        when(mJobFactory.downloadCatalog(sourceURL)).thenReturn(mCatalogFuture);
+
+        // run
+        mRepo.startTrackingBundle(bundleID, distribution);
+
+        // verify
+        verify(mJobFactory).cloneBundle(eq(sourceURL), eq(bundleID), eq(distribution), eq(mCatalogFuture), eq(rootFolder.getRoot()));
+    }
 }

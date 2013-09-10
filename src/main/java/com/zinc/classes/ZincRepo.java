@@ -3,6 +3,8 @@ package com.zinc.classes;
 import com.zinc.classes.data.BundleID;
 import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincCatalog;
+import com.zinc.classes.data.ZincRepoIndex;
+import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
 import java.net.URI;
@@ -32,7 +34,7 @@ public class ZincRepo {
 
     private void downloadCatalogsForTrackedSources() {
         for (final SourceURL sourceURL : mIndexWriter.getIndex().getSources()) {
-            downloadCatalog(sourceURL);
+            getCatalog(sourceURL);
         }
     }
 
@@ -43,17 +45,34 @@ public class ZincRepo {
         mIndexWriter.getIndex().addSourceURL(sourceURL);
         mIndexWriter.saveIndex();
 
-        downloadCatalog(sourceURL);
+        getCatalog(sourceURL);
     }
 
     public void startTrackingBundle(final BundleID bundleID, final String distribution) {
         mIndexWriter.getIndex().trackBundle(bundleID, distribution);
         mIndexWriter.saveIndex();
+
+        cloneBundle(bundleID, distribution);
     }
 
-    private void downloadCatalog(final SourceURL sourceURL) {
+    private Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
         if (!mCatalogs.containsKey(sourceURL)) {
             mCatalogs.put(sourceURL, mJobFactory.downloadCatalog(sourceURL));
         }
+
+        return mCatalogs.get(sourceURL);
+    }
+
+    private void cloneBundle(final BundleID bundleID, final String distribution) {
+        final String catalogID = bundleID.getCatalogID();
+
+        final SourceURL sourceURL;
+        try {
+            sourceURL = mIndexWriter.getIndex().getSourceURLForCatalog(catalogID);
+        } catch (ZincRepoIndex.CatalogNotFoundException e) {
+            throw new ZincRuntimeException(String.format("No sources for catalog '%s'", catalogID));
+        }
+
+        mJobFactory.cloneBundle(sourceURL, bundleID, distribution, getCatalog(sourceURL), mRoot);
     }
 }

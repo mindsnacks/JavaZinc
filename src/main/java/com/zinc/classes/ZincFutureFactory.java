@@ -14,7 +14,7 @@ import java.util.concurrent.Future;
 * Date: 9/5/13
 */
 public interface ZincFutureFactory {
-    Future<ZincCatalog> downloadCatalog(final SourceURL sourceURL);
+    Future<ZincCatalog> downloadCatalog(SourceURL sourceURL);
     Future<File> downloadArchive(URL url, File root, String child);
     Future<ZincBundle> cloneBundle(SourceURL sourceURL,
                                    BundleID bundleID,
