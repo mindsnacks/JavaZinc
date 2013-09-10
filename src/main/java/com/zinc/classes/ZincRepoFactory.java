@@ -1,5 +1,6 @@
 package com.zinc.classes;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.zinc.classes.data.SourceURL;
@@ -22,7 +23,7 @@ public final class ZincRepoFactory {
 
         final Gson gson = gsonBuilder.create();
 
-        final ExecutorService executorService = Executors.newCachedThreadPool();
+        final ExecutorService executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).build());
 
         final ZincFutureFactory jobFactory = new ZincDownloader(gson, executorService);
         final ZincRepoIndexWriter indexWriter = new ZincRepoIndexWriter(root, gson);
