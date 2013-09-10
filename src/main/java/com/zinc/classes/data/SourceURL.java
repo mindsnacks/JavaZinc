@@ -40,10 +40,7 @@ public class SourceURL {
 
     @Override
     public String toString() {
-        return "SourceURL {" +
-                "url=" + mUrl +
-                ", catalogID='" + mCatalogID + '\'' +
-                '}';
+        return getUrl().toString();
     }
 
     @Override

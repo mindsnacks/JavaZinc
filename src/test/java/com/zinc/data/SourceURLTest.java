@@ -57,6 +57,15 @@ public class SourceURLTest extends ZincBaseTest {
     }
 
     @Test
+    public void toStringInitializingWithHostAndCatalogName() throws Exception {
+        assertEquals(zincURL + catalogID + "/", new SourceURL(zincURL, catalogID).toString());
+    }
+
+    public void toStringInitializingSourceURL() throws Exception {
+        assertEquals(zincURL + catalogID + "/", new SourceURL(new URL(zincURL, catalogID)).toString());
+    }
+
+    @Test
     public void deserialization() throws Exception {
         final URL url = new URL(zincURL, catalogID);
 
