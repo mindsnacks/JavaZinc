@@ -3,7 +3,9 @@ package com.zinc.classes.jobs;
 import com.zinc.classes.ZincFutureFactory;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.classes.data.ZincBundleCloneRequest;
+import com.zinc.classes.data.ZincManifest;
 
+import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
@@ -26,6 +28,14 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
     @Override
     public ZincBundle call() throws Exception {
         final ZincBundle result = mBundle.get();
+
+        final ZincManifest manifest = mFutureFactory.downloadManifest(
+                mBundleCloneRequest.getSourceURL(),
+                mBundleCloneRequest.getBundleID().getBundleName(),
+                result.getVersion()
+        ).get();
+
+        final Map<String, String> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName());
 
         return result;
     }
