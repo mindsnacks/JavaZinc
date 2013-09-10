@@ -32,6 +32,7 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
     final private BundleID mBundleID = new BundleID(mCatalogID, mBundleName);
     final private String mDistribution = "master";
     final private String mFlavorName = "retina";
+    final private int mVersion = randomInt(1, 100);
     final private URL mSourceHost;
     final private URL mArchiveURL;
 
@@ -93,22 +94,21 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
     @Test
     @SuppressWarnings("unchecked")
     public void downloadsArchive() throws Exception {
-        final int version = randomInt(1, 100);
-
-        when(mZincCatalog.getVersionForBundleName(anyString(), anyString())).thenReturn(version);
+        when(mZincCatalog.getVersionForBundleName(anyString(), anyString())).thenReturn(mVersion);
 
         // run
         final ZincBundle result = run();
 
         // verify
         verify(mResultFuture).get();
-        verifyDownloadArchiveJobCreation(version);
+        verifyDownloadArchiveJobCreation(mVersion);
         checkResult(result);
     }
 
     private void checkResult(final ZincBundle result) {
         assertEquals(mResultPath, result.getPath());
         assertEquals(mBundleID, result.getBundleID());
+        assertEquals(mVersion, result.getVersion());
     }
 
     private ZincDownloadBundleJob initializeJob(final SourceURL sourceURL) {
