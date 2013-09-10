@@ -11,8 +11,10 @@ import org.mockito.Mock;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import static com.zinc.utils.MockFactory.createCatalog;
@@ -23,7 +25,7 @@ import static org.mockito.Mockito.*;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public class RepoJobTest extends RepoBaseTest {
+public class RepoJobsTest extends RepoBaseTest {
     @Mock private Future<ZincCatalog> mCatalogFuture;
     @Mock private ZincRepoIndex mRepoIndex;
 
@@ -32,7 +34,7 @@ public class RepoJobTest extends RepoBaseTest {
     private final String mCatalogID;
     private final SourceURL mSourceURL;
 
-    public RepoJobTest() throws MalformedURLException {
+    public RepoJobsTest() throws MalformedURLException {
         mCatalogID = "com.mindsnacks.lessons";
         mSourceURL = new SourceURL(new URL("https://mindsnacks.com"), mCatalogID);
     }
@@ -41,7 +43,7 @@ public class RepoJobTest extends RepoBaseTest {
     @Before
     public void setUp() throws Exception {
         when(mRepoIndexWriter.getIndex()).thenReturn(mRepoIndex);
-        when(mRepoIndex.getSources()).thenReturn(new HashSet<SourceURL>());
+        mockGetSources(new ArrayList<SourceURL>());
 
         super.setUp();
     }
@@ -78,13 +80,17 @@ public class RepoJobTest extends RepoBaseTest {
 
     @Test
     public void catalogsAreDownloadedForExistingSourceURLs() throws Exception {
-        when(mRepoIndex.getSources()).thenReturn(new HashSet<SourceURL>(Arrays.asList(mSourceURL)));
+        mockGetSources(Arrays.asList(mSourceURL));
 
         // run
         initializeRepo();
 
         // verify
         verifyCatalogIsDownloaded();
+    }
+
+    private void mockGetSources(List<SourceURL> sourceURLs) {
+        when(mRepoIndex.getSources()).thenReturn(new HashSet<SourceURL>(sourceURLs));
     }
 
     @Test
@@ -105,13 +111,34 @@ public class RepoJobTest extends RepoBaseTest {
         final String distribution = "master";
 
         mockDownloadCatalog(mSourceURL);
-        when(mRepoIndex.getSourceURLForCatalog(eq(mCatalogID))).thenReturn(mSourceURL);
+        mockSourceURLForCatalog();
 
         // run
         mRepo.startTrackingBundle(bundleID, distribution);
 
         // verify
         verify(mJobFactory).cloneBundle(eq(mSourceURL), eq(bundleID), eq(distribution), eq(mCatalogFuture), eq(rootFolder.getRoot()));
+    }
+
+    @Test
+    public void bundlesAreAreClonedForAlreadyTrackedBundles() throws Exception {
+        final BundleID bundleID = new BundleID(mCatalogID, "swell");
+        final String distribution = "master";
+
+        mockDownloadCatalog(mSourceURL);
+        mockSourceURLForCatalog();
+        when(mRepoIndex.getTrackedBundleIDs()).thenReturn(new HashSet<BundleID>(Arrays.asList(bundleID)));
+        when(mRepoIndex.getTrackingInfo(eq(bundleID))).thenReturn(new ZincRepoIndex.TrackingInfo(distribution));
+
+        // run
+        initializeRepo();
+
+        // verify
+        verify(mJobFactory).cloneBundle(eq(mSourceURL), eq(bundleID), eq(distribution), eq(mCatalogFuture), eq(rootFolder.getRoot()));
+    }
+
+    private void mockSourceURLForCatalog() throws ZincRepoIndex.CatalogNotFoundException {
+        when(mRepoIndex.getSourceURLForCatalog(eq(mCatalogID))).thenReturn(mSourceURL);
     }
 
     private void mockDownloadCatalog(final SourceURL sourceURL) {

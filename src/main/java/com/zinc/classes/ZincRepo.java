@@ -30,11 +30,20 @@ public class ZincRepo {
         mIndexWriter = repoIndexWriter;
 
         downloadCatalogsForTrackedSources();
+        downloadTrackedBundles();
     }
 
     private void downloadCatalogsForTrackedSources() {
         for (final SourceURL sourceURL : mIndexWriter.getIndex().getSources()) {
             getCatalog(sourceURL);
+        }
+    }
+
+    private void downloadTrackedBundles() {
+        final ZincRepoIndex index = mIndexWriter.getIndex();
+
+        for (final BundleID bundleID : index.getTrackedBundleIDs()) {
+            cloneBundle(bundleID, index.getTrackingInfo(bundleID).getDistribution());
         }
     }
 

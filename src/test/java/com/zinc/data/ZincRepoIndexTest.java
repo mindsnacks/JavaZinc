@@ -97,6 +97,6 @@ public class ZincRepoIndexTest extends ZincBaseTest {
         index.addSourceURL(new SourceURL(new URL("http://mindsnacks.com"), "com.mindsnacks.lessons"));
 
         // run
-        final SourceURL result = index.getSourceURLForCatalog("not-found");
+        index.getSourceURLForCatalog("not-found");
     }
 }
