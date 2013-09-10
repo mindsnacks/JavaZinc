@@ -31,6 +31,8 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
                               final Future<ZincCatalog> catalogFuture,
                               final ZincFutureFactory futureFactory,
                               final File repoFolder) {
+        assert sourceURL.getCatalogID().equals(bundleID.getCatalogID());
+
         mSourceURL = sourceURL;
         mBundleID = bundleID;
         mDistribution = distribution;
