@@ -1,14 +1,14 @@
 package com.zinc.jobs;
 
+import com.zinc.classes.jobs.ZincDownloadFileJob;
+import com.zinc.classes.jobs.ZincRequestExecutor;
+import com.zinc.utils.MockFactory;
+import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
-import com.zinc.utils.MockFactory;
-import com.zinc.utils.ZincBaseTest;
-import com.zinc.classes.jobs.ZincDownloadFileJob;
-import com.zinc.classes.jobs.ZincRequestExecutor;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,13 +16,11 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static com.zinc.utils.TestUtils.readFile;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static com.zinc.utils.TestUtils.readFile;
+import static org.mockito.Mockito.*;
 
 /**
  * User: NachoSoto
@@ -71,12 +69,12 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
     public void doesntOverrideFile() throws Exception {
         initializeJob(false);
 
-        // create folder
         createFolder();
 
-        run();
+        final File result = run();
 
         verify(mRequestExecutor, never()).get(any(URL.class));
+        assertEquals(new File(rootFolder.getRoot(), mFilename), result);
     }
 
     @Test
@@ -94,9 +92,7 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
 
         setURLContents(contents);
 
-        final File file = run();
-
-        assertEquals(contents, readFile(file.getPath()));
+        assertEquals(contents, readFile(run().getPath()));
     }
 
     private void initializeJob(final boolean override) {
