@@ -1,10 +1,7 @@
 package com.zinc.jobs;
 
 import com.zinc.classes.ZincFutureFactory;
-import com.zinc.classes.data.BundleID;
-import com.zinc.classes.data.SourceURL;
-import com.zinc.classes.data.ZincBundle;
-import com.zinc.classes.data.ZincCatalog;
+import com.zinc.classes.data.*;
 import com.zinc.classes.jobs.ZincCloneBundleJob;
 import com.zinc.utils.MockFactory;
 import com.zinc.utils.ZincBaseTest;
@@ -115,7 +112,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     }
 
     private ZincCloneBundleJob initializeJob(final SourceURL sourceURL) {
-        return new ZincCloneBundleJob(sourceURL, mBundleID, mDistribution, mFlavorName, mZincCatalogFuture, mFutureFactory, mRepoFolder);
+        return new ZincCloneBundleJob(new ZincBundleCloneRequest(sourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder), mZincCatalogFuture, mFutureFactory);
     }
 
     private void verifyDownloadArchiveJobCreation(final int version) {

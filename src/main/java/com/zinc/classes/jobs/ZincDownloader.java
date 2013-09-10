@@ -3,10 +3,7 @@ package com.zinc.classes.jobs;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
 import com.zinc.classes.ZincFutureFactory;
-import com.zinc.classes.data.BundleID;
-import com.zinc.classes.data.SourceURL;
-import com.zinc.classes.data.ZincBundle;
-import com.zinc.classes.data.ZincCatalog;
+import com.zinc.classes.data.*;
 import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
@@ -48,13 +45,13 @@ public class ZincDownloader implements ZincFutureFactory {
     }
 
     @Override
-    public Future<ZincBundle> cloneBundle(final SourceURL sourceURL,
-                                          final BundleID bundleID,
-                                          final String distribution,
-                                          final String flavorName,
-                                          final File repoFolder,
-                                          final Future<ZincCatalog> catalog) {
-        return submitJob(new ZincCloneBundleJob(sourceURL, bundleID, distribution, flavorName, catalog, this, repoFolder));
+    public Future<ZincBundle> downloadBundle(final SourceURL sourceURL,
+                                             final BundleID bundleID,
+                                             final String distribution,
+                                             final String flavorName,
+                                             final File repoFolder,
+                                             final Future<ZincCatalog> catalogFuture) {
+        return submitJob(new ZincCloneBundleJob(new ZincBundleCloneRequest(sourceURL, bundleID, distribution, flavorName, repoFolder), catalogFuture, this));
     }
 
     private ZincRequestExecutor createRequestExecutor() {

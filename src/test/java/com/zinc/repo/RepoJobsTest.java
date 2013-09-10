@@ -168,7 +168,7 @@ public class RepoJobsTest extends RepoBaseTest {
         // run
         final Future<ZincBundle> result = mRepo.getBundle(bundleID);
 
-        verify(mJobFactory, times(1)).cloneBundle(any(SourceURL.class), eq(bundleID), eq(distribution), eq(mFlavorName), any(File.class), any(Future.class));
+        verify(mJobFactory, times(1)).downloadBundle(any(SourceURL.class), eq(bundleID), eq(distribution), eq(mFlavorName), any(File.class), any(Future.class));
         assertEquals(expectedResult, result);
     }
 
@@ -182,7 +182,7 @@ public class RepoJobsTest extends RepoBaseTest {
 
     @SuppressWarnings("unchecked")
     private void mockCloneBundle(final Future<ZincBundle> expectedResult) {
-        when(mJobFactory.cloneBundle(any(SourceURL.class), any(BundleID.class), anyString(), eq(mFlavorName), any(File.class), any(Future.class))).thenReturn(expectedResult);
+        when(mJobFactory.downloadBundle(any(SourceURL.class), any(BundleID.class), anyString(), eq(mFlavorName), any(File.class), any(Future.class))).thenReturn(expectedResult);
     }
 
     private void mockGetTrackingInfo(final BundleID bundleID, final String distribution) {
@@ -202,7 +202,7 @@ public class RepoJobsTest extends RepoBaseTest {
     }
 
     private void verifyCloneBundle(final BundleID bundleID, final String distribution) {
-        verify(mJobFactory).cloneBundle(eq(mSourceURL), eq(bundleID), eq(distribution), eq(mFlavorName), eq(rootFolder.getRoot()), eq(mCatalogFuture));
+        verify(mJobFactory).downloadBundle(eq(mSourceURL), eq(bundleID), eq(distribution), eq(mFlavorName), eq(rootFolder.getRoot()), eq(mCatalogFuture));
     }
 
     private void mockGetSources(List<SourceURL> sourceURLs) {

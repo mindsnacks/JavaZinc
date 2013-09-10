@@ -1,10 +1,7 @@
 package com.zinc.classes.jobs;
 
 import com.zinc.classes.ZincFutureFactory;
-import com.zinc.classes.data.BundleID;
-import com.zinc.classes.data.SourceURL;
-import com.zinc.classes.data.ZincBundle;
-import com.zinc.classes.data.ZincCatalog;
+import com.zinc.classes.data.*;
 
 import java.io.File;
 import java.net.URL;
@@ -20,25 +17,22 @@ public class ZincCloneBundleJob implements ZincJob<ZincBundle> {
     private final String mDistribution;
     private final String mFlavorName;
     private final Future<ZincCatalog> mCatalog;
-    private final ZincFutureFactory mFutureFactory;
     private final File mRepoFolder;
 
-    public ZincCloneBundleJob(final SourceURL sourceURL,
-                              final BundleID bundleID,
-                              final String distribution,
-                              final String flavorName,
-                              final Future<ZincCatalog> catalogFuture,
-                              final ZincFutureFactory futureFactory,
-                              final File repoFolder) {
-        assert sourceURL.getCatalogID().equals(bundleID.getCatalogID());
+    protected final ZincFutureFactory mFutureFactory;
 
-        mSourceURL = sourceURL;
-        mBundleID = bundleID;
-        mDistribution = distribution;
-        mFlavorName = flavorName;
+    public ZincCloneBundleJob(final ZincBundleCloneRequest zincBundleCloneRequest,
+                              final Future<ZincCatalog> catalogFuture,
+                              final ZincFutureFactory futureFactory) {
+        assert zincBundleCloneRequest.getSourceURL().getCatalogID().equals(zincBundleCloneRequest.getBundleID().getCatalogID());
+
+        mSourceURL = zincBundleCloneRequest.getSourceURL();
+        mBundleID = zincBundleCloneRequest.getBundleID();
+        mDistribution = zincBundleCloneRequest.getDistribution();
+        mFlavorName = zincBundleCloneRequest.getFlavorName();
         mCatalog = catalogFuture;
         mFutureFactory = futureFactory;
-        mRepoFolder = repoFolder;
+        mRepoFolder = zincBundleCloneRequest.getRepoFolder();
     }
 
     @Override
