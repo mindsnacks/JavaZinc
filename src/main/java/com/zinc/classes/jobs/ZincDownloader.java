@@ -4,6 +4,7 @@ import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
 import com.zinc.classes.ZincFutureFactory;
 import com.zinc.classes.data.*;
+import com.zinc.classes.fileutils.GzipHelper;
 import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
@@ -65,7 +66,7 @@ public class ZincDownloader implements ZincFutureFactory {
         final ZincBundleCloneRequest zincBundleCloneRequest = new ZincBundleCloneRequest(sourceURL, bundleID, distribution, flavorName, repoFolder);
         final Future<ZincBundle> bundleFuture = submitJob(new ZincDownloadBundleJob(zincBundleCloneRequest, catalogFuture, this));
 
-        return submitJob(new ZincUnarchiveBundleJob(bundleFuture, zincBundleCloneRequest, this));
+        return submitJob(new ZincUnarchiveBundleJob(bundleFuture, zincBundleCloneRequest, this, new GzipHelper()));
     }
 
     private ZincRequestExecutor createRequestExecutor() {

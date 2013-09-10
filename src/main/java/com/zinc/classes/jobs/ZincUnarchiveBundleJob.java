@@ -4,6 +4,7 @@ import com.zinc.classes.ZincFutureFactory;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.classes.data.ZincBundleCloneRequest;
 import com.zinc.classes.data.ZincManifest;
+import com.zinc.classes.fileutils.GzipHelper;
 
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -16,13 +17,16 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
     private final Future<ZincBundle> mBundle;
     private final ZincBundleCloneRequest mBundleCloneRequest;
     private final ZincFutureFactory mFutureFactory;
+    private final GzipHelper mGzipHelper;
 
     public ZincUnarchiveBundleJob(final Future<ZincBundle> bundle,
                                   final ZincBundleCloneRequest bundleCloneRequest,
-                                  final ZincFutureFactory futureFactory) {
+                                  final ZincFutureFactory futureFactory,
+                                  final GzipHelper gzipHelper) {
         mBundle = bundle;
         mBundleCloneRequest = bundleCloneRequest;
         mFutureFactory = futureFactory;
+        mGzipHelper = gzipHelper;
     }
 
     @Override
@@ -35,7 +39,9 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
                 result.getVersion()
         ).get();
 
-        final Map<String, String> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName());
+        for (final Map.Entry<String, String> entry : manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName()).entrySet()) {
+            mGzipHelper.unzipFile(result, entry.getValue(), entry.getKey());
+        }
 
         return result;
     }
