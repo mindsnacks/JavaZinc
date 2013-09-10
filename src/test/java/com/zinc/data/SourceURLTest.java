@@ -49,31 +49,13 @@ public class SourceURLTest extends ZincBaseTest {
     }
 
     @Test
-    public void serialization() throws Exception {
-        final SourceURL sourceURL = new SourceURL(zincURL, catalogID);
-
-        final String json = mGson.toJson(sourceURL).replace("\"", "");
-
-        assertEquals(sourceURL.getUrl().toString(), json);
-    }
-
-    @Test
     public void toStringInitializingWithHostAndCatalogName() throws Exception {
         assertEquals(zincURL + catalogID + "/", new SourceURL(zincURL, catalogID).toString());
     }
 
-    public void toStringInitializingSourceURL() throws Exception {
-        assertEquals(zincURL + catalogID + "/", new SourceURL(new URL(zincURL, catalogID)).toString());
-    }
-
     @Test
-    public void deserialization() throws Exception {
-        final URL url = new URL(zincURL, catalogID);
-
-        final SourceURL sourceURL = mGson.fromJson("\"" + url + "\"", SourceURL.class);
-
-        assertEquals(catalogID, sourceURL.getCatalogID());
-        assertEquals(url, sourceURL.getUrl());
+    public void toStringInitializingSourceURL() throws Exception {
+        assertEquals(zincURL + catalogID, new SourceURL(new URL(zincURL, catalogID)).toString());
     }
 
     @Test
@@ -94,5 +76,33 @@ public class SourceURLTest extends ZincBaseTest {
         assertTrue(result.getFile().endsWith(".tar"));
         assertTrue(result.toString().contains(Integer.toString(version)));
         assertTrue(result.toString().contains(bundleName));
+    }
+
+    @Test
+    public void testTrailingSlashes() throws Exception {
+        final String catalogID = "com.mindsnacks.misc";
+
+        final SourceURL result = new SourceURL(new URL("http://zinc.mindsnacks.com/" + catalogID + "/"));
+
+        assertEquals(catalogID, result.getCatalogID());
+    }
+
+    @Test
+    public void serialization() throws Exception {
+        final SourceURL sourceURL = new SourceURL(zincURL, catalogID);
+
+        final String json = mGson.toJson(sourceURL).replace("\"", "");
+
+        assertEquals(sourceURL.getUrl().toString(), json);
+    }
+
+    @Test
+    public void deserialization() throws Exception {
+        final URL url = new URL(zincURL, catalogID);
+
+        final SourceURL sourceURL = mGson.fromJson("\"" + url + "\"", SourceURL.class);
+
+        assertEquals(catalogID, sourceURL.getCatalogID());
+        assertEquals(url, sourceURL.getUrl());
     }
 }

@@ -63,7 +63,7 @@ public class SourceURL {
     }
 
     private static String extractCatalogID(final URL sourceURL) {
-        final String path = sourceURL.getPath();
+        final String path = sourceURL.getPath().replaceAll("/$", "");
         return path.substring(path.lastIndexOf("/") + 1);
     }
 
