@@ -36,11 +36,14 @@ public class ZincRepoIndex {
         return mBundles.get(bundleID.toString());
     }
 
-    @Override
-    public String toString() {
-        return "ZincRepoIndex {" +
-                "mSources=" + mSources +
-                '}';
+    public Set<BundleID> getTrackedBundleIDs() {
+        final HashSet<BundleID> result = new HashSet<BundleID>();
+
+        for (final String bundle : mBundles.keySet()) {
+            result.add(new BundleID(bundle));
+        }
+
+        return result;
     }
 
     public SourceURL getSourceURLForCatalog(final String catalogID) throws CatalogNotFoundException {
@@ -51,6 +54,13 @@ public class ZincRepoIndex {
        }
 
        throw new CatalogNotFoundException(catalogID);
+    }
+
+    @Override
+    public String toString() {
+        return "ZincRepoIndex {" +
+                "mSources=" + mSources +
+                '}';
     }
 
     public static class TrackingInfo {

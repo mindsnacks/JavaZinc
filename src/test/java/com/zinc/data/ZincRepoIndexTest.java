@@ -64,6 +64,19 @@ public class ZincRepoIndexTest extends ZincBaseTest {
     }
 
     @Test
+    public void getTrackedBundleIDs() throws Exception {
+        final BundleID bundleID1 = new BundleID("com.mindsnacks.games.swell"),
+                       bundleID2 = new BundleID("com.mindsnacks.lessons.body-parts");
+
+        // run
+        index.trackBundle(bundleID1, "master");
+        index.trackBundle(bundleID2, "develop");
+
+        // verify
+        assertEquals(new HashSet<BundleID>(Arrays.asList(bundleID1, bundleID2)), index.getTrackedBundleIDs());
+    }
+
+    @Test
     public void sourceURLForCatalogID() throws Exception {
         final URL host = new URL("http://mindsnacks.com");
         final String catalogID = "com.mindsnacks.games";
