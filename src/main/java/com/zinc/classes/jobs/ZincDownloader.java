@@ -45,12 +45,12 @@ public class ZincDownloader implements ZincFutureFactory {
     }
 
     @Override
-    public Future<ZincBundle> downloadBundle(final SourceURL sourceURL,
-                                             final BundleID bundleID,
-                                             final String distribution,
-                                             final String flavorName,
-                                             final File repoFolder,
-                                             final Future<ZincCatalog> catalogFuture) {
+    public Future<ZincBundle> cloneBundle(final SourceURL sourceURL,
+                                          final BundleID bundleID,
+                                          final String distribution,
+                                          final String flavorName,
+                                          final File repoFolder,
+                                          final Future<ZincCatalog> catalogFuture) {
         return submitJob(new ZincDownloadBundleJob(new ZincBundleCloneRequest(sourceURL, bundleID, distribution, flavorName, repoFolder), catalogFuture, this));
     }
 

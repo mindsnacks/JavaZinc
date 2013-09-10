@@ -47,7 +47,7 @@ public class ZincDownloadBundleJob implements ZincJob<ZincBundle> {
 
         final Future<File> job = mFutureFactory.downloadArchive(archiveURL, mRepoFolder, folderName, false);
 
-        return new ZincBundle(job.get(), mBundleID);
+        return new ZincBundle(job.get(), mBundleID, version);
     }
 
     private static String removeExtension(final String filename) {
