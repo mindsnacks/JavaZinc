@@ -11,23 +11,35 @@ import java.net.URL;
  */
 public abstract class AbstractZincDownloadFileJob extends AbstractZincDownloadJob<File> {
     private final File mFile;
+    private final boolean mOverride;
 
-    public AbstractZincDownloadFileJob(final ZincRequestExecutor requestExecutor, final URL url, final File root, final String child) {
+    public AbstractZincDownloadFileJob(final ZincRequestExecutor requestExecutor,
+                                       final URL url,
+                                       final File root,
+                                       final String child,
+                                       final boolean override) {
         super(requestExecutor, url, File.class);
         mFile = new File(root, child);
+        mOverride = override;
     }
 
     @Override
     public final File call() throws DownloadFileError {
-        final InputStream inputStream = mRequestExecutor.get(mUrl);
+        if (shouldDownloadFile()) {
+            final InputStream inputStream = mRequestExecutor.get(mUrl);
 
-        try {
-            writeFile(inputStream, mFile);
-        } catch (IOException e) {
-            throw new DownloadFileError("Error writing to file '" + mFile.getAbsolutePath() + "'", e);
+            try {
+                writeFile(inputStream, mFile);
+            } catch (IOException e) {
+                throw new DownloadFileError("Error writing to file '" + mFile.getAbsolutePath() + "'", e);
+            }
         }
 
         return mFile;
+    }
+
+    private boolean shouldDownloadFile() {
+        return mOverride || !mFile.exists();
     }
 
     abstract protected void writeFile(final InputStream inputStream, final File file) throws IOException;

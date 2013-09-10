@@ -13,8 +13,12 @@ import java.net.URL;
 public class ZincDownloadArchiveJob extends AbstractZincDownloadFileJob {
     public static final int BUFFER_SIZE = 2048;
 
-    public ZincDownloadArchiveJob(final ZincRequestExecutor requestExecutor, final URL url, final File root, final String child) {
-        super(requestExecutor, url, root, child);
+    public ZincDownloadArchiveJob(final ZincRequestExecutor requestExecutor,
+                                  final URL url,
+                                  final File root,
+                                  final String child,
+                                  final boolean override) {
+        super(requestExecutor, url, root, child, override);
     }
 
     @Override

@@ -50,7 +50,7 @@ public final class ZincRepoFactory {
 
         @Override
         public Thread newThread(Runnable r) {
-            Thread t = new Thread(group, r,
+            final Thread t = new Thread(group, r,
                     namePrefix + threadNumber.getAndIncrement(),
                     0);
             t.setDaemon(true);
