@@ -92,7 +92,7 @@ public class ZincCatalog {
         }
 
         public DistributionNotFoundException(final String distribution, final String bundleName) {
-            super(String.format("Distribution '%s' not found in bundle ''%s", distribution, bundleName));
+            super(String.format("Distribution '%s' not found in bundle '%s'", distribution, bundleName));
         }
     }
 }
