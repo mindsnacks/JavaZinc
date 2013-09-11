@@ -18,14 +18,12 @@ new ZincRepoFactory().createRepo(new File(currentDirectory), "flavor");
 Then you can add your sources:
 ```java
 final String catalogID = "com.mindsnacks.catalog";
-final SourceURL sourceURL = new SourceURL(new URL("http://zinc-repo.com/"), catalogID);
-repo.addSourceURL(sourceURL);
+repo.addSourceURL(new SourceURL(new URL("http://zinc-repo.com/"), catalogID));
 ```
 
 And start tracking bundles:
 ```java
-final BundleID bundleID = new BundleID(catalogID, "english-kidsvocab-astronomy");
-repo.startTrackingBundle(bundleID, "master");
+repo.startTrackingBundle(new BundleID(catalogID, "english-kidsvocab-astronomy"), "master");
 ```
 
 Once you've started tracking the bundles you need, you can get ```Future```s for them:
