@@ -11,8 +11,6 @@ import java.util.Map;
 
 import static com.zinc.utils.MockFactory.randomString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * User: NachoSoto
@@ -47,16 +45,16 @@ public class ZincManifestTest extends ZincBaseTest {
 
         assertEquals(1, result.size());
         assertEquals("a7c55929d6f674b839e6ea0276830ee213472952", info.getHash());
-        assertFalse(info.isGzipped());
     }
 
     @Test
-    public void fileInfoIsGzipped() throws Exception {
+    public void getHashWithExtensionGzippedFile() throws Exception {
         final Map<String, Map<String, Integer>> formats = new HashMap<String, Map<String, Integer>>();
         formats.put(ZincManifest.FileInfo.GZIPPED_FORMAT, null);
         formats.put("raw", null);
 
-        assertTrue(new ZincManifest.FileInfo(null, randomString(), formats).isGzipped());
+        final String hash = randomString();
+        assertEquals(hash + "." + ZincManifest.FileInfo.GZIPPED_FORMAT, new ZincManifest.FileInfo(null, hash, formats).getHashWithExtension());
     }
 
     @Test
@@ -65,7 +63,8 @@ public class ZincManifestTest extends ZincBaseTest {
         formats.put("raw", null);
         formats.put("other format", null);
 
-        assertFalse(new ZincManifest.FileInfo(null, randomString(), formats).isGzipped());
+        final String hash = randomString();
+        assertEquals(hash, new ZincManifest.FileInfo(null, hash, formats).getHashWithExtension());
     }
 
     private ZincManifest createSampleManifest(final String identifier, final String bundleName) {

@@ -99,7 +99,15 @@ public class ZincManifest {
             return mHash;
         }
 
-        public boolean isGzipped() {
+        public String getHashWithExtension() {
+            if (isGzipped()) {
+                return getHash() + "." + GZIPPED_FORMAT;
+            } else {
+                return getHash();
+            }
+        }
+
+        private boolean isGzipped() {
             return mFormats.containsKey(GZIPPED_FORMAT);
         }
 
