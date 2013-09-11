@@ -4,7 +4,7 @@
 
     <groupId>com.mindsnacks.javazinc</groupId>
     <artifactId>JavaZinc</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 	<name>Zinc client for Java</name>
     <packaging>jar</packaging>
 
