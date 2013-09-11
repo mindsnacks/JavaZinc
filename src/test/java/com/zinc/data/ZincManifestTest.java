@@ -9,7 +9,10 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.zinc.utils.MockFactory.randomString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * User: NachoSoto
@@ -39,50 +42,88 @@ public class ZincManifestTest extends ZincBaseTest {
     public void getFilesWithFlavor() throws Exception {
         final ZincManifest manifest = createSampleManifest("identifier", "bundle");
 
-        final Map<String, String> expectedResult = new HashMap<String, String>();
-        expectedResult.put("level10.mp4", "7d1bab3be96f71a0c93fab14e0aca05a0ae1167a");
+        final Map<String, ZincManifest.FileInfo> result = manifest.getFilesWithFlavor("iphone");
+        final ZincManifest.FileInfo info = result.get("level11.mp4");
 
-        final Map<String, String> result = manifest.getFilesWithFlavor("iphone");
+        assertEquals(1, result.size());
+        assertEquals("a7c55929d6f674b839e6ea0276830ee213472952", info.getHash());
+        assertFalse(info.isGzipped());
+    }
 
-        assertEquals(expectedResult, result);
+    @Test
+    public void fileInfoIsGzipped() throws Exception {
+        final Map<String, Map<String, Integer>> formats = new HashMap<String, Map<String, Integer>>();
+        formats.put(ZincManifest.FileInfo.GZIPPED_FORMAT, null);
+        formats.put("raw", null);
+
+        assertTrue(new ZincManifest.FileInfo(null, randomString(), formats).isGzipped());
+    }
+
+    @Test
+    public void fileInfoIsNotGzipped() throws Exception {
+        final Map<String, Map<String, Integer>> formats = new HashMap<String, Map<String, Integer>>();
+        formats.put("raw", null);
+        formats.put("other format", null);
+
+        assertFalse(new ZincManifest.FileInfo(null, randomString(), formats).isGzipped());
     }
 
     private ZincManifest createSampleManifest(final String identifier, final String bundleName) {
         final String json = "{\n" +
                 "  \"flavors\": [\n" +
+                "    \"ipad-retina\",\n" +
                 "    \"iphone\",\n" +
                 "    \"ipad\",\n" +
-                "    \"iphone-retina\",\n" +
-                "    \"ipad-retina\"\n" +
+                "    \"iphone-retina\"\n" +
                 "  ],\n" +
                 "  \"files\": {\n" +
-                "    \"level10.mp4\": {\n" +
-                "      \"flavors\": [\n" +
-                "        \"iphone\"\n" +
-                "      ],\n" +
-                "      \"sha\": \"7d1bab3be96f71a0c93fab14e0aca05a0ae1167a\"\n" +
-                "    },\n" +
-                "    \"level10~ipad.mp4\": {\n" +
-                "      \"flavors\": [\n" +
-                "        \"ipad\"\n" +
-                "      ],\n" +
-                "      \"sha\": \"bd90835a496fefedf7b516676edcf5384d089fca\"\n" +
-                "    },\n" +
-                "    \"level10@2x.mp4\": {\n" +
-                "      \"flavors\": [\n" +
-                "        \"iphone-retina\"\n" +
-                "      ],\n" +
-                "      \"sha\": \"bd90835a496fefedf7b516676edcf5384d089fca\"\n" +
-                "    },\n" +
-                "    \"level10@2x~ipad.mp4\": {\n" +
+                "    \"level11@2x~ipad.mp4\": {\n" +
                 "      \"flavors\": [\n" +
                 "        \"ipad-retina\"\n" +
                 "      ],\n" +
-                "      \"sha\": \"b3c83a3db47dba56a73fbd7a97e224a6321d0b12\"\n" +
+                "      \"sha\": \"14d4d73af5b4bb4042251f92df785639defd1ff5\",\n" +
+                "      \"formats\": {\n" +
+                "        \"raw\": {\n" +
+                "          \"size\": 386755\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"level11.mp4\": {\n" +
+                "      \"flavors\": [\n" +
+                "        \"iphone\"\n" +
+                "      ],\n" +
+                "      \"sha\": \"a7c55929d6f674b839e6ea0276830ee213472952\",\n" +
+                "      \"formats\": {\n" +
+                "        \"raw\": {\n" +
+                "          \"size\": 122891\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"level11~ipad.mp4\": {\n" +
+                "      \"flavors\": [\n" +
+                "        \"ipad\"\n" +
+                "      ],\n" +
+                "      \"sha\": \"d242110ae6a99ac4b367ad04542624096a90e490\",\n" +
+                "      \"formats\": {\n" +
+                "        \"raw\": {\n" +
+                "          \"size\": 250314\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"level11@2x.mp4\": {\n" +
+                "      \"flavors\": [\n" +
+                "        \"iphone-retina\"\n" +
+                "      ],\n" +
+                "      \"sha\": \"d242110ae6a99ac4b367ad04542624096a90e490\",\n" +
+                "      \"formats\": {\n" +
+                "        \"raw\": {\n" +
+                "          \"size\": 250314\n" +
+                "        }\n" +
+                "      }\n" +
                 "    }\n" +
                 "  },\n" +
                 "  \"catalog\": \"" + identifier + "\",\n" +
-                "  \"version\": 5,\n" +
+                "  \"version\": 3,\n" +
                 "  \"bundle\": \"" + bundleName + "\"\n" +
                 "}";
 

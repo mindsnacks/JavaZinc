@@ -2,10 +2,7 @@ package com.zinc.classes.data;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: NachoSoto
@@ -55,31 +52,43 @@ public class ZincManifest {
     }
 
     /**
-     * @return Map (filename => hash)
+     * @return Map (filename => FileInfo)
      */
-    public Map<String,String> getFilesWithFlavor(final String flavor) {
-          final Map<String, String> result = new HashMap<String, String>();
+    public Map<String, FileInfo> getFilesWithFlavor(final String flavor) {
+        final Map<String, FileInfo> result = new HashMap<String, FileInfo>();
 
         for (final Map.Entry<String, FileInfo> entry : mFiles.entrySet()) {
             final FileInfo fileInfo = entry.getValue();
             if (fileInfo.getFlavors().contains(flavor)) {
-                result.put(entry.getKey(), fileInfo.getHash());
+                result.put(entry.getKey(), fileInfo);
             }
         }
 
         return result;
     }
 
-    public class FileInfo {
+    public static class FileInfo {
+        public static final String GZIPPED_FORMAT = "gz";
+
         @SerializedName("flavors")
         private final Set<String> mFlavors;
 
         @SerializedName("sha")
         private final String mHash;
 
-        public FileInfo(final Set<String> flavors, final String hash) {
+        @SerializedName("formats")
+        private final Map<String, Map<String, Integer>> mFormats;
+
+        public FileInfo() {
+            mFlavors = null;
+            mHash = null;
+            mFormats = null;
+        }
+
+        public FileInfo(final Set<String> flavors, final String hash, final Map<String, Map<String, Integer>> formats) {
             mFlavors = flavors;
             mHash = hash;
+            mFormats = formats;
         }
 
         public Set<String> getFlavors() {
@@ -88,6 +97,10 @@ public class ZincManifest {
 
         public String getHash() {
             return mHash;
+        }
+
+        public boolean isGzipped() {
+            return mFormats.containsKey(GZIPPED_FORMAT);
         }
 
         @Override
