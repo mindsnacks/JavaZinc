@@ -64,6 +64,15 @@ public class GzipHelperTest extends ZincBaseTest {
     }
 
     @Test
+    public void removeFile() throws Exception {
+        final File file = new File(mBundle, mFilename);
+
+        assertTrue(file.exists());
+        mHelper.removeFile(mBundle, mFilename);
+        assertFalse(file.exists());
+    }
+
+    @Test
     public void moveFile() throws Exception {
         assertFalse(mDestinationFile.exists());
 

@@ -45,4 +45,8 @@ public class GzipHelper {
     public void moveFile(final ZincBundle bundle, final String filename, final String destination) {
         new File(bundle, filename).renameTo(new File(bundle, destination));
     }
+
+    public void removeFile(final ZincBundle bundle, final String filename) {
+        new File(bundle, filename).delete();
+    }
 }
