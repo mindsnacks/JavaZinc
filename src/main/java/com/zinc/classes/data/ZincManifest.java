@@ -107,7 +107,7 @@ public class ZincManifest {
             }
         }
 
-        private boolean isGzipped() {
+        public boolean isGzipped() {
             return mFormats.containsKey(GZIPPED_FORMAT);
         }
 
