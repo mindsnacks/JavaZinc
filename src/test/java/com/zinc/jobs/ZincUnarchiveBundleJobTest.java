@@ -20,6 +20,7 @@ import java.util.concurrent.Future;
 import static com.zinc.utils.MockFactory.randomInt;
 import static com.zinc.utils.MockFactory.randomString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -98,8 +99,8 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         final String hash1 = randomString(), hash2 = randomString();
         final Map<String, ZincManifest.FileInfo> files = new HashMap<String, ZincManifest.FileInfo>();
 
-        files.put(filename1, new ZincManifest.FileInfo(null, hash1, null));
-        files.put(filename2, new ZincManifest.FileInfo(null, hash2, null));
+        addFileInfo(files, filename1, hash1);
+        addFileInfo(files, filename2, hash2);
 
         when(mManifest.getFilesWithFlavor(eq(mFlavorName))).thenReturn(files);
 
@@ -110,8 +111,16 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         verify(mGzipHelper).unzipFile(eq(mBundle), eq(hash2), eq(filename2));
     }
 
-
     private ZincBundle run() throws Exception {
         return mJob.call();
+    }
+
+    private void addFileInfo(final Map<String, ZincManifest.FileInfo> files,
+                             final String filename,
+                             final String hashWithExtension) {
+        final ZincManifest.FileInfo info = mock(ZincManifest.FileInfo.class);
+        when(info.getHashWithExtension()).thenReturn(hashWithExtension);
+
+        files.put(filename, info);
     }
 }
