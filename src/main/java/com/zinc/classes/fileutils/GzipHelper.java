@@ -25,7 +25,13 @@ public class GzipHelper {
             throw new FileNotFoundException("File not found: " + input.getAbsolutePath());
         }
 
-        final InputStream in = new BufferedInputStream(new GZIPInputStream(new FileInputStream(input)));;
+        final InputStream in;
+        try {
+            in = new BufferedInputStream(new GZIPInputStream(new FileInputStream(input)));
+        } catch (ZipException e) {
+            throw new ZincRuntimeException("Error opening gzip file: " + input.getAbsolutePath(), e);
+        }
+
         final OutputStream dest = new BufferedOutputStream(new FileOutputStream(output));
         try {
             int count;
