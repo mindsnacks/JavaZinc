@@ -28,11 +28,9 @@ import static org.mockito.Mockito.when;
  * Date: 9/4/13
  */
 public class ZincDownloadArchiveJobTest extends ZincBaseTest {
-    @Mock
-    private ZincRequestExecutor mRequestExecutor;
+    @Mock private ZincRequestExecutor mRequestExecutor;
 
-    @Rule
-    public final TemporaryFolder rootFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
 
     private final String mFolder;
 
