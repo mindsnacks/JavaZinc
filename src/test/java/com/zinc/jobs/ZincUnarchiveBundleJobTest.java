@@ -107,6 +107,8 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         verify(mManifest).getFilesWithFlavor(mFlavorName);
         verify(mGzipHelper, times(1)).unzipFile(eq(mBundle), eq(hash1 + ".gz"), eq(filename1));
         verify(mGzipHelper, times(1)).moveFile(eq(mBundle), eq(hash2), eq(filename2));
+        verify(mGzipHelper).removeFile(eq(mBundle), eq(hash1 + ".gz"));
+
         verify(mGzipHelper, times(0)).unzipFile(eq(mBundle), anyString(), eq(filename2));
         verify(mGzipHelper, times(0)).moveFile(eq(mBundle), anyString(), eq(filename1));
     }

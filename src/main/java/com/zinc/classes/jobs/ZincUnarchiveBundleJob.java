@@ -6,7 +6,9 @@ import com.zinc.classes.data.ZincBundleCloneRequest;
 import com.zinc.classes.data.ZincManifest;
 import com.zinc.classes.fileutils.GzipHelper;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 /**
@@ -39,6 +41,8 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
                 result.getVersion()
         ).get();
 
+        final Set<String> filenamesToRemove = new HashSet<String>();
+
         for (final Map.Entry<String, ZincManifest.FileInfo> entry : manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName()).entrySet()) {
             final ZincManifest.FileInfo fileInfo = entry.getValue();
 
@@ -47,9 +51,14 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
 
             if (fileInfo.isGzipped()) {
                 mGzipHelper.unzipFile(result, originFilename, destinationFilename);
+                filenamesToRemove.add(originFilename);
             } else {
                 mGzipHelper.moveFile(result, originFilename, destinationFilename);
             }
+        }
+
+        for (final String filename : filenamesToRemove) {
+            mGzipHelper.removeFile(result, filename);
         }
 
         return result;
