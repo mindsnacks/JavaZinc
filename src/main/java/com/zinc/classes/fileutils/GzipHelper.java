@@ -18,31 +18,28 @@ public class GzipHelper {
         final File input = new File(bundle, filename),
                    output = new File(bundle, destination);
 
-        if (!input.exists()) {
-            throw new FileNotFoundException("File not found: " + input.getAbsolutePath());
-        }
+        if (!output.exists()) {
+            final InputStream in;
 
-        final InputStream in;
-        try {
-            in = new BufferedInputStream(new GZIPInputStream(new FileInputStream(input)));
-        } catch (ZipException e) {
-            throw new ZincRuntimeException("Error opening gzip file: " + input.getAbsolutePath(), e);
-        }
-
-        final OutputStream dest = new BufferedOutputStream(new FileOutputStream(output));
-        try {
-            int count;
-            final byte data[] = new byte[BUFFER_SIZE];
-
-            while ((count = in.read(data)) != -1) {
-                dest.write(data, 0, count);
+            try {
+                in = new BufferedInputStream(new GZIPInputStream(new FileInputStream(input)));
+            } catch (ZipException e) {
+                throw new ZincRuntimeException("Error opening gzip file: " + input.getAbsolutePath(), e);
             }
-        } finally {
-            dest.close();
-            in.close();
-        }
 
-        input.delete();
+            final OutputStream dest = new BufferedOutputStream(new FileOutputStream(output));
+            try {
+                int count;
+                final byte data[] = new byte[BUFFER_SIZE];
+
+                while ((count = in.read(data)) != -1) {
+                    dest.write(data, 0, count);
+                }
+            } finally {
+                dest.close();
+                in.close();
+            }
+        }
     }
 
     public void moveFile(final ZincBundle bundle, final String filename, final String destination) {
