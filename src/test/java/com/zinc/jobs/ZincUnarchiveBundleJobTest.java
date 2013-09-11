@@ -96,10 +96,10 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
     public void unzipsAllFiles() throws Exception {
         final String filename1 = "file1.txt", filename2 = "file2.png";
         final String hash1 = randomString(), hash2 = randomString();
-        final Map<String, String> files = new HashMap<String, String>();
+        final Map<String, ZincManifest.FileInfo> files = new HashMap<String, ZincManifest.FileInfo>();
 
-        files.put(filename1, hash1);
-        files.put(filename2, hash2);
+        files.put(filename1, new ZincManifest.FileInfo(null, hash1, null));
+        files.put(filename2, new ZincManifest.FileInfo(null, hash2, null));
 
         when(mManifest.getFilesWithFlavor(eq(mFlavorName))).thenReturn(files);
 

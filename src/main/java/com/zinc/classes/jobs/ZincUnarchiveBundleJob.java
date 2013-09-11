@@ -39,8 +39,8 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
                 result.getVersion()
         ).get();
 
-        for (final Map.Entry<String, String> entry : manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName()).entrySet()) {
-            mGzipHelper.unzipFile(result, entry.getValue(), entry.getKey());
+        for (final Map.Entry<String, ZincManifest.FileInfo> entry : manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName()).entrySet()) {
+            mGzipHelper.unzipFile(result, entry.getValue().getHash(), entry.getKey());
         }
 
         return result;

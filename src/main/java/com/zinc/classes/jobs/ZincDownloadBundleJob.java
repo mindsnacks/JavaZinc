@@ -10,6 +10,7 @@ import java.util.concurrent.Future;
 /**
  * User: NachoSoto
  * Date: 9/4/13
+ * @todo: remove gz files?
  */
 public class ZincDownloadBundleJob implements ZincJob<ZincBundle> {
     private final SourceURL mSourceURL;
