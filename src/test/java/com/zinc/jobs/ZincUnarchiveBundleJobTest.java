@@ -20,9 +20,7 @@ import java.util.concurrent.Future;
 import static com.zinc.utils.MockFactory.randomInt;
 import static com.zinc.utils.MockFactory.randomString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * User: NachoSoto
@@ -99,16 +97,18 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         final String hash1 = randomString(), hash2 = randomString();
         final Map<String, ZincManifest.FileInfo> files = new HashMap<String, ZincManifest.FileInfo>();
 
-        addFileInfo(files, filename1, hash1);
-        addFileInfo(files, filename2, hash2);
+        addFileInfo(files, filename1, hash1, hash1 + ".gz", true);
+        addFileInfo(files, filename2, hash2, hash2, false);
 
         when(mManifest.getFilesWithFlavor(eq(mFlavorName))).thenReturn(files);
 
         run();
 
         verify(mManifest).getFilesWithFlavor(mFlavorName);
-        verify(mGzipHelper).unzipFile(eq(mBundle), eq(hash1), eq(filename1));
-        verify(mGzipHelper).unzipFile(eq(mBundle), eq(hash2), eq(filename2));
+        verify(mGzipHelper, times(1)).unzipFile(eq(mBundle), eq(hash1 + ".gz"), eq(filename1));
+        verify(mGzipHelper, times(1)).moveFile(eq(mBundle), eq(hash2), eq(filename2));
+        verify(mGzipHelper, times(0)).unzipFile(eq(mBundle), anyString(), eq(filename2));
+        verify(mGzipHelper, times(0)).moveFile(eq(mBundle), anyString(), eq(filename1));
     }
 
     private ZincBundle run() throws Exception {
@@ -117,9 +117,13 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
     private void addFileInfo(final Map<String, ZincManifest.FileInfo> files,
                              final String filename,
-                             final String hashWithExtension) {
+                             final String hash,
+                             final String hashWithExtension,
+                             final boolean isGzipped) {
         final ZincManifest.FileInfo info = mock(ZincManifest.FileInfo.class);
+        when(info.getHash()).thenReturn(hash);
         when(info.getHashWithExtension()).thenReturn(hashWithExtension);
+        when(info.isGzipped()).thenReturn(isGzipped);
 
         files.put(filename, info);
     }
