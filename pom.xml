@@ -5,7 +5,9 @@
     <groupId>com.mindsnacks.javazinc</groupId>
     <artifactId>JavaZinc</artifactId>
     <version>1.0.1-SNAPSHOT</version>
-	<name>Zinc client for Java</name>
+	<name>JavaZinc</name>
+	<description>Zinc client for Java</description>
+	<url>http://github.com/mindsnacks/JavaZinc</url>
     <packaging>jar</packaging>
 
     <build>
@@ -39,11 +41,26 @@
     </distributionManagement>
 
     <scm>
-        <url>http://github.com/mindsnacks/JavaZinc/</url>
+        <url>http://github.com/mindsnacks/JavaZinc</url>
         <connection>scm:git:git://github.com/mindsnacks/JavaZinc.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/mindsnacks/JavaZinc.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
+
+    <developers>
+        <developer>
+            <name>Nacho Soto</name>
+            <organization>MindSnacks Inc.</organization>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <dependencies>
         <dependency>
