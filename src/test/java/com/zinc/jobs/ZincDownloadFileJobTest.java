@@ -1,25 +1,26 @@
 package com.zinc.jobs;
 
+import com.zinc.classes.jobs.ZincDownloadFileJob;
+import com.zinc.classes.jobs.ZincRequestExecutor;
+import com.zinc.utils.MockFactory;
+import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
-import com.zinc.utils.MockFactory;
-import com.zinc.utils.ZincBaseTest;
-import com.zinc.classes.jobs.ZincDownloadFileJob;
-import com.zinc.classes.jobs.ZincRequestExecutor;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static com.zinc.utils.TestUtils.readFile;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static com.zinc.utils.TestUtils.readFile;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * User: NachoSoto
@@ -44,20 +45,36 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        mJob = new ZincDownloadFileJob(mRequestExecutor, mUrl, rootFolder.getRoot(), mFilename);
-    }
-
-    private File run() {
-        return mJob.call();
+        initializeJob(true);
     }
 
     @Test
     public void createsFile() throws Exception {
         setURLContents("Hello World");
 
-        final File file = run();
+        assertTrue(run().exists());
+    }
 
-        assertTrue(file.exists());
+    @Test
+    public void overridesFile() throws Exception {
+        setURLContents("Hello World");
+        createFolder();
+
+        run();
+
+        verifyFileIsDownloaded();
+    }
+
+    @Test
+    public void doesntOverrideFile() throws Exception {
+        initializeJob(false);
+
+        createFolder();
+
+        final File result = run();
+
+        verify(mRequestExecutor, never()).get(any(URL.class));
+        assertEquals(new File(rootFolder.getRoot(), mFilename), result);
     }
 
     @Test
@@ -66,7 +83,7 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
 
         run();
 
-        verify(mRequestExecutor).get(mUrl);
+        verifyFileIsDownloaded();
     }
 
     @Test
@@ -75,14 +92,28 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
 
         setURLContents(contents);
 
-        final File file = run();
+        assertEquals(contents, readFile(run().getPath()));
+    }
 
-        assertEquals(contents, readFile(file.getPath()));
+    private void initializeJob(final boolean override) {
+        mJob = new ZincDownloadFileJob(mRequestExecutor, mUrl, rootFolder.getRoot(), mFilename, override);
+    }
+
+    private File run() {
+        return mJob.call();
+    }
+
+    private void verifyFileIsDownloaded() {
+        verify(mRequestExecutor).get(mUrl);
     }
 
     private void setURLContents(final String contents) {
         final InputStream reader = MockFactory.inputStreamWithString(contents);
 
         when(mRequestExecutor.get(mUrl)).thenReturn(reader);
+    }
+
+    private void createFolder() throws IOException {
+        new File(rootFolder.getRoot(), mFilename).createNewFile();
     }
 }

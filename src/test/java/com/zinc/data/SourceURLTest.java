@@ -67,15 +67,30 @@ public class SourceURLTest extends ZincBaseTest {
     }
 
     @Test
+    public void manifestFileURL() throws Exception {
+        final String bundleName = "swell";
+        final int version = randomInt(2, 10);
+
+        final URL result = new SourceURL(zincURL, catalogID).getManifestFileURL(bundleName, version);
+
+        assertTrue(result.toString().contains(catalogID));
+        assertTrue(result.toString().contains(Integer.toString(version)));
+        assertTrue(result.toString().contains(bundleName));
+        assertTrue(result.getFile().endsWith(".json"));
+    }
+
+    @Test
     public void archiveURL() throws Exception {
         final String bundleName = "swell";
         final int version = randomInt(1, 1000);
+        final String flavorName = "retina";
 
-        final URL result = new SourceURL(zincURL, catalogID).getArchiveURL(bundleName, version);
+        final URL result = new SourceURL(zincURL, catalogID).getArchiveURL(bundleName, version, flavorName);
 
         assertTrue(result.getFile().endsWith(".tar"));
         assertTrue(result.toString().contains(Integer.toString(version)));
         assertTrue(result.toString().contains(bundleName));
+        assertTrue(result.toString().contains(flavorName));
     }
 
     @Test

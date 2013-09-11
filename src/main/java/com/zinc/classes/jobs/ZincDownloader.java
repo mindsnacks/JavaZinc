@@ -3,10 +3,8 @@ package com.zinc.classes.jobs;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
 import com.zinc.classes.ZincFutureFactory;
-import com.zinc.classes.data.BundleID;
-import com.zinc.classes.data.SourceURL;
-import com.zinc.classes.data.ZincBundle;
-import com.zinc.classes.data.ZincCatalog;
+import com.zinc.classes.data.*;
+import com.zinc.classes.fileutils.GzipHelper;
 import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
@@ -43,17 +41,32 @@ public class ZincDownloader implements ZincFutureFactory {
     }
 
     @Override
-    public Future<File> downloadArchive(final URL url, final File root, final String child) {
-        return submitJob(new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child));
+    public Future<ZincManifest> downloadManifest(final SourceURL sourceURL, final String bundleName, final int version) {
+        final URL manifestFileURL;
+        try {
+            manifestFileURL = sourceURL.getManifestFileURL(bundleName, version);
+        } catch (MalformedURLException e) {
+            throw new ZincRuntimeException("Invalid manifest URL: " + sourceURL, e);
+        }
+        return submitJob(new ZincDownloadObjectJob<ZincManifest>(createRequestExecutor(), manifestFileURL, mGson, ZincManifest.class));
+    }
+
+    @Override
+    public Future<File> downloadArchive(final URL url, final File root, final String child, final boolean override) {
+        return submitJob(new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child, override));
     }
 
     @Override
     public Future<ZincBundle> cloneBundle(final SourceURL sourceURL,
                                           final BundleID bundleID,
                                           final String distribution,
-                                          final Future<ZincCatalog> catalog,
-                                          final File repoFolder) {
-        return submitJob(new ZincCloneBundleJob(sourceURL, bundleID, distribution, catalog, this, repoFolder));
+                                          final String flavorName,
+                                          final File repoFolder,
+                                          final Future<ZincCatalog> catalogFuture) {
+        final ZincBundleCloneRequest zincBundleCloneRequest = new ZincBundleCloneRequest(sourceURL, bundleID, distribution, flavorName, repoFolder);
+        final Future<ZincBundle> bundleFuture = submitJob(new ZincDownloadBundleJob(zincBundleCloneRequest, catalogFuture, this));
+
+        return submitJob(new ZincUnarchiveBundleJob(bundleFuture, zincBundleCloneRequest, this, new GzipHelper()));
     }
 
     private ZincRequestExecutor createRequestExecutor() {

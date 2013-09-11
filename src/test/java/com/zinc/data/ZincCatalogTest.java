@@ -21,7 +21,7 @@ public class ZincCatalogTest extends ZincBaseTest {
 
     @Test
     public void createFromJSON() throws ZincCatalog.DistributionNotFoundException {
-        String json = "{\n" +
+        final String json = "{\n" +
                 "  \"bundles\": {\n" +
                 "    \"bundleName1\": {\n" +
                 "      \"distributions\": {\n" +

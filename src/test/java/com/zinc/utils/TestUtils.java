@@ -9,7 +9,7 @@ import java.io.IOException;
  * Date: 9/4/13
  */
 public class TestUtils {
-    public static String readFile(String path) throws IOException {
+    public static String readFile(final String path) throws IOException {
         final File file = new File(path);
         final FileInputStream fis = new FileInputStream(file);
 
@@ -21,7 +21,7 @@ public class TestUtils {
         return new String(bytes);
     }
 
-    public static String readFile(File file) throws IOException {
+    public static String readFile(final File file) throws IOException {
         return readFile(file.getPath());
     }
 }

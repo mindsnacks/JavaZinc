@@ -18,6 +18,9 @@ import java.net.URL;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -25,11 +28,9 @@ import static org.mockito.Mockito.when;
  * Date: 9/4/13
  */
 public class ZincDownloadArchiveJobTest extends ZincBaseTest {
-    @Mock
-    private ZincRequestExecutor mRequestExecutor;
+    @Mock private ZincRequestExecutor mRequestExecutor;
 
-    @Rule
-    public final TemporaryFolder rootFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
 
     private final String mFolder;
 
@@ -43,11 +44,7 @@ public class ZincDownloadArchiveJobTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        mJob = new ZincDownloadArchiveJob(mRequestExecutor, mUrl, rootFolder.getRoot(), mFolder);
-    }
-
-    private File run() {
-        return mJob.call();
+        initializeJob(true);
     }
 
     @Test
@@ -74,6 +71,26 @@ public class ZincDownloadArchiveJobTest extends ZincBaseTest {
         assertTrue(resultsFolder.exists());
         assertEquals(fileContents1, TestUtils.readFile(new File(resultsFolder, fileName1).getPath()));
         assertEquals(fileContents2, TestUtils.readFile(new File(resultsFolder, fileName2).getPath()));
+    }
+
+    @Test
+    public void doesntOverrideFile() throws Exception {
+        initializeJob(false);
+
+        // create folder
+        new File(rootFolder.getRoot(), mFolder).mkdirs();
+
+        run();
+
+        verify(mRequestExecutor, never()).get(any(URL.class));
+    }
+
+    private void initializeJob(final boolean override) {
+        mJob = new ZincDownloadArchiveJob(mRequestExecutor, mUrl, rootFolder.getRoot(), mFolder, override);
+    }
+
+    private File run() {
+        return mJob.call();
     }
 
     private File createTar(File[] filesToTar) throws IOException {

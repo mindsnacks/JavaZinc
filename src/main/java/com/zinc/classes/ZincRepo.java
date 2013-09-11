@@ -16,6 +16,7 @@ import java.util.concurrent.Future;
 public class ZincRepo {
     private final ZincFutureFactory mJobFactory;
     private final ZincRepoIndexWriter mIndexWriter;
+    private final String mFlavorName;
 
     private final File mRoot;
 
@@ -25,8 +26,9 @@ public class ZincRepo {
     /**
      * @todo remove cached promises that failed?
      */
-    public ZincRepo(final ZincFutureFactory jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter) {
+    public ZincRepo(final ZincFutureFactory jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter, final String flavorName) {
         mJobFactory = jobFactory;
+        mFlavorName = flavorName;
         mRoot = new File(root);
         mIndexWriter = repoIndexWriter;
 
@@ -91,6 +93,6 @@ public class ZincRepo {
             throw new ZincRuntimeException(String.format("No sources for catalog '%s'", catalogID));
         }
 
-        return mJobFactory.cloneBundle(sourceURL, bundleID, distribution, getCatalog(sourceURL), mRoot);
+        return mJobFactory.cloneBundle(sourceURL, bundleID, distribution, mFlavorName, mRoot, getCatalog(sourceURL));
     }
 }

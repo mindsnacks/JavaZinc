@@ -57,7 +57,7 @@ public class RepoJobsTest extends RepoBaseTest {
         final ZincCatalog catalog = createCatalog();
 
         when(mCatalogFuture.get()).thenReturn(catalog);
-        mockDownloadCatalog(eq(mSourceURL));
+        mockDownloadCatalog();
 
         // run
         mRepo.addSourceURL(mSourceURL);
@@ -107,7 +107,7 @@ public class RepoJobsTest extends RepoBaseTest {
         final BundleID bundleID = new BundleID(mCatalogID, "swell");
         final String distribution = "master";
 
-        mockDownloadCatalog(mSourceURL);
+        mockDownloadCatalog();
         mockSourceURLForCatalog();
         mockGetTrackingInfo(bundleID, distribution);
 
@@ -115,7 +115,7 @@ public class RepoJobsTest extends RepoBaseTest {
         mRepo.startTrackingBundle(bundleID, distribution);
 
         // verify
-        verify(mJobFactory).cloneBundle(eq(mSourceURL), eq(bundleID), eq(distribution), eq(mCatalogFuture), eq(rootFolder.getRoot()));
+        verifyCloneBundle(bundleID, distribution);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class RepoJobsTest extends RepoBaseTest {
         initializeRepo();
 
         // verify
-        verify(mJobFactory).cloneBundle(eq(mSourceURL), eq(bundleID), eq(distribution), eq(mCatalogFuture), eq(rootFolder.getRoot()));
+        verifyCloneBundle(bundleID, distribution);
     }
 
     @Test
@@ -140,13 +140,15 @@ public class RepoJobsTest extends RepoBaseTest {
 
         final Future<ZincBundle> expectedResult = mock(Future.class);
 
+        mockDownloadCatalog();
+        mockSourceURLForCatalog();
         mockGetTrackingInfo(bundleID, distribution);
         mockCloneBundle(expectedResult);
 
         // run
         final Future<ZincBundle> result = mRepo.getBundle(bundleID);
 
-        verify(mJobFactory).cloneBundle(any(SourceURL.class), eq(bundleID), eq(distribution), any(Future.class), any(File.class));
+        verifyCloneBundle(bundleID, distribution);
         assertEquals(expectedResult, result);
     }
 
@@ -166,13 +168,13 @@ public class RepoJobsTest extends RepoBaseTest {
         // run
         final Future<ZincBundle> result = mRepo.getBundle(bundleID);
 
-        verify(mJobFactory, times(1)).cloneBundle(any(SourceURL.class), eq(bundleID), eq(distribution), any(Future.class), any(File.class));
+        verify(mJobFactory, times(1)).cloneBundle(any(SourceURL.class), eq(bundleID), eq(distribution), eq(mFlavorName), any(File.class), any(Future.class));
         assertEquals(expectedResult, result);
     }
 
     private void setUpIndexWithTrackedBundleID(final BundleID bundleID,
                                                final String distribution) throws ZincRepoIndex.CatalogNotFoundException {
-        mockDownloadCatalog(mSourceURL);
+        mockDownloadCatalog();
         mockSourceURLForCatalog();
         mockGetTrackingInfo(bundleID, distribution);
         when(mRepoIndex.getTrackedBundleIDs()).thenReturn(new HashSet<BundleID>(Arrays.asList(bundleID)));
@@ -180,7 +182,7 @@ public class RepoJobsTest extends RepoBaseTest {
 
     @SuppressWarnings("unchecked")
     private void mockCloneBundle(final Future<ZincBundle> expectedResult) {
-        when(mJobFactory.cloneBundle(any(SourceURL.class), any(BundleID.class), anyString(), any(Future.class), any(File.class))).thenReturn(expectedResult);
+        when(mJobFactory.cloneBundle(any(SourceURL.class), any(BundleID.class), anyString(), eq(mFlavorName), any(File.class), any(Future.class))).thenReturn(expectedResult);
     }
 
     private void mockGetTrackingInfo(final BundleID bundleID, final String distribution) {
@@ -191,12 +193,16 @@ public class RepoJobsTest extends RepoBaseTest {
         when(mRepoIndex.getSourceURLForCatalog(eq(mCatalogID))).thenReturn(mSourceURL);
     }
 
-    private void mockDownloadCatalog(final SourceURL sourceURL) {
-        when(mJobFactory.downloadCatalog(sourceURL)).thenReturn(mCatalogFuture);
+    private void mockDownloadCatalog() {
+        when(mJobFactory.downloadCatalog(mSourceURL)).thenReturn(mCatalogFuture);
     }
 
     private void verifyCatalogIsDownloaded() {
         verify(mJobFactory, times(1)).downloadCatalog(eq(mSourceURL));
+    }
+
+    private void verifyCloneBundle(final BundleID bundleID, final String distribution) {
+        verify(mJobFactory).cloneBundle(eq(mSourceURL), eq(bundleID), eq(distribution), eq(mFlavorName), eq(rootFolder.getRoot()), eq(mCatalogFuture));
     }
 
     private void mockGetSources(List<SourceURL> sourceURLs) {
