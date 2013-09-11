@@ -25,9 +25,9 @@
     </build>
 
     <scm>
-        <url>http://github.com/minsdnacks/JavaZinc/</url>
-        <connection>scm:git:git://github.com/minsdnacks/JavaZinc.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/minsdnacks/JavaZinc.git</developerConnection>
+        <url>http://github.com/mindsnacks/JavaZinc/</url>
+        <connection>scm:git:git://github.com/mindsnacks/JavaZinc.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/mindsnacks/JavaZinc.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
