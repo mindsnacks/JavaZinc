@@ -58,9 +58,11 @@ public class ZincManifest {
         final Map<String, FileInfo> result = new HashMap<String, FileInfo>();
 
         for (final Map.Entry<String, FileInfo> entry : mFiles.entrySet()) {
+            final String filename = entry.getKey();
             final FileInfo fileInfo = entry.getValue();
+
             if (fileInfo.getFlavors().contains(flavor)) {
-                result.put(entry.getKey(), fileInfo);
+                result.put(filename, fileInfo);
             }
         }
 
