@@ -13,8 +13,12 @@ import java.net.URL;
 public class ZincDownloadArchiveJob extends AbstractZincDownloadFileJob {
     public static final int BUFFER_SIZE = 2048;
 
-    public ZincDownloadArchiveJob(final ZincRequestExecutor requestExecutor, final URL url, final File root, final String child) {
-        super(requestExecutor, url, root, child);
+    public ZincDownloadArchiveJob(final ZincRequestExecutor requestExecutor,
+                                  final URL url,
+                                  final File root,
+                                  final String child,
+                                  final boolean override) {
+        super(requestExecutor, url, root, child, override);
     }
 
     @Override
@@ -27,22 +31,25 @@ public class ZincDownloadArchiveJob extends AbstractZincDownloadFileJob {
 
         final TarInputStream tis = new TarInputStream(new BufferedInputStream(inputStream));
 
-        TarEntry entry;
-        while ((entry = tis.getNextEntry()) != null) {
-            int count;
-            final byte data[] = new byte[BUFFER_SIZE];
+        try {
+            TarEntry entry;
+            while ((entry = tis.getNextEntry()) != null) {
+                int count;
+                final byte data[] = new byte[BUFFER_SIZE];
 
-            final FileOutputStream fos = new FileOutputStream(file.getPath() + "/" + entry.getName());
-            final BufferedOutputStream dest = new BufferedOutputStream(fos);
+                final FileOutputStream fos = new FileOutputStream(file.getPath() + "/" + entry.getName());
+                final BufferedOutputStream dest = new BufferedOutputStream(fos);
 
-            while ((count = tis.read(data)) != -1) {
-                dest.write(data, 0, count);
+                try {
+                    while ((count = tis.read(data)) != -1) {
+                        dest.write(data, 0, count);
+                    }
+                } finally {
+                    dest.close();
+                }
             }
-
-            dest.flush();
-            dest.close();
+        } finally {
+            tis.close();
         }
-
-        tis.close();
     }
 }

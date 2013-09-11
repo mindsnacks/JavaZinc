@@ -1,9 +1,6 @@
 package com.zinc.classes;
 
-import com.zinc.classes.data.BundleID;
-import com.zinc.classes.data.SourceURL;
-import com.zinc.classes.data.ZincBundle;
-import com.zinc.classes.data.ZincCatalog;
+import com.zinc.classes.data.*;
 
 import java.io.File;
 import java.net.URL;
@@ -15,10 +12,12 @@ import java.util.concurrent.Future;
 */
 public interface ZincFutureFactory {
     Future<ZincCatalog> downloadCatalog(SourceURL sourceURL);
-    Future<File> downloadArchive(URL url, File root, String child);
+    Future<ZincManifest> downloadManifest(SourceURL sourceURL, String bundleName, int version);
+    Future<File> downloadArchive(URL url, File root, String child, boolean override);
     Future<ZincBundle> cloneBundle(SourceURL sourceURL,
                                    BundleID bundleID,
                                    String distribution,
-                                   Future<ZincCatalog> catalog,
-                                   File repoFolder);
+                                   String flavorName,
+                                   File repoFolder,
+                                   Future<ZincCatalog> catalogFuture);
 }

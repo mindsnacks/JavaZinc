@@ -25,10 +25,11 @@ import java.io.IOException;
 public abstract class RepoBaseTest extends ZincBaseTest {
     protected ZincRepo mRepo;
     protected ZincRepoIndexWriter mIndexWriter;
+    protected final String mFlavorName = "retina";
+
     @Mock protected ZincFutureFactory mJobFactory;
 
     protected Gson mGson;
-
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
 
     @Before
@@ -40,7 +41,7 @@ public abstract class RepoBaseTest extends ZincBaseTest {
 
     protected void initializeRepo() {
         mIndexWriter = newRepoIndexWriter();
-        mRepo = new ZincRepo(mJobFactory, rootFolder.getRoot().toURI(), mIndexWriter);
+        mRepo = new ZincRepo(mJobFactory, rootFolder.getRoot().toURI(), mIndexWriter, mFlavorName);
     }
 
     protected ZincRepoIndexWriter newRepoIndexWriter() {

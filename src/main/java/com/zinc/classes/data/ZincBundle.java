@@ -8,20 +8,27 @@ import java.io.File;
  */
 public class ZincBundle extends File {
     final private BundleID mBundleID;
+    final private int mVersion;
 
-    public ZincBundle(final String root, final BundleID bundleID) {
+    public ZincBundle(final String root, final BundleID bundleID, final int version) {
         super(root, bundleID.toString());
 
         mBundleID = bundleID;
+        mVersion = version;
     }
 
-    public ZincBundle(final File file, final BundleID bundleID) {
+    public ZincBundle(final File file, final BundleID bundleID, final int version) {
         super(file.getPath());
 
         mBundleID = bundleID;
+        mVersion = version;
     }
 
     public BundleID getBundleID() {
         return mBundleID;
+    }
+
+    public int getVersion() {
+        return mVersion;
     }
 }
