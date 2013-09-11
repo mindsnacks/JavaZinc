@@ -1,9 +1,11 @@
 package com.zinc.classes.fileutils;
 
 import com.zinc.classes.data.ZincBundle;
+import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.*;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipException;
 
 /**
  * User: NachoSoto
@@ -12,6 +14,9 @@ import java.util.zip.GZIPInputStream;
 public class GzipHelper {
     public static final int BUFFER_SIZE = 8192;
 
+    /**
+     * @todo remove filename
+     */
     public void unzipFile(final ZincBundle bundle, final String filename, final String destination) throws IOException {
         final File input = new File(bundle, filename),
                    output = new File(bundle, destination);
@@ -33,5 +38,9 @@ public class GzipHelper {
             dest.close();
             in.close();
         }
+    }
+
+    public void moveFile(final ZincBundle bundle, final String filename, final String destination) {
+        new File(bundle, filename).renameTo(new File(bundle, destination));
     }
 }
