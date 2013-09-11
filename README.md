@@ -5,9 +5,10 @@ JavaZinc
 
 This is a WIP of a Java Zinc client.
 Only a very limited of features is supported:
-    - Tracking different sources and bundles.
-    - Flavors.
-    - Tracking distributions.
+
+	- Tracking different sources and bundles.
+	- Flavors.
+	- Tracking distributions.
 
 ### Usage
 You can create a ```ZincRepo``` using ```ZincRepoFactory```:
