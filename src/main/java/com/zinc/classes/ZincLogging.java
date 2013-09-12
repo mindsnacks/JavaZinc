@@ -10,9 +10,9 @@ import java.util.List;
 public class ZincLogging {
     private static List<MessageListener> mListeners = new ArrayList<MessageListener>();
 
-    public static void log(final String message) {
+    public static void log(final String tag, final String message) {
         for (final MessageListener listener : mListeners) {
-            listener.logMessage(message);
+            listener.logMessage(tag, message);
         }
     }
 
@@ -25,6 +25,6 @@ public class ZincLogging {
     }
 
     public static interface MessageListener {
-        void logMessage(String message);
+        void logMessage(String tag, String message);
     }
 }

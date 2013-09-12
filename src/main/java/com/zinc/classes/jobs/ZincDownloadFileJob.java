@@ -1,8 +1,9 @@
 package com.zinc.classes.jobs;
 
-import com.zinc.classes.ZincLogging;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
@@ -22,7 +23,7 @@ public class ZincDownloadFileJob extends AbstractZincDownloadFileJob {
 
     @Override
     protected void writeFile(final InputStream inputStream, final File file) throws IOException {
-        ZincLogging.log("Saving file " + file.getAbsolutePath());
+        logMessage("Saving file " + file.getAbsolutePath());
 
         final FileOutputStream outputStream = new FileOutputStream(file);
 

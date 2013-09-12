@@ -10,16 +10,18 @@ import java.util.concurrent.Callable;
  */
 public abstract class ZincJob<V> implements Callable<V> {
     protected String getJobName() {
-        return this.getClass().getSimpleName();
+        return this.getClass().getSimpleName() + " - " + hashCode();
+    }
+
+    protected final void logMessage(final String message) {
+        ZincLogging.log(getJobName(), message);
     }
 
     @Override
     public final V call() throws Exception {
-        final String className = getJobName();
-
-        ZincLogging.log(String.format("%s started", className));
+        logMessage("started");
         final V result = run();
-        ZincLogging.log(String.format("%s finished", className));
+        logMessage("finished");
 
         return result;
     }
