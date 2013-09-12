@@ -24,12 +24,30 @@ public class ZincRepoIndex {
         return mSources;
     }
 
-    public void addSourceURL(final SourceURL sourceURL) {
-        mSources.add(sourceURL);
+    /**
+     * @return true if sourceURL was added. false if it was already there.
+     */
+    public boolean addSourceURL(final SourceURL sourceURL) {
+        if (!mSources.contains(sourceURL)) {
+            mSources.add(sourceURL);
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public void trackBundle(final BundleID bundleID, final String distribution) {
-        mBundles.put(bundleID.toString(), new TrackingInfo(distribution));
+    /**
+     * @return true if bundle was added or the distribution changed.
+     */
+    public boolean trackBundle(final BundleID bundleID, final String distribution) {
+        final String key = bundleID.toString();
+
+        if (!mBundles.containsKey(key) || !mBundles.get(key).getDistribution().equals(distribution)) {
+            mBundles.put(key, new TrackingInfo(distribution));
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public TrackingInfo getTrackingInfo(final BundleID bundleID) throws BundleNotBeingTrackedException {

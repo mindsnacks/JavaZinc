@@ -51,15 +51,17 @@ public class ZincRepo {
     }
 
     public void addSourceURL(final SourceURL sourceURL) {
-        mIndexWriter.getIndex().addSourceURL(sourceURL);
-        mIndexWriter.saveIndex();
+        if (mIndexWriter.getIndex().addSourceURL(sourceURL)) {
+            mIndexWriter.saveIndex();
+        }
 
         getCatalog(sourceURL);
     }
 
     public void startTrackingBundle(final BundleID bundleID, final String distribution) {
-        mIndexWriter.getIndex().trackBundle(bundleID, distribution);
-        mIndexWriter.saveIndex();
+        if (mIndexWriter.getIndex().trackBundle(bundleID, distribution)) {
+            mIndexWriter.saveIndex();
+        }
 
         getBundle(bundleID);
     }
