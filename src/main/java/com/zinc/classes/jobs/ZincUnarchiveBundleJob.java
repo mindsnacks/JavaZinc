@@ -15,7 +15,7 @@ import java.util.concurrent.Future;
  * User: NachoSoto
  * Date: 9/10/13
  */
-public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
+public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
     private final Future<ZincBundle> mBundle;
     private final ZincBundleCloneRequest mBundleCloneRequest;
     private final ZincFutureFactory mFutureFactory;
@@ -32,7 +32,7 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
     }
 
     @Override
-    public ZincBundle call() throws Exception {
+    public ZincBundle run() throws Exception {
         final ZincBundle result = mBundle.get();
 
         final ZincManifest manifest = mFutureFactory.downloadManifest(

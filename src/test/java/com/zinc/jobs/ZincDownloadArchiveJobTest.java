@@ -89,7 +89,7 @@ public class ZincDownloadArchiveJobTest extends ZincBaseTest {
         mJob = new ZincDownloadArchiveJob(mRequestExecutor, mUrl, rootFolder.getRoot(), mFolder, override);
     }
 
-    private File run() {
+    private File run() throws Exception {
         return mJob.call();
     }
 
