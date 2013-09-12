@@ -1,8 +1,8 @@
 package com.zinc.classes.fileutils;
 
+import com.google.common.io.Files;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.exceptions.ZincRuntimeException;
-import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.util.zip.GZIPInputStream;
@@ -48,7 +48,7 @@ public class GzipHelper {
     }
 
     public void copyFile(final ZincBundle bundle, final String filename, final String destination) throws IOException {
-        FileUtils.copyFile(new File(bundle, filename), new File(bundle, destination));
+        Files.copy(new File(bundle, filename), new File(bundle, destination));
     }
 
     public void removeFile(final ZincBundle bundle, final String filename) {
