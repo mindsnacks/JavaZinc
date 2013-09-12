@@ -41,9 +41,10 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
                 result.getVersion()
         ).get();
 
+        final Set<Map.Entry<String, ZincManifest.FileInfo>> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName()).entrySet();
         final Set<String> filenamesToRemove = new HashSet<String>();
 
-        for (final Map.Entry<String, ZincManifest.FileInfo> entry : manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName()).entrySet()) {
+        for (final Map.Entry<String, ZincManifest.FileInfo> entry : files) {
             final ZincManifest.FileInfo fileInfo = entry.getValue();
 
             final String originFilename = fileInfo.getHashWithExtension();
@@ -51,10 +52,11 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
 
             if (fileInfo.isGzipped()) {
                 mGzipHelper.unzipFile(result, originFilename, destinationFilename);
-                filenamesToRemove.add(originFilename);
             } else {
-                mGzipHelper.moveFile(result, originFilename, destinationFilename);
+                mGzipHelper.copyFile(result, originFilename, destinationFilename);
             }
+
+            filenamesToRemove.add(originFilename);
         }
 
         for (final String filename : filenamesToRemove) {
