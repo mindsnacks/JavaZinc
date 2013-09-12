@@ -20,6 +20,8 @@ public class FileHelper {
                    output = new File(bundle, destination);
 
         if (!output.exists()) {
+            output.getParentFile().mkdirs();
+
             final InputStream in;
 
             try {
