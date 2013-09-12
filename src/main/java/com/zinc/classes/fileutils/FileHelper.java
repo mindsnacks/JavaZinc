@@ -48,7 +48,10 @@ public class FileHelper {
     }
 
     public void copyFile(final ZincBundle bundle, final String filename, final String destination) throws IOException {
-        Files.copy(new File(bundle, filename), new File(bundle, destination));
+        final File destinationFile = new File(bundle, destination);
+        if (!destinationFile.exists()) {
+            Files.copy(new File(bundle, filename), destinationFile);
+        }
     }
 
     public void removeFile(final ZincBundle bundle, final String filename) {
