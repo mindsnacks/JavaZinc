@@ -41,10 +41,10 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
                 result.getVersion()
         ).get();
 
-        final Set<Map.Entry<String, ZincManifest.FileInfo>> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName()).entrySet();
+        final Map<String,ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName());
         final Set<String> filenamesToRemove = new HashSet<String>();
 
-        for (final Map.Entry<String, ZincManifest.FileInfo> entry : files) {
+        for (final Map.Entry<String, ZincManifest.FileInfo> entry : files.entrySet()) {
             final ZincManifest.FileInfo fileInfo = entry.getValue();
 
             final String originFilename = fileInfo.getHashWithExtension();
