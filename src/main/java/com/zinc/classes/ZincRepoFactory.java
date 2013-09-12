@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Date: 9/10/13
  */
 public final class ZincRepoFactory {
+    private static final int CONCURRENCY = 2;
+
     public ZincRepo createRepo(final File root, final String flavorName) {
         // TODO: disable pretty printing
         final GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting().serializeNulls().setVersion(1.0);
@@ -24,12 +26,18 @@ public final class ZincRepoFactory {
 
         final Gson gson = gsonBuilder.create();
 
-        final ExecutorService executorService = Executors.newCachedThreadPool(new DaemonThreadFactory());
-
-        final ZincFutureFactory jobFactory = new ZincDownloader(gson, executorService);
+        final ZincFutureFactory jobFactory = createFutureFactory(gson);
         final ZincRepoIndexWriter indexWriter = new ZincRepoIndexWriter(root, gson);
 
         return new ZincRepo(jobFactory, root.toURI(), indexWriter, flavorName);
+    }
+
+    private ZincFutureFactory createFutureFactory(final Gson gson) {
+        final DaemonThreadFactory threadFactory = new DaemonThreadFactory();
+        final ExecutorService mainExecutorService = Executors.newCachedThreadPool(threadFactory);
+        final ExecutorService limitedConcurrencyExecutorService = Executors.newFixedThreadPool(CONCURRENCY, threadFactory);
+
+        return new ZincDownloader(gson, mainExecutorService, limitedConcurrencyExecutorService);
     }
 
     // extracted from Executors.DefaultThreadFactory (which unfortunately is private)
