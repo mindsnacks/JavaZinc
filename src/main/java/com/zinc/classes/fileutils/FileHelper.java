@@ -12,7 +12,7 @@ import java.util.zip.ZipException;
  * User: NachoSoto
  * Date: 9/10/13
  */
-public class GzipHelper {
+public class FileHelper {
     public static final int BUFFER_SIZE = 8192;
 
     public void unzipFile(final ZincBundle bundle, final String filename, final String destination) throws IOException {

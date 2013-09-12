@@ -2,7 +2,7 @@ package com.zinc.jobs;
 
 import com.zinc.classes.ZincFutureFactory;
 import com.zinc.classes.data.*;
-import com.zinc.classes.fileutils.GzipHelper;
+import com.zinc.classes.fileutils.FileHelper;
 import com.zinc.classes.jobs.ZincUnarchiveBundleJob;
 import com.zinc.utils.MockFactory;
 import com.zinc.utils.ZincBaseTest;
@@ -47,7 +47,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
     @Mock private ZincFutureFactory mFutureFactory;
     @Mock private SourceURL mSourceURL;
     @Mock private File mRepoFolder;
-    @Mock private GzipHelper mGzipHelper;
+    @Mock private FileHelper mFileHelper;
 
     public ZincUnarchiveBundleJobTest() throws MalformedURLException {
         mSourceHost = new URL("https://mindsnacks.com/");
@@ -67,7 +67,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
         when(mFutureFactory.downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion))).thenReturn(mManifestFuture);
 
-        mJob = new ZincUnarchiveBundleJob(mBundleFuture, mBundleCloneRequest, mFutureFactory, mGzipHelper);
+        mJob = new ZincUnarchiveBundleJob(mBundleFuture, mBundleCloneRequest, mFutureFactory, mFileHelper);
     }
 
     @Test
@@ -105,14 +105,14 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         run();
 
         verify(mManifest).getFilesWithFlavor(mFlavorName);
-        verify(mGzipHelper, times(1)).unzipFile(eq(mBundle), eq(hash1 + ".gz"), eq(filename1));
-        verify(mGzipHelper, times(1)).copyFile(eq(mBundle), eq(hash2), eq(filename2));
+        verify(mFileHelper, times(1)).unzipFile(eq(mBundle), eq(hash1 + ".gz"), eq(filename1));
+        verify(mFileHelper, times(1)).copyFile(eq(mBundle), eq(hash2), eq(filename2));
 
-        verify(mGzipHelper, times(0)).unzipFile(eq(mBundle), anyString(), eq(filename2));
-        verify(mGzipHelper, times(0)).copyFile(eq(mBundle), anyString(), eq(filename1));
+        verify(mFileHelper, times(0)).unzipFile(eq(mBundle), anyString(), eq(filename2));
+        verify(mFileHelper, times(0)).copyFile(eq(mBundle), anyString(), eq(filename1));
 
-        verify(mGzipHelper).removeFile(eq(mBundle), eq(hash1 + ".gz"));
-        verify(mGzipHelper).removeFile(eq(mBundle), eq(hash2));
+        verify(mFileHelper).removeFile(eq(mBundle), eq(hash1 + ".gz"));
+        verify(mFileHelper).removeFile(eq(mBundle), eq(hash2));
     }
 
     private ZincBundle run() throws Exception {

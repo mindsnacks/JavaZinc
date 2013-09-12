@@ -21,8 +21,8 @@ import static org.junit.Assert.assertTrue;
  * User: NachoSoto
  * Date: 9/10/13
  */
-public class GzipHelperTest extends ZincBaseTest {
-    private GzipHelper mHelper;
+public class FileHelperTest extends ZincBaseTest {
+    private FileHelper mHelper;
     private ZincBundle mBundle;
 
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
@@ -35,7 +35,7 @@ public class GzipHelperTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        mHelper = new GzipHelper();
+        mHelper = new FileHelper();
         mBundle = new ZincBundle(rootFolder.getRoot(), new BundleID("com.mindsnacks.catalog", "mBundle name"), 2);
         mDestinationFile = new File(mBundle, mDestination);
 
