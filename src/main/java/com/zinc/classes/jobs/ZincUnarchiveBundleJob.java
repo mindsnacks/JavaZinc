@@ -1,6 +1,7 @@
 package com.zinc.classes.jobs;
 
 import com.zinc.classes.ZincFutureFactory;
+import com.zinc.classes.ZincLogging;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.classes.data.ZincBundleCloneRequest;
 import com.zinc.classes.data.ZincManifest;
@@ -41,6 +42,8 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
                 result.getVersion()
         ).get();
 
+        ZincLogging.log("Unarchiving " + mBundleCloneRequest.getBundleID());
+
         final Map<String,ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName());
         final Set<String> filenamesToRemove = new HashSet<String>();
 
@@ -59,10 +62,19 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
             filenamesToRemove.add(originFilename);
         }
 
+        ZincLogging.log("Cleaning up archive for " + mBundleCloneRequest.getBundleID());
+
         for (final String filename : filenamesToRemove) {
             mFileHelper.removeFile(result, filename);
         }
 
+        ZincLogging.log("Finished unarchiving " + mBundleCloneRequest.getBundleID());
+
         return result;
+    }
+
+    @Override
+    protected String getJobName() {
+        return super.getJobName() + " (" + mBundleCloneRequest.getBundleID() + ")";
     }
 }

@@ -2,6 +2,7 @@ package com.zinc.classes.jobs;
 
 import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
+import com.zinc.classes.ZincLogging;
 
 import java.io.*;
 import java.net.URL;
@@ -23,6 +24,8 @@ public class ZincDownloadArchiveJob extends AbstractZincDownloadFileJob {
 
     @Override
     protected void writeFile(final InputStream inputStream, final File file) throws IOException {
+        ZincLogging.log("Untaring " + file.getAbsolutePath());
+
         if (!file.exists()) {
             if (!file.mkdirs()) {
                 throw new DownloadFileError("Error creating folder: " + file.getAbsolutePath());
@@ -49,6 +52,8 @@ public class ZincDownloadArchiveJob extends AbstractZincDownloadFileJob {
                 }
             }
         } finally {
+            ZincLogging.log("Finished untaring " + file.getAbsolutePath());
+
             tis.close();
         }
     }

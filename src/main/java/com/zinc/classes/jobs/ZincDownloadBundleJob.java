@@ -50,6 +50,11 @@ public class ZincDownloadBundleJob extends ZincJob<ZincBundle> {
         return new ZincBundle(job.get(), mBundleID, version);
     }
 
+    @Override
+    protected String getJobName() {
+        return super.getJobName() + " (" + mBundleID + ")";
+    }
+
     private static String removeExtension(final String filename) {
         return filename.substring(0, filename.lastIndexOf("."));
     }

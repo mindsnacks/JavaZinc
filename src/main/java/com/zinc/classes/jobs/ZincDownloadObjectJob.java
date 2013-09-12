@@ -21,4 +21,9 @@ public class ZincDownloadObjectJob<V> extends AbstractZincDownloadJob<V> {
     public V run() throws Exception {
         return mGson.fromJson(new InputStreamReader(mRequestExecutor.get(mUrl)), mClass);
     }
+
+    @Override
+    protected String getJobName() {
+        return super.getJobName() + " <" + mClass.getSimpleName() + ">";
+    }
 }

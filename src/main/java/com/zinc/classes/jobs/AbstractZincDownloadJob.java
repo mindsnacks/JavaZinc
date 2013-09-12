@@ -28,4 +28,9 @@ public abstract class AbstractZincDownloadJob<V> extends ZincJob<V> {
             super(message, cause);
         }
     }
+
+    @Override
+    protected String getJobName() {
+        return super.getJobName() + " (" + mUrl +")";
+    }
 }

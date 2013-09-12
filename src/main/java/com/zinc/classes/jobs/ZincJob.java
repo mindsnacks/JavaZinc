@@ -9,13 +9,17 @@ import java.util.concurrent.Callable;
  * Date: 9/3/13
  */
 public abstract class ZincJob<V> implements Callable<V> {
+    protected String getJobName() {
+        return this.getClass().getSimpleName();
+    }
+
     @Override
     public final V call() throws Exception {
-        final String className = this.getClass().getName();
+        final String className = getJobName();
 
-        ZincLogging.log(String.format("Job '%s' started", className));
+        ZincLogging.log(String.format("%s started", className));
         final V result = run();
-        ZincLogging.log(String.format("Job '%s' finished", className));
+        ZincLogging.log(String.format("%s finished", className));
 
         return result;
     }
