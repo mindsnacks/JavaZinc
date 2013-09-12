@@ -12,7 +12,7 @@ import java.util.zip.ZipException;
  * User: NachoSoto
  * Date: 9/10/13
  */
-public class GzipHelper {
+public class FileHelper {
     public static final int BUFFER_SIZE = 8192;
 
     public void unzipFile(final ZincBundle bundle, final String filename, final String destination) throws IOException {
@@ -20,6 +20,8 @@ public class GzipHelper {
                    output = new File(bundle, destination);
 
         if (!output.exists()) {
+            output.getParentFile().mkdirs();
+
             final InputStream in;
 
             try {
@@ -48,7 +50,10 @@ public class GzipHelper {
     }
 
     public void copyFile(final ZincBundle bundle, final String filename, final String destination) throws IOException {
-        Files.copy(new File(bundle, filename), new File(bundle, destination));
+        final File destinationFile = new File(bundle, destination);
+        if (!destinationFile.exists()) {
+            Files.copy(new File(bundle, filename), destinationFile);
+        }
     }
 
     public void removeFile(final ZincBundle bundle, final String filename) {

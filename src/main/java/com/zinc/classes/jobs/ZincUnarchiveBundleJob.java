@@ -4,7 +4,7 @@ import com.zinc.classes.ZincFutureFactory;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.classes.data.ZincBundleCloneRequest;
 import com.zinc.classes.data.ZincManifest;
-import com.zinc.classes.fileutils.GzipHelper;
+import com.zinc.classes.fileutils.FileHelper;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -19,16 +19,16 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
     private final Future<ZincBundle> mBundle;
     private final ZincBundleCloneRequest mBundleCloneRequest;
     private final ZincFutureFactory mFutureFactory;
-    private final GzipHelper mGzipHelper;
+    private final FileHelper mFileHelper;
 
     public ZincUnarchiveBundleJob(final Future<ZincBundle> bundle,
                                   final ZincBundleCloneRequest bundleCloneRequest,
                                   final ZincFutureFactory futureFactory,
-                                  final GzipHelper gzipHelper) {
+                                  final FileHelper fileHelper) {
         mBundle = bundle;
         mBundleCloneRequest = bundleCloneRequest;
         mFutureFactory = futureFactory;
-        mGzipHelper = gzipHelper;
+        mFileHelper = fileHelper;
     }
 
     @Override
@@ -41,26 +41,26 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
                 result.getVersion()
         ).get();
 
-        final Set<Map.Entry<String, ZincManifest.FileInfo>> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName()).entrySet();
+        final Map<String,ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName());
         final Set<String> filenamesToRemove = new HashSet<String>();
 
-        for (final Map.Entry<String, ZincManifest.FileInfo> entry : files) {
+        for (final Map.Entry<String, ZincManifest.FileInfo> entry : files.entrySet()) {
             final ZincManifest.FileInfo fileInfo = entry.getValue();
 
             final String originFilename = fileInfo.getHashWithExtension();
             final String destinationFilename = entry.getKey();
 
             if (fileInfo.isGzipped()) {
-                mGzipHelper.unzipFile(result, originFilename, destinationFilename);
+                mFileHelper.unzipFile(result, originFilename, destinationFilename);
             } else {
-                mGzipHelper.copyFile(result, originFilename, destinationFilename);
+                mFileHelper.copyFile(result, originFilename, destinationFilename);
             }
 
             filenamesToRemove.add(originFilename);
         }
 
         for (final String filename : filenamesToRemove) {
-            mGzipHelper.removeFile(result, filename);
+            mFileHelper.removeFile(result, filename);
         }
 
         return result;

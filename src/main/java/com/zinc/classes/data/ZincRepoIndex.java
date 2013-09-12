@@ -24,19 +24,40 @@ public class ZincRepoIndex {
         return mSources;
     }
 
-    public void addSourceURL(final SourceURL sourceURL) {
-        mSources.add(sourceURL);
-    }
-
-    public void trackBundle(final BundleID bundleID, final String distribution) {
-        mBundles.put(bundleID.toString(), new TrackingInfo(distribution));
+    /**
+     * @return true if sourceURL was added. false if it was already there.
+     */
+    public boolean addSourceURL(final SourceURL sourceURL) {
+        if (!mSources.contains(sourceURL)) {
+            mSources.add(sourceURL);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
-     * @todo throw exception?
+     * @return true if bundle was added or the distribution changed.
      */
-    public TrackingInfo getTrackingInfo(final BundleID bundleID) {
-        return mBundles.get(bundleID.toString());
+    public boolean trackBundle(final BundleID bundleID, final String distribution) {
+        final String key = bundleID.toString();
+
+        if (!mBundles.containsKey(key) || !mBundles.get(key).getDistribution().equals(distribution)) {
+            mBundles.put(key, new TrackingInfo(distribution));
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public TrackingInfo getTrackingInfo(final BundleID bundleID) throws BundleNotBeingTrackedException {
+        final String key = bundleID.toString();
+
+        if (mBundles.containsKey(key)) {
+            return mBundles.get(key);
+        } else {
+            throw new BundleNotBeingTrackedException(bundleID);
+        }
     }
 
     public Set<BundleID> getTrackedBundleIDs() {
@@ -82,6 +103,12 @@ public class ZincRepoIndex {
     public static class CatalogNotFoundException extends ZincException {
         public CatalogNotFoundException(final String catalogID) {
             super(String.format("Source URL for catalog '%s' not found", catalogID));
+        }
+    }
+
+    public static class BundleNotBeingTrackedException extends ZincException {
+        public BundleNotBeingTrackedException(final BundleID bundleID) {
+            super(String.format("Bundle '%s' is not currently being tracked", bundleID));
         }
     }
 }
