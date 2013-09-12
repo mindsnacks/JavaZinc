@@ -64,7 +64,7 @@ public class RepoInitializationTest extends RepoBaseTest {
     }
 
     @Test
-    public void addingTrackingRequestAddsItToIndexFile() throws IOException {
+    public void addingTrackingRequestAddsItToIndexFile() throws IOException, ZincRepoIndex.BundleNotBeingTrackedException {
         // run
         final String catalogID = "com.mindsnacks.games";
         final BundleID bundleID = new BundleID(catalogID, "swell");

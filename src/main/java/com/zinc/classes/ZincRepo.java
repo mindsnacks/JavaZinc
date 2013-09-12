@@ -77,10 +77,18 @@ public class ZincRepo {
      */
     public Future<ZincBundle> getBundle(final BundleID bundleID) {
         if (!mBundles.containsKey(bundleID)) {
-            mBundles.put(bundleID, cloneBundle(bundleID, mIndexWriter.getIndex().getTrackingInfo(bundleID).getDistribution()));
+            mBundles.put(bundleID, cloneBundle(bundleID, getTrackingInfo(bundleID).getDistribution()));
         }
 
         return mBundles.get(bundleID);
+    }
+
+    private ZincRepoIndex.TrackingInfo getTrackingInfo(final BundleID bundleID) {
+        try {
+            return  mIndexWriter.getIndex().getTrackingInfo(bundleID);
+        } catch (ZincRepoIndex.BundleNotBeingTrackedException e) {
+            throw new ZincRuntimeException(e.getMessage(), e);
+        }
     }
 
     private Future<ZincBundle> cloneBundle(final BundleID bundleID, final String distribution) {

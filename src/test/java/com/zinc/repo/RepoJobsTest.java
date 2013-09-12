@@ -173,7 +173,7 @@ public class RepoJobsTest extends RepoBaseTest {
     }
 
     private void setUpIndexWithTrackedBundleID(final BundleID bundleID,
-                                               final String distribution) throws ZincRepoIndex.CatalogNotFoundException {
+                                               final String distribution) throws ZincRepoIndex.CatalogNotFoundException, ZincRepoIndex.BundleNotBeingTrackedException {
         mockDownloadCatalog();
         mockSourceURLForCatalog();
         mockGetTrackingInfo(bundleID, distribution);
@@ -185,7 +185,7 @@ public class RepoJobsTest extends RepoBaseTest {
         when(mJobFactory.cloneBundle(any(SourceURL.class), any(BundleID.class), anyString(), eq(mFlavorName), any(File.class), any(Future.class))).thenReturn(expectedResult);
     }
 
-    private void mockGetTrackingInfo(final BundleID bundleID, final String distribution) {
+    private void mockGetTrackingInfo(final BundleID bundleID, final String distribution) throws ZincRepoIndex.BundleNotBeingTrackedException {
         when(mRepoIndex.getTrackingInfo(eq(bundleID))).thenReturn(new ZincRepoIndex.TrackingInfo(distribution));
     }
 

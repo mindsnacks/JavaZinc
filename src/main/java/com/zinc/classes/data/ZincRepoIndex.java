@@ -32,11 +32,14 @@ public class ZincRepoIndex {
         mBundles.put(bundleID.toString(), new TrackingInfo(distribution));
     }
 
-    /**
-     * @todo throw exception?
-     */
-    public TrackingInfo getTrackingInfo(final BundleID bundleID) {
-        return mBundles.get(bundleID.toString());
+    public TrackingInfo getTrackingInfo(final BundleID bundleID) throws BundleNotBeingTrackedException {
+        final String key = bundleID.toString();
+
+        if (mBundles.containsKey(key)) {
+            return mBundles.get(key);
+        } else {
+            throw new BundleNotBeingTrackedException(bundleID);
+        }
     }
 
     public Set<BundleID> getTrackedBundleIDs() {
@@ -82,6 +85,12 @@ public class ZincRepoIndex {
     public static class CatalogNotFoundException extends ZincException {
         public CatalogNotFoundException(final String catalogID) {
             super(String.format("Source URL for catalog '%s' not found", catalogID));
+        }
+    }
+
+    public static class BundleNotBeingTrackedException extends ZincException {
+        public BundleNotBeingTrackedException(final BundleID bundleID) {
+            super(String.format("Bundle '%s' is not currently being tracked", bundleID));
         }
     }
 }
