@@ -81,6 +81,19 @@ public class GzipHelperTest extends ZincBaseTest {
         assertTrue(mDestinationFile.exists());
     }
 
+    @Test
+    public void copyFile() throws Exception {
+        final File originFile = new File(mBundle, mFilename);
+
+        assertFalse(mDestinationFile.exists());
+
+        mHelper.copyFile(mBundle, mFilename, mDestination);
+
+        assertTrue(mDestinationFile.exists());
+        assertTrue(originFile.exists());
+        assertEquals(TestUtils.readFile(originFile), TestUtils.readFile(mDestinationFile));
+    }
+
     private void createGzipFile(final String contents, final File file) throws IOException {
        final FileOutputStream output = new FileOutputStream(file);
         try {
