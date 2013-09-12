@@ -89,5 +89,10 @@
             <artifactId>javatar</artifactId>
             <version>2.5</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava-io</artifactId>
+            <version>r03</version>
+        </dependency>
     </dependencies>
 </project>
