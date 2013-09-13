@@ -109,12 +109,12 @@ public class SourceURLTest extends ZincBaseTest {
     }
 
     @Test
-    public void localArchivesFolder() throws Exception {
+    public void localBundlesFolder() throws Exception {
         final String bundleName = "swell";
         final int version = randomInt(1, 1000);
         final String flavorName = "retina";
 
-        final String result = SourceURL.getLocalArchivesFolder(bundleName, version, flavorName);
+        final String result = SourceURL.getLocalBundlesFolder(bundleName, version, flavorName);
 
         assertTrue(result.contains(Integer.toString(version)));
         assertTrue(result.contains(bundleName));
@@ -122,12 +122,12 @@ public class SourceURLTest extends ZincBaseTest {
     }
 
     @Test
-    public void localArchivesFolderIsDifferentThanDownloads() throws Exception {
+    public void localBundlesFolderIsDifferentThanDownloads() throws Exception {
         final String bundleName = "swell";
         final int version = randomInt(1, 1000);
         final String flavorName = "retina";
 
-        assertThat(SourceURL.getLocalArchivesFolder(bundleName, version, flavorName), not(equalTo(SourceURL.getLocalDownloadsFolder(bundleName, version, flavorName))));
+        assertThat(SourceURL.getLocalBundlesFolder(bundleName, version, flavorName), not(equalTo(SourceURL.getLocalDownloadsFolder(bundleName, version, flavorName))));
     }
 
     @Test

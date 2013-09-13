@@ -15,6 +15,7 @@ public class SourceURL {
     private static final String ARCHIVES_FOLDER = "archives";
     private static final String MANIFESTS_FOLDER = "manifests";
     private static final String DOWNLOADS_FOLDER = "downloads";
+    private static final String BUNDLES_FOLDER = "bundles";
     private static final String FLAVOR_SEPARATOR = "~";
     private static final String ARCHIVES_FORMAT = "tar";
     private static final String MANIFESTS_FORMAT = "json";
@@ -52,8 +53,8 @@ public class SourceURL {
         return String.format("%s/%s-%d%s%s", DOWNLOADS_FOLDER, bundleName, version, FLAVOR_SEPARATOR, flavorName);
     }
 
-    public static String getLocalArchivesFolder(final String bundleName, final int version, final String flavorName) {
-        return String.format("%s/%s-%d%s%s", ARCHIVES_FOLDER, bundleName, version, FLAVOR_SEPARATOR, flavorName);
+    public static String getLocalBundlesFolder(final String bundleName, final int version, final String flavorName) {
+        return String.format("%s/%s-%d%s%s", BUNDLES_FOLDER, bundleName, version, FLAVOR_SEPARATOR, flavorName);
     }
 
     public URL getManifestFileURL(final String bundleName, final int version) throws MalformedURLException {

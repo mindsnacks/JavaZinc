@@ -28,70 +28,68 @@ public class FileHelperTest extends ZincBaseTest {
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
 
     private final String mFilename = "file.gz";
-    private final String mDestination = "file.txt";
+    private final String mDestinationFilename = "file.txt";
     private final String mContents = randomString();
 
+    private File mOriginalFile;
     private File mDestinationFile;
 
     @Before
     public void setUp() throws Exception {
         mHelper = new FileHelper();
         mBundle = new ZincBundle(rootFolder.getRoot(), new BundleID("com.mindsnacks.catalog", "mBundle name"), 2);
-        mDestinationFile = new File(mBundle, mDestination);
+        mOriginalFile = new File(mBundle, mFilename);
+        mDestinationFile = new File(mBundle, mDestinationFilename);
 
         createGzipFile(mContents, new File(mBundle, mFilename));
     }
 
     @Test
     public void unzipFileCreatesFile() throws Exception {
-        mHelper.unzipFile(mBundle, mFilename, mDestination);
+        mHelper.unzipFile(mBundle, mFilename, mBundle, mDestinationFilename);
 
         assertTrue(mDestinationFile.exists());
     }
 
     @Test
     public void testUnzipFile() throws Exception {
-        mHelper.unzipFile(mBundle, mFilename, mDestination);
+        mHelper.unzipFile(mBundle, mFilename, mBundle, mDestinationFilename);
 
         assertEquals(mContents, TestUtils.readFile(mDestinationFile));
     }
 
     @Test
     public void unzipFileDoesntRemoveOriginalFile() throws Exception {
-        mHelper.unzipFile(mBundle, mFilename, mDestination);
+        mHelper.unzipFile(mBundle, mFilename, mBundle, mDestinationFilename);
 
-        assertTrue(new File(mBundle, mFilename).exists());
+        assertTrue(mOriginalFile.exists());
     }
 
     @Test
     public void removeFile() throws Exception {
-        final File file = new File(mBundle, mFilename);
-
-        assertTrue(file.exists());
-        mHelper.removeFile(mBundle, mFilename);
-        assertFalse(file.exists());
+        assertTrue(mOriginalFile.exists());
+        mHelper.removeFile(mOriginalFile);
+        assertFalse(mOriginalFile.exists());
     }
 
     @Test
     public void moveFile() throws Exception {
         assertFalse(mDestinationFile.exists());
 
-        mHelper.moveFile(mBundle, mFilename, mDestination);
+        mHelper.moveFile(mBundle, mFilename, mBundle, mDestinationFilename);
 
         assertTrue(mDestinationFile.exists());
     }
 
     @Test
     public void copyFile() throws Exception {
-        final File originFile = new File(mBundle, mFilename);
-
         assertFalse(mDestinationFile.exists());
 
-        mHelper.copyFile(mBundle, mFilename, mDestination);
+        mHelper.copyFile(mBundle, mFilename, mBundle, mDestinationFilename);
 
         assertTrue(mDestinationFile.exists());
-        assertTrue(originFile.exists());
-        assertEquals(TestUtils.readFile(originFile), TestUtils.readFile(mDestinationFile));
+        assertTrue(mOriginalFile.exists());
+        assertEquals(TestUtils.readFile(mOriginalFile), TestUtils.readFile(mDestinationFile));
     }
 
     private void createGzipFile(final String contents, final File file) throws IOException {

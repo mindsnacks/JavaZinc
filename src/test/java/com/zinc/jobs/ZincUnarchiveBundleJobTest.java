@@ -19,6 +19,7 @@ import java.util.concurrent.Future;
 
 import static com.zinc.utils.MockFactory.randomInt;
 import static com.zinc.utils.MockFactory.randomString;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -47,6 +48,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
     @Mock private ZincFutureFactory mFutureFactory;
     @Mock private SourceURL mSourceURL;
     @Mock private File mRepoFolder;
+    private final String mRepoFolderAbsolutePath = "/resources/zinc/";
     @Mock private FileHelper mFileHelper;
 
     public ZincUnarchiveBundleJobTest() throws MalformedURLException {
@@ -58,6 +60,8 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         mBundleCloneRequest = new ZincBundleCloneRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
         mBundleFuture = MockFactory.createFutureWithResult(mBundle);
         mManifestFuture = MockFactory.createFutureWithResult(mManifest);
+
+        when(mRepoFolder.getAbsolutePath()).thenReturn(mRepoFolderAbsolutePath);
 
         when(mBundle.getBundleID()).thenReturn(mBundleID);
         when(mBundle.getVersion()).thenReturn(mVersion);
@@ -102,17 +106,18 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
         when(mManifest.getFilesWithFlavor(eq(mFlavorName))).thenReturn(files);
 
-        run();
+        final ZincBundle result = run();
 
         verify(mManifest).getFilesWithFlavor(mFlavorName);
-        verify(mFileHelper, times(1)).unzipFile(eq(mBundle), eq(hash1 + ".gz"), eq(filename1));
-        verify(mFileHelper, times(1)).copyFile(eq(mBundle), eq(hash2), eq(filename2));
+        verify(mFileHelper, times(1)).unzipFile(eq(mBundle), eq(hash1 + ".gz"), any(ZincBundle.class), eq(filename1));
+        verify(mFileHelper, times(1)).copyFile(eq(mBundle), eq(hash2), any(ZincBundle.class), eq(filename2));
 
-        verify(mFileHelper, times(0)).unzipFile(eq(mBundle), anyString(), eq(filename2));
-        verify(mFileHelper, times(0)).copyFile(eq(mBundle), anyString(), eq(filename1));
+        verify(mFileHelper, times(0)).unzipFile(eq(mBundle), anyString(), any(ZincBundle.class), eq(filename2));
+        verify(mFileHelper, times(0)).copyFile(eq(mBundle), anyString(), any(ZincBundle.class), eq(filename1));
 
-        verify(mFileHelper).removeFile(eq(mBundle), eq(hash1 + ".gz"));
-        verify(mFileHelper).removeFile(eq(mBundle), eq(hash2));
+        verify(mFileHelper).removeFile(eq(mBundle));
+
+        assertTrue(result.getAbsolutePath().startsWith(mRepoFolderAbsolutePath));
     }
 
     private ZincBundle run() throws Exception {

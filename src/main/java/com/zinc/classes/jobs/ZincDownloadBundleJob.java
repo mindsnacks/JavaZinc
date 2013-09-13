@@ -43,7 +43,7 @@ public class ZincDownloadBundleJob extends ZincJob<ZincBundle> {
         final int version = catalog.getVersionForBundleName(bundleName, mDistribution);
 
         final URL archiveURL = mSourceURL.getArchiveURL(bundleName, version, mFlavorName);
-        final String folderName = removeExtension(archiveURL.getFile());
+        final String folderName = SourceURL.getLocalDownloadsFolder(bundleName, version, mFlavorName);
 
         final Future<File> job = mFutureFactory.downloadArchive(archiveURL, mRepoFolder, folderName, false);
 
@@ -53,9 +53,5 @@ public class ZincDownloadBundleJob extends ZincJob<ZincBundle> {
     @Override
     protected String getJobName() {
         return super.getJobName() + " (" + mBundleID + ")";
-    }
-
-    private static String removeExtension(final String filename) {
-        return filename.substring(0, filename.lastIndexOf("."));
     }
 }

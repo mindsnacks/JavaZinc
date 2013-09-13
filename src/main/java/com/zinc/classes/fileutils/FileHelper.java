@@ -1,7 +1,6 @@
 package com.zinc.classes.fileutils;
 
 import com.google.common.io.Files;
-import com.zinc.classes.data.ZincBundle;
 import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.*;
@@ -15,9 +14,9 @@ import java.util.zip.ZipException;
 public class FileHelper {
     public static final int BUFFER_SIZE = 8192;
 
-    public void unzipFile(final ZincBundle bundle, final String filename, final String destination) throws IOException {
-        final File input = new File(bundle, filename),
-                   output = new File(bundle, destination);
+    public void unzipFile(final File originFolder, final String originFilename, final File destinationFolder, final String destinationFilename) throws IOException {
+        final File input = new File(originFolder, originFilename),
+                   output = new File(destinationFolder, destinationFilename);
 
         if (!output.exists()) {
             createDirectories(output);
@@ -45,23 +44,28 @@ public class FileHelper {
         }
     }
 
-    public boolean moveFile(final ZincBundle bundle, final String filename, final String destination) {
-        return new File(bundle, filename).renameTo(new File(bundle, destination));
+    public boolean moveFile(final File originFolder, final String originFilename, final File destinationFolder, final String destinationFilename) {
+        final File input = new File(originFolder, originFilename),
+                   output = new File(destinationFolder, destinationFilename);
+
+        return input.renameTo(output);
     }
 
-    public void copyFile(final ZincBundle bundle, final String filename, final String destination) throws IOException {
-        final File destinationFile = new File(bundle, destination);
-        if (!destinationFile.exists()) {
-            createDirectories(destinationFile);
-            Files.copy(new File(bundle, filename), destinationFile);
+    public void copyFile(final File originFolder, final String originFilename, final File destinationFolder, final String destinationFilename) throws IOException {
+        final File input = new File(originFolder, originFilename),
+                   output = new File(destinationFolder, destinationFilename);
+
+        if (!output.exists()) {
+            createDirectories(output);
+            Files.copy(input, output);
         }
     }
 
-    public void removeFile(final ZincBundle bundle, final String filename) {
-        new File(bundle, filename).delete();
+    public boolean removeFile(final File file) {
+        return file.delete();
     }
 
-    private void createDirectories(final File file) {
-        file.getParentFile().mkdirs();
+    private boolean createDirectories(final File file) {
+        return file.getParentFile().mkdirs();
     }
 }
