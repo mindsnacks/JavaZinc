@@ -2,6 +2,7 @@ package com.zinc.classes.data;
 
 import com.google.gson.annotations.SerializedName;
 import com.zinc.exceptions.ZincException;
+import com.zinc.exceptions.ZincRuntimeException;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -141,7 +142,7 @@ public class ZincRepoIndex {
         }
     }
 
-    public static class BundleFlavorChangedException extends ZincException {
+    public static class BundleFlavorChangedException extends ZincRuntimeException {
         public BundleFlavorChangedException(final BundleID bundleID,
                                             final String existingFlavor,
                                             final String newFlavor) {
