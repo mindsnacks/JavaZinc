@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
 
 /**
  * User: NachoSoto
@@ -41,12 +42,27 @@ public class ZincRepoIndexTest extends ZincBaseTest {
     public void trackBundleAddsTrackingInfo() throws Exception {
         final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
         final String distribution = "master";
+        final String flavor = "iphone";
 
         // run
-        index.trackBundle(bundleID, distribution);
+        index.trackBundle(bundleID, distribution, flavor);
 
         // verify
         assertEquals(distribution, index.getTrackingInfo(bundleID).getDistribution());
+        assertEquals(flavor, index.getTrackingInfo(bundleID).getFlavor());
+    }
+
+    @Test
+    public void trackBundleAllowsNullFlavor() throws Exception {
+        final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
+        final String distribution = "master";
+
+        // run
+        index.trackBundle(bundleID, distribution, null);
+
+        // verify
+        assertEquals(distribution, index.getTrackingInfo(bundleID).getDistribution());
+        assertNull(index.getTrackingInfo(bundleID).getFlavor());
     }
 
     @Test
@@ -61,6 +77,30 @@ public class ZincRepoIndexTest extends ZincBaseTest {
 
         // verify
         assertEquals(newDistribution, index.getTrackingInfo(bundleID).getDistribution());
+    }
+
+    @Test
+    public void trackBundleUpdatesFlavorIfNull() throws Exception {
+        final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
+        final String flavor = "ipad";
+
+        // run
+        index.trackBundle(bundleID, "master", null);
+        index.trackBundle(bundleID, "master", flavor);
+
+        // verify
+        assertEquals(flavor, index.getTrackingInfo(bundleID).getFlavor());
+    }
+
+    @Test(expected=ZincRepoIndex.BundleFlavorChangedException.class)
+    public void trackBundleThrowIfFlavorChanged() throws Exception {
+        final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
+        final String oldFlavor = "ipad",
+                     newFlavor = "iphone";
+
+        // run
+        index.trackBundle(bundleID, "master", oldFlavor);
+        index.trackBundle(bundleID, "master", newFlavor);
     }
 
     @Test
