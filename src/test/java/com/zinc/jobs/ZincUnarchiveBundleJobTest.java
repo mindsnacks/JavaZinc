@@ -125,7 +125,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
     @Test
     public void doesntUnarchiveAnythingIfFolderIsAlreadyThere() throws Exception {
-        final String folderName = SourceURL.getLocalBundlesFolder(mBundleName, mVersion, mFlavorName);
+        final String folderName = SourceURL.getLocalBundlesFolder(mBundleID, mVersion, mFlavorName);
 
         final File folder = new File(mRepoFolder, folderName);
         folder.mkdirs();

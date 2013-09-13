@@ -49,12 +49,12 @@ public class SourceURL {
         return new URL(getUrl(), String.format("%s/%s-%d%s%s.%s", ARCHIVES_FOLDER, bundleName, version, FLAVOR_SEPARATOR, flavorName, ARCHIVES_FORMAT));
     }
 
-    public static String getLocalDownloadsFolder(final String bundleName, final int version, final String flavorName) {
-        return String.format("%s/%s-%d%s%s", DOWNLOADS_FOLDER, bundleName, version, FLAVOR_SEPARATOR, flavorName);
+    public static String getLocalDownloadsFolder(final BundleID bundleID, final int version, final String flavorName) {
+        return String.format("%s/%s-%d%s%s", DOWNLOADS_FOLDER, bundleID, version, FLAVOR_SEPARATOR, flavorName);
     }
 
-    public static String getLocalBundlesFolder(final String bundleName, final int version, final String flavorName) {
-        return String.format("%s/%s-%d%s%s", BUNDLES_FOLDER, bundleName, version, FLAVOR_SEPARATOR, flavorName);
+    public static String getLocalBundlesFolder(final BundleID bundleID, final int version, final String flavorName) {
+        return String.format("%s/%s-%d%s%s", BUNDLES_FOLDER, bundleID, version, FLAVOR_SEPARATOR, flavorName);
     }
 
     public URL getManifestFileURL(final String bundleName, final int version) throws MalformedURLException {
