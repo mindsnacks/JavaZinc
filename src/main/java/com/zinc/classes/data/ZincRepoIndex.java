@@ -2,6 +2,7 @@ package com.zinc.classes.data;
 
 import com.google.gson.annotations.SerializedName;
 import com.zinc.exceptions.ZincException;
+import com.zinc.exceptions.ZincRuntimeException;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,17 +38,33 @@ public class ZincRepoIndex {
     }
 
     /**
-     * @return true if bundle was added or the distribution changed.
+     * @return true if bundle was added or the distribution or flavor changed.
      */
-    public boolean trackBundle(final BundleID bundleID, final String distribution) {
+    public boolean trackBundle(final BundleID bundleID, final String distribution, final String flavor)  throws BundleFlavorChangedException {
         final String key = bundleID.toString();
+        final boolean containsKey = mBundles.containsKey(key);
 
-        if (!mBundles.containsKey(key) || !mBundles.get(key).getDistribution().equals(distribution)) {
-            mBundles.put(key, new TrackingInfo(distribution));
+        if (containsKey) {
+            final String existingFlavor = mBundles.get(key).getFlavor();
+            if (existingFlavor != null && (flavor == null || !existingFlavor.equals(flavor))) {
+                throw new BundleFlavorChangedException(bundleID, mBundles.get(key).getFlavor(), flavor);
+            }
+        }
+
+        if (!containsKey
+                || !mBundles.get(key).getDistribution().equals(distribution)
+                || (mBundles.get(key).getFlavor() == null && flavor != null)) {
+
+            mBundles.put(key, new TrackingInfo(distribution, flavor));
             return true;
+
         } else {
             return false;
         }
+    }
+
+    public boolean trackBundle(final BundleID bundleID, final String distribution) throws BundleFlavorChangedException {
+        return trackBundle(bundleID, distribution, null);
     }
 
     public TrackingInfo getTrackingInfo(final BundleID bundleID) throws BundleNotBeingTrackedException {
@@ -91,12 +108,25 @@ public class ZincRepoIndex {
         @SerializedName("distribution")
         final private String mDistribution;
 
+        @SerializedName("flavor")
+        final private String mFlavor;
+
+        public TrackingInfo(final String distribution, final String flavor) {
+            mDistribution = distribution;
+            mFlavor = flavor;
+        }
+
         public TrackingInfo(final String distribution) {
             mDistribution = distribution;
+            mFlavor = null;
         }
 
         public String getDistribution() {
             return mDistribution;
+        }
+
+        public String getFlavor() {
+            return mFlavor;
         }
     }
 
@@ -109,6 +139,15 @@ public class ZincRepoIndex {
     public static class BundleNotBeingTrackedException extends ZincException {
         public BundleNotBeingTrackedException(final BundleID bundleID) {
             super(String.format("Bundle '%s' is not currently being tracked", bundleID));
+        }
+    }
+
+    public static class BundleFlavorChangedException extends ZincRuntimeException {
+        public BundleFlavorChangedException(final BundleID bundleID,
+                                            final String existingFlavor,
+                                            final String newFlavor) {
+            super(String.format("Bundle '%s' is already tracking flavor '%s', new flavor '%s'",
+                    bundleID, existingFlavor, newFlavor));
         }
     }
 }

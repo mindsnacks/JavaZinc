@@ -58,12 +58,16 @@ public class ZincRepo {
         getCatalog(sourceURL);
     }
 
-    public void startTrackingBundle(final BundleID bundleID, final String distribution) {
+    public void startTrackingBundle(final BundleID bundleID, final String distribution, final String flavor) throws ZincRepoIndex.BundleFlavorChangedException {
         if (mIndexWriter.getIndex().trackBundle(bundleID, distribution)) {
             mIndexWriter.saveIndex();
         }
 
         getBundle(bundleID);
+    }
+
+    public void startTrackingBundle(final BundleID bundleID, final String distribution) throws ZincRepoIndex.BundleFlavorChangedException {
+        startTrackingBundle(bundleID, distribution, null);
     }
 
     private Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
