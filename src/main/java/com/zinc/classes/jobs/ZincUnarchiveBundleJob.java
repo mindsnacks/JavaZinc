@@ -7,6 +7,7 @@ import com.zinc.classes.fileutils.FileHelper;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -40,11 +41,7 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
         final ZincBundle result = new ZincBundle(localBundleFolder, bundleID, version);
 
         if (!localBundleFolder.exists()) {
-            final ZincManifest manifest = mFutureFactory.downloadManifest(
-                    mBundleCloneRequest.getSourceURL(),
-                    bundleID.getBundleName(),
-                    version
-            ).get();
+            final ZincManifest manifest = getManifest(version, bundleID);
 
             logMessage("unarchiving");
             unarchiveBundle(downloadedBundle, result, manifest);
@@ -56,6 +53,15 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
         }
 
         return result;
+    }
+
+    private ZincManifest getManifest(final int version,
+                                     final BundleID bundleID) throws InterruptedException, ExecutionException {
+        return mFutureFactory.downloadManifest(
+                        mBundleCloneRequest.getSourceURL(),
+                        bundleID.getBundleName(),
+                        version
+                ).get();
     }
 
     private void unarchiveBundle(final ZincBundle downloadedBundle,
