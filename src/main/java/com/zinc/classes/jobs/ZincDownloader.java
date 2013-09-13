@@ -3,6 +3,7 @@ package com.zinc.classes.jobs;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
 import com.zinc.classes.ZincFutureFactory;
+import com.zinc.classes.ZincLogging;
 import com.zinc.classes.data.*;
 import com.zinc.classes.fileutils.FileHelper;
 import com.zinc.exceptions.ZincRuntimeException;
@@ -85,6 +86,8 @@ public class ZincDownloader implements ZincFutureFactory {
         return new ZincRequestExecutor() {
             @Override
             public InputStream get(final URL url) throws AbstractZincDownloadJob.DownloadFileError {
+                ZincLogging.log("ZincRequestExcecutor", "Downloading " + url);
+
                 try {
                     final HttpRequest request = getRequest(url);
                     final int code = request.code();

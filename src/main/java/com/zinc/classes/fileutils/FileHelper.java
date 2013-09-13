@@ -20,7 +20,7 @@ public class FileHelper {
                    output = new File(bundle, destination);
 
         if (!output.exists()) {
-            output.getParentFile().mkdirs();
+            createDirectories(output);
 
             final InputStream in;
 
@@ -52,11 +52,16 @@ public class FileHelper {
     public void copyFile(final ZincBundle bundle, final String filename, final String destination) throws IOException {
         final File destinationFile = new File(bundle, destination);
         if (!destinationFile.exists()) {
+            createDirectories(destinationFile);
             Files.copy(new File(bundle, filename), destinationFile);
         }
     }
 
     public void removeFile(final ZincBundle bundle, final String filename) {
         new File(bundle, filename).delete();
+    }
+
+    private void createDirectories(final File file) {
+        file.getParentFile().mkdirs();
     }
 }
