@@ -4,6 +4,7 @@ import com.zinc.classes.ZincFutureFactory;
 import com.zinc.classes.data.*;
 import com.zinc.classes.fileutils.FileHelper;
 
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -34,37 +35,41 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
         final int version = downloadedBundle.getVersion();
         final BundleID bundleID = mBundleCloneRequest.getBundleID();
 
-        final ZincManifest manifest = mFutureFactory.downloadManifest(
-                mBundleCloneRequest.getSourceURL(),
-                bundleID.getBundleName(),
-                version
-        ).get();
+        final File localBundleFolder = new File(mBundleCloneRequest.getRepoFolder().getAbsolutePath() + "/" + SourceURL.getLocalBundlesFolder(bundleID.getBundleName(), version, mBundleCloneRequest.getFlavorName()));
+        final ZincBundle result = new ZincBundle(localBundleFolder, bundleID, version);
 
-        logMessage("unarchiving");
+        if (!localBundleFolder.exists()) {
+            final ZincManifest manifest = mFutureFactory.downloadManifest(
+                    mBundleCloneRequest.getSourceURL(),
+                    bundleID.getBundleName(),
+                    version
+            ).get();
 
-        final String localBundleFolder = SourceURL.getLocalBundlesFolder(bundleID.getBundleName(), version, mBundleCloneRequest.getFlavorName());
-        final ZincBundle result = new ZincBundle(mBundleCloneRequest.getRepoFolder().getAbsolutePath() + "/" + localBundleFolder, bundleID, version);
+            logMessage("unarchiving");
 
-        final Map<String, ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName());
+            final Map<String, ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName());
 
-        for (final Map.Entry<String, ZincManifest.FileInfo> entry : files.entrySet()) {
-            final ZincManifest.FileInfo fileInfo = entry.getValue();
+            for (final Map.Entry<String, ZincManifest.FileInfo> entry : files.entrySet()) {
+                final ZincManifest.FileInfo fileInfo = entry.getValue();
 
-            final String originFilename = fileInfo.getHashWithExtension();
-            final String destinationFilename = entry.getKey();
+                final String originFilename = fileInfo.getHashWithExtension();
+                final String destinationFilename = entry.getKey();
 
-            if (fileInfo.isGzipped()) {
-                mFileHelper.unzipFile(downloadedBundle, originFilename, result, destinationFilename);
-            } else {
-                mFileHelper.copyFile(downloadedBundle, originFilename, result, destinationFilename);
+                if (fileInfo.isGzipped()) {
+                    mFileHelper.unzipFile(downloadedBundle, originFilename, result, destinationFilename);
+                } else {
+                    mFileHelper.copyFile(downloadedBundle, originFilename, result, destinationFilename);
+                }
             }
+
+            logMessage("cleaning up archive");
+
+            mFileHelper.removeFile(downloadedBundle);
+
+            logMessage("finished unarchiving");
+        } else {
+            logMessage("skipping unarchiving - bundle already found");
         }
-
-        logMessage("cleaning up archive");
-
-        mFileHelper.removeFile(downloadedBundle);
-
-        logMessage("finished unarchiving");
 
         return result;
     }

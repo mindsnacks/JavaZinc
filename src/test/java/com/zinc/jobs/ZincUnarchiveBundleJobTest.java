@@ -7,7 +7,9 @@ import com.zinc.classes.jobs.ZincUnarchiveBundleJob;
 import com.zinc.utils.MockFactory;
 import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 
 import java.io.File;
@@ -41,15 +43,16 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
     final private int mVersion = randomInt(5, 100);
     final private URL mSourceHost;
 
+    @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
+
     @Mock private ZincBundle mBundle;
     private Future<ZincBundle> mBundleFuture;
     @Mock private ZincManifest mManifest;
     private Future<ZincManifest> mManifestFuture;
     @Mock private ZincFutureFactory mFutureFactory;
     @Mock private SourceURL mSourceURL;
-    @Mock private File mRepoFolder;
-    private final String mRepoFolderAbsolutePath = "/resources/zinc/";
     @Mock private FileHelper mFileHelper;
+    private File mRepoFolder;
 
     public ZincUnarchiveBundleJobTest() throws MalformedURLException {
         mSourceHost = new URL("https://mindsnacks.com/");
@@ -57,11 +60,11 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
+        mRepoFolder = rootFolder.getRoot();
+
         mBundleCloneRequest = new ZincBundleCloneRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
         mBundleFuture = MockFactory.createFutureWithResult(mBundle);
         mManifestFuture = MockFactory.createFutureWithResult(mManifest);
-
-        when(mRepoFolder.getAbsolutePath()).thenReturn(mRepoFolderAbsolutePath);
 
         when(mBundle.getBundleID()).thenReturn(mBundleID);
         when(mBundle.getVersion()).thenReturn(mVersion);
@@ -117,7 +120,19 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
         verify(mFileHelper).removeFile(eq(mBundle));
 
-        assertTrue(result.getAbsolutePath().startsWith(mRepoFolderAbsolutePath));
+        assertTrue(result.getAbsolutePath().startsWith(mRepoFolder.getAbsolutePath()));
+    }
+
+    @Test
+    public void doesntUnarchiveAnythingIfFolderIsAlreadyThere() throws Exception {
+        final String folderName = SourceURL.getLocalBundlesFolder(mBundleName, mVersion, mFlavorName);
+
+        final File folder = new File(mRepoFolder, folderName);
+        folder.mkdirs();
+
+        run();
+
+        verify(mFutureFactory, times(0)).downloadManifest(any(SourceURL.class), anyString(), anyInt());
     }
 
     private ZincBundle run() throws Exception {
