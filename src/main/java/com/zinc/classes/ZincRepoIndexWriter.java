@@ -48,6 +48,7 @@ public class ZincRepoIndexWriter {
             return mGson.fromJson(new FileReader(mIndexFile), ZincRepoIndex.class);
         } catch (FileNotFoundException fnfe) {
             try {
+                mIndexFile.getParentFile().mkdirs();
                 mIndexFile.createNewFile();
 
                 return new ZincRepoIndex();
