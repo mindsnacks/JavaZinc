@@ -5,6 +5,7 @@ import com.zinc.classes.data.*;
 import com.zinc.classes.fileutils.FileHelper;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -46,32 +47,34 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
             ).get();
 
             logMessage("unarchiving");
-
-            final Map<String, ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName());
-
-            for (final Map.Entry<String, ZincManifest.FileInfo> entry : files.entrySet()) {
-                final ZincManifest.FileInfo fileInfo = entry.getValue();
-
-                final String originFilename = fileInfo.getHashWithExtension();
-                final String destinationFilename = entry.getKey();
-
-                if (fileInfo.isGzipped()) {
-                    mFileHelper.unzipFile(downloadedBundle, originFilename, result, destinationFilename);
-                } else {
-                    mFileHelper.copyFile(downloadedBundle, originFilename, result, destinationFilename);
-                }
-            }
+            unarchiveBundle(downloadedBundle, result, manifest);
 
             logMessage("cleaning up archive");
-
             mFileHelper.removeFile(downloadedBundle);
-
-            logMessage("finished unarchiving");
         } else {
             logMessage("skipping unarchiving - bundle already found");
         }
 
         return result;
+    }
+
+    private void unarchiveBundle(final ZincBundle downloadedBundle,
+                                 final ZincBundle result,
+                                 final ZincManifest manifest) throws IOException {
+        final Map<String, ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName());
+
+        for (final Map.Entry<String, ZincManifest.FileInfo> entry : files.entrySet()) {
+            final ZincManifest.FileInfo fileInfo = entry.getValue();
+
+            final String originFilename = fileInfo.getHashWithExtension();
+            final String destinationFilename = entry.getKey();
+
+            if (fileInfo.isGzipped()) {
+                mFileHelper.unzipFile(downloadedBundle, originFilename, result, destinationFilename);
+            } else {
+                mFileHelper.copyFile(downloadedBundle, originFilename, result, destinationFilename);
+            }
+        }
     }
 
     @Override
