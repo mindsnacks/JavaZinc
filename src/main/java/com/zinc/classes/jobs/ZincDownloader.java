@@ -4,7 +4,7 @@ import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
 import com.zinc.classes.ZincFutureFactory;
 import com.zinc.classes.data.*;
-import com.zinc.classes.fileutils.GzipHelper;
+import com.zinc.classes.fileutils.FileHelper;
 import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
@@ -21,11 +21,15 @@ import java.util.concurrent.Future;
  */
 public class ZincDownloader implements ZincFutureFactory {
     private final Gson mGson;
-    private final ExecutorService mExecutorService;
+    private final ExecutorService mMainExecutorService;
+    private final ExecutorService mLimitedConcurrencyExecutorService;
 
-    public ZincDownloader(final Gson gson, final ExecutorService executorService) {
+    public ZincDownloader(final Gson gson,
+                          final ExecutorService mainExecutorService,
+                          final ExecutorService limitedConcurrencyExecutorService) {
         mGson = gson;
-        mExecutorService = executorService;
+        mMainExecutorService = mainExecutorService;
+        mLimitedConcurrencyExecutorService = limitedConcurrencyExecutorService;
     }
 
     @Override
@@ -37,7 +41,7 @@ public class ZincDownloader implements ZincFutureFactory {
             throw new ZincRuntimeException("Error getting catalog file URL for source: " + sourceURL, e);
         }
 
-        return submitJob(new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class));
+        return submitJob(new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class), false);
     }
 
     @Override
@@ -48,12 +52,12 @@ public class ZincDownloader implements ZincFutureFactory {
         } catch (MalformedURLException e) {
             throw new ZincRuntimeException("Invalid manifest URL: " + sourceURL, e);
         }
-        return submitJob(new ZincDownloadObjectJob<ZincManifest>(createRequestExecutor(), manifestFileURL, mGson, ZincManifest.class));
+        return submitJob(new ZincDownloadObjectJob<ZincManifest>(createRequestExecutor(), manifestFileURL, mGson, ZincManifest.class), false);
     }
 
     @Override
     public Future<File> downloadArchive(final URL url, final File root, final String child, final boolean override) {
-        return submitJob(new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child, override));
+        return submitJob(new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child, override), true);
     }
 
     @Override
@@ -64,9 +68,17 @@ public class ZincDownloader implements ZincFutureFactory {
                                           final File repoFolder,
                                           final Future<ZincCatalog> catalogFuture) {
         final ZincBundleCloneRequest zincBundleCloneRequest = new ZincBundleCloneRequest(sourceURL, bundleID, distribution, flavorName, repoFolder);
-        final Future<ZincBundle> bundleFuture = submitJob(new ZincDownloadBundleJob(zincBundleCloneRequest, catalogFuture, this));
+        final Future<ZincBundle> bundleFuture = submitJob(new ZincDownloadBundleJob(zincBundleCloneRequest, catalogFuture, this), false);
 
-        return submitJob(new ZincUnarchiveBundleJob(bundleFuture, zincBundleCloneRequest, this, new GzipHelper()));
+        return submitJob(new ZincUnarchiveBundleJob(bundleFuture, zincBundleCloneRequest, this, new FileHelper()), false);
+    }
+
+    private <V> Future<V> submitJob(final ZincJob<V> job, boolean limitedConcurrency) {
+        return executorService(limitedConcurrency).submit(job);
+    }
+
+    private ExecutorService executorService(boolean limitedConcurrency) {
+        return (limitedConcurrency) ? mLimitedConcurrencyExecutorService : mMainExecutorService;
     }
 
     private ZincRequestExecutor createRequestExecutor() {
@@ -91,9 +103,5 @@ public class ZincDownloader implements ZincFutureFactory {
                 return HttpRequest.get(url).acceptGzipEncoding().uncompress(true);
             }
         };
-    }
-
-    private <V> Future<V> submitJob(final ZincJob<V> job) {
-        return mExecutorService.submit(job);
     }
 }

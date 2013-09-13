@@ -51,15 +51,17 @@ public class ZincRepo {
     }
 
     public void addSourceURL(final SourceURL sourceURL) {
-        mIndexWriter.getIndex().addSourceURL(sourceURL);
-        mIndexWriter.saveIndex();
+        if (mIndexWriter.getIndex().addSourceURL(sourceURL)) {
+            mIndexWriter.saveIndex();
+        }
 
         getCatalog(sourceURL);
     }
 
     public void startTrackingBundle(final BundleID bundleID, final String distribution) {
-        mIndexWriter.getIndex().trackBundle(bundleID, distribution);
-        mIndexWriter.saveIndex();
+        if (mIndexWriter.getIndex().trackBundle(bundleID, distribution)) {
+            mIndexWriter.saveIndex();
+        }
 
         getBundle(bundleID);
     }
@@ -77,10 +79,18 @@ public class ZincRepo {
      */
     public Future<ZincBundle> getBundle(final BundleID bundleID) {
         if (!mBundles.containsKey(bundleID)) {
-            mBundles.put(bundleID, cloneBundle(bundleID, mIndexWriter.getIndex().getTrackingInfo(bundleID).getDistribution()));
+            mBundles.put(bundleID, cloneBundle(bundleID, getTrackingInfo(bundleID).getDistribution()));
         }
 
         return mBundles.get(bundleID);
+    }
+
+    private ZincRepoIndex.TrackingInfo getTrackingInfo(final BundleID bundleID) {
+        try {
+            return  mIndexWriter.getIndex().getTrackingInfo(bundleID);
+        } catch (ZincRepoIndex.BundleNotBeingTrackedException e) {
+            throw new ZincRuntimeException(e.getMessage(), e);
+        }
     }
 
     private Future<ZincBundle> cloneBundle(final BundleID bundleID, final String distribution) {
