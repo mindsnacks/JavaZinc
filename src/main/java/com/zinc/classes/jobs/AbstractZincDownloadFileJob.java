@@ -34,7 +34,7 @@ public abstract class AbstractZincDownloadFileJob extends AbstractZincDownloadJo
                 throw new DownloadFileError("Error writing to file '" + mFile.getAbsolutePath() + "'", e);
             }
         } else {
-            logMessage("not downloading file " + mUrl + " - was already there.");
+            logMessage("not downloading file - was already there.");
         }
 
         return mFile;
