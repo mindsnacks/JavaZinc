@@ -10,9 +10,8 @@ import java.util.concurrent.Future;
 /**
  * User: NachoSoto
  * Date: 9/4/13
- * @todo: remove gz files?
  */
-public class ZincDownloadBundleJob implements ZincJob<ZincBundle> {
+public class ZincDownloadBundleJob extends ZincJob<ZincBundle> {
     private final SourceURL mSourceURL;
     private final BundleID mBundleID;
     private final String mDistribution;
@@ -37,7 +36,7 @@ public class ZincDownloadBundleJob implements ZincJob<ZincBundle> {
     }
 
     @Override
-    public ZincBundle call() throws Exception {
+    public ZincBundle run() throws Exception {
         final ZincCatalog catalog = mCatalog.get();
 
         final String bundleName = mBundleID.getBundleName();
@@ -49,6 +48,11 @@ public class ZincDownloadBundleJob implements ZincJob<ZincBundle> {
         final Future<File> job = mFutureFactory.downloadArchive(archiveURL, mRepoFolder, folderName, false);
 
         return new ZincBundle(job.get(), mBundleID, version);
+    }
+
+    @Override
+    protected String getJobName() {
+        return super.getJobName() + " (" + mBundleID + ")";
     }
 
     private static String removeExtension(final String filename) {

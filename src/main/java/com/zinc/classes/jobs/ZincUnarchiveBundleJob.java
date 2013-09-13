@@ -15,7 +15,7 @@ import java.util.concurrent.Future;
  * User: NachoSoto
  * Date: 9/10/13
  */
-public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
+public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
     private final Future<ZincBundle> mBundle;
     private final ZincBundleCloneRequest mBundleCloneRequest;
     private final ZincFutureFactory mFutureFactory;
@@ -32,7 +32,7 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
     }
 
     @Override
-    public ZincBundle call() throws Exception {
+    public ZincBundle run() throws Exception {
         final ZincBundle result = mBundle.get();
 
         final ZincManifest manifest = mFutureFactory.downloadManifest(
@@ -40,6 +40,8 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
                 mBundleCloneRequest.getBundleID().getBundleName(),
                 result.getVersion()
         ).get();
+
+        logMessage("unarchiving");
 
         final Map<String,ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName());
         final Set<String> filenamesToRemove = new HashSet<String>();
@@ -59,10 +61,19 @@ public class ZincUnarchiveBundleJob implements ZincJob<ZincBundle> {
             filenamesToRemove.add(originFilename);
         }
 
+        logMessage("cleaning up archive");
+
         for (final String filename : filenamesToRemove) {
             mFileHelper.removeFile(result, filename);
         }
 
+        logMessage("finished unarchiving");
+
         return result;
+    }
+
+    @Override
+    protected String getJobName() {
+        return super.getJobName() + " (" + mBundleCloneRequest.getBundleID() + ")";
     }
 }

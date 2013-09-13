@@ -24,7 +24,7 @@ public abstract class AbstractZincDownloadFileJob extends AbstractZincDownloadJo
     }
 
     @Override
-    public final File call() throws DownloadFileError {
+    public final File run() throws DownloadFileError {
         if (shouldDownloadFile()) {
             final InputStream inputStream = mRequestExecutor.get(mUrl);
 
@@ -33,6 +33,8 @@ public abstract class AbstractZincDownloadFileJob extends AbstractZincDownloadJo
             } catch (IOException e) {
                 throw new DownloadFileError("Error writing to file '" + mFile.getAbsolutePath() + "'", e);
             }
+        } else {
+            logMessage("not downloading file " + mUrl + " - was already there.");
         }
 
         return mFile;
