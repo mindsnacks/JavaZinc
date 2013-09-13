@@ -9,8 +9,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import static com.zinc.utils.MockFactory.randomInt;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * User: NachoSoto
@@ -91,6 +93,41 @@ public class SourceURLTest extends ZincBaseTest {
         assertTrue(result.toString().contains(Integer.toString(version)));
         assertTrue(result.toString().contains(bundleName));
         assertTrue(result.toString().contains(flavorName));
+    }
+
+    @Test
+    public void localDownloadsFolder() throws Exception {
+        final String bundleName = "swell";
+        final int version = randomInt(1, 1000);
+        final String flavorName = "retina";
+
+        final String result = SourceURL.getLocalDownloadsFolder(bundleName, version, flavorName);
+
+        assertTrue(result.contains(Integer.toString(version)));
+        assertTrue(result.contains(bundleName));
+        assertTrue(result.contains(flavorName));
+    }
+
+    @Test
+    public void localArchivesFolder() throws Exception {
+        final String bundleName = "swell";
+        final int version = randomInt(1, 1000);
+        final String flavorName = "retina";
+
+        final String result = SourceURL.getLocalArchivesFolder(bundleName, version, flavorName);
+
+        assertTrue(result.contains(Integer.toString(version)));
+        assertTrue(result.contains(bundleName));
+        assertTrue(result.contains(flavorName));
+    }
+
+    @Test
+    public void localArchivesFolderIsDifferentThanDownloads() throws Exception {
+        final String bundleName = "swell";
+        final int version = randomInt(1, 1000);
+        final String flavorName = "retina";
+
+        assertThat(SourceURL.getLocalArchivesFolder(bundleName, version, flavorName), not(equalTo(SourceURL.getLocalDownloadsFolder(bundleName, version, flavorName))));
     }
 
     @Test
