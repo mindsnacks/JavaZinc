@@ -2,14 +2,14 @@ package com.zinc.classes.data;
 
 import java.io.File;
 
-public class ZincBundleCloneRequest {
+public class ZincCloneBundleRequest {
     private final SourceURL mSourceURL;
     private final BundleID mBundleID;
     private final String mDistribution;
     private final String mFlavorName;
     private final File mRepoFolder;
 
-    public ZincBundleCloneRequest(final SourceURL sourceURL,
+    public ZincCloneBundleRequest(final SourceURL sourceURL,
                                   final BundleID bundleID,
                                   final String distribution,
                                   final String flavorName,

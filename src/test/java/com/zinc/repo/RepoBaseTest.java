@@ -27,7 +27,7 @@ public abstract class RepoBaseTest extends ZincBaseTest {
     protected ZincRepoIndexWriter mIndexWriter;
     protected final String mFlavorName = "retina";
 
-    @Mock protected ZincFutureFactory mJobFactory;
+    @Mock protected ZincFutureFactory mFutureFactory;
 
     protected Gson mGson;
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
@@ -41,7 +41,7 @@ public abstract class RepoBaseTest extends ZincBaseTest {
 
     protected void initializeRepo() {
         mIndexWriter = newRepoIndexWriter();
-        mRepo = new ZincRepo(mJobFactory, rootFolder.getRoot().toURI(), mIndexWriter, mFlavorName);
+        mRepo = new ZincRepo(mFutureFactory, rootFolder.getRoot().toURI(), mIndexWriter, mFlavorName);
     }
 
     protected ZincRepoIndexWriter newRepoIndexWriter() {

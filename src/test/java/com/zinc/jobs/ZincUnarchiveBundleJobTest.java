@@ -7,7 +7,9 @@ import com.zinc.classes.jobs.ZincUnarchiveBundleJob;
 import com.zinc.utils.MockFactory;
 import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 
 import java.io.File;
@@ -19,6 +21,7 @@ import java.util.concurrent.Future;
 
 import static com.zinc.utils.MockFactory.randomInt;
 import static com.zinc.utils.MockFactory.randomString;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -28,7 +31,7 @@ import static org.mockito.Mockito.*;
  */
 public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
-    private ZincBundleCloneRequest mBundleCloneRequest;
+    private ZincCloneBundleRequest mBundleCloneRequest;
 
     private ZincUnarchiveBundleJob mJob;
 
@@ -40,14 +43,16 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
     final private int mVersion = randomInt(5, 100);
     final private URL mSourceHost;
 
+    @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
+
     @Mock private ZincBundle mBundle;
     private Future<ZincBundle> mBundleFuture;
     @Mock private ZincManifest mManifest;
     private Future<ZincManifest> mManifestFuture;
     @Mock private ZincFutureFactory mFutureFactory;
     @Mock private SourceURL mSourceURL;
-    @Mock private File mRepoFolder;
     @Mock private FileHelper mFileHelper;
+    private File mRepoFolder;
 
     public ZincUnarchiveBundleJobTest() throws MalformedURLException {
         mSourceHost = new URL("https://mindsnacks.com/");
@@ -55,7 +60,9 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        mBundleCloneRequest = new ZincBundleCloneRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
+        mRepoFolder = rootFolder.getRoot();
+
+        mBundleCloneRequest = new ZincCloneBundleRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
         mBundleFuture = MockFactory.createFutureWithResult(mBundle);
         mManifestFuture = MockFactory.createFutureWithResult(mManifest);
 
@@ -102,17 +109,30 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
         when(mManifest.getFilesWithFlavor(eq(mFlavorName))).thenReturn(files);
 
-        run();
+        final ZincBundle result = run();
 
         verify(mManifest).getFilesWithFlavor(mFlavorName);
-        verify(mFileHelper, times(1)).unzipFile(eq(mBundle), eq(hash1 + ".gz"), eq(filename1));
-        verify(mFileHelper, times(1)).copyFile(eq(mBundle), eq(hash2), eq(filename2));
+        verify(mFileHelper, times(1)).unzipFile(eq(mBundle), eq(hash1 + ".gz"), any(ZincBundle.class), eq(filename1));
+        verify(mFileHelper, times(1)).copyFile(eq(mBundle), eq(hash2), any(ZincBundle.class), eq(filename2));
 
-        verify(mFileHelper, times(0)).unzipFile(eq(mBundle), anyString(), eq(filename2));
-        verify(mFileHelper, times(0)).copyFile(eq(mBundle), anyString(), eq(filename1));
+        verify(mFileHelper, times(0)).unzipFile(eq(mBundle), anyString(), any(ZincBundle.class), eq(filename2));
+        verify(mFileHelper, times(0)).copyFile(eq(mBundle), anyString(), any(ZincBundle.class), eq(filename1));
 
-        verify(mFileHelper).removeFile(eq(mBundle), eq(hash1 + ".gz"));
-        verify(mFileHelper).removeFile(eq(mBundle), eq(hash2));
+        verify(mFileHelper).removeFile(eq(mBundle));
+
+        assertTrue(result.getAbsolutePath().startsWith(mRepoFolder.getAbsolutePath()));
+    }
+
+    @Test
+    public void doesntUnarchiveAnythingIfFolderIsAlreadyThere() throws Exception {
+        final String folderName = SourceURL.getLocalBundlesFolder(mBundleID, mVersion, mFlavorName);
+
+        final File folder = new File(mRepoFolder, folderName);
+        folder.mkdirs();
+
+        run();
+
+        verify(mFutureFactory, times(0)).downloadManifest(any(SourceURL.class), anyString(), anyInt());
     }
 
     private ZincBundle run() throws Exception {
