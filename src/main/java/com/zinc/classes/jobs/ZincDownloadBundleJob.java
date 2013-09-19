@@ -12,46 +12,38 @@ import java.util.concurrent.Future;
  * Date: 9/4/13
  */
 public class ZincDownloadBundleJob extends ZincJob<ZincBundle> {
-    private final SourceURL mSourceURL;
-    private final BundleID mBundleID;
-    private final String mDistribution;
-    private final String mFlavorName;
-    private final Future<ZincCatalog> mCatalog;
-    private final File mRepoFolder;
-
     protected final ZincFutureFactory mFutureFactory;
+    private final ZincCloneBundleRequest mRequest;
+    private final Future<ZincCatalog> mCatalogFuture;
 
-    public ZincDownloadBundleJob(final ZincBundleCloneRequest zincBundleCloneRequest,
+    public ZincDownloadBundleJob(final ZincCloneBundleRequest request,
                                  final Future<ZincCatalog> catalogFuture,
                                  final ZincFutureFactory futureFactory) {
-        assert zincBundleCloneRequest.getSourceURL().getCatalogID().equals(zincBundleCloneRequest.getBundleID().getCatalogID());
+        assert request.getSourceURL().getCatalogID().equals(request.getBundleID().getCatalogID());
 
-        mSourceURL = zincBundleCloneRequest.getSourceURL();
-        mBundleID = zincBundleCloneRequest.getBundleID();
-        mDistribution = zincBundleCloneRequest.getDistribution();
-        mFlavorName = zincBundleCloneRequest.getFlavorName();
-        mCatalog = catalogFuture;
+        mRequest = request;
+        mCatalogFuture = catalogFuture;
         mFutureFactory = futureFactory;
-        mRepoFolder = zincBundleCloneRequest.getRepoFolder();
     }
 
     @Override
     public ZincBundle run() throws Exception {
-        final ZincCatalog catalog = mCatalog.get();
+        final ZincCatalog catalog = mCatalogFuture.get();
+        final BundleID bundleID = mRequest.getBundleID();
 
-        final String bundleName = mBundleID.getBundleName();
-        final int version = catalog.getVersionForBundleName(bundleName, mDistribution);
+        final String bundleName = bundleID.getBundleName();
+        final int version = catalog.getVersionForBundleName(bundleName, mRequest.getDistribution());
 
-        final URL archiveURL = mSourceURL.getArchiveURL(bundleName, version, mFlavorName);
-        final String folderName = SourceURL.getLocalDownloadsFolder(mBundleID, version, mFlavorName);
+        final URL archiveURL = mRequest.getSourceURL().getArchiveURL(bundleName, version, mRequest.getFlavorName());
+        final String folderName = SourceURL.getLocalDownloadsFolder(bundleID, version, mRequest.getFlavorName());
 
-        final Future<File> job = mFutureFactory.downloadArchive(archiveURL, mRepoFolder, folderName, false);
+        final Future<File> job = mFutureFactory.downloadArchive(archiveURL, mRequest.getRepoFolder(), folderName, false);
 
-        return new ZincBundle(job.get(), mBundleID, version);
+        return new ZincBundle(job.get(), bundleID, version);
     }
 
     @Override
     protected String getJobName() {
-        return super.getJobName() + " (" + mBundleID + ")";
+        return super.getJobName() + " (" + mRequest.getBundleID() + ")";
     }
 }

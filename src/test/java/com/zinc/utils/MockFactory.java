@@ -38,6 +38,11 @@ public final class MockFactory {
 
     public static <V> Future<V> createFutureWithResult(V result) {
         final Future<V> mock = futureMock();
+
+        return setFutureResult(mock, result);
+    }
+
+    public static <V> Future<V> setFutureResult(Future<V> mock, V result) {
         try {
             when(mock.get()).thenReturn(result);
         }

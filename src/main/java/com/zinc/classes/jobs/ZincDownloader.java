@@ -62,16 +62,21 @@ public class ZincDownloader implements ZincFutureFactory {
     }
 
     @Override
-    public Future<ZincBundle> cloneBundle(final SourceURL sourceURL,
-                                          final BundleID bundleID,
-                                          final String distribution,
-                                          final String flavorName,
-                                          final File repoFolder,
+    public Future<ZincBundle> cloneBundle(final ZincCloneBundleRequest request,
                                           final Future<ZincCatalog> catalogFuture) {
-        final ZincBundleCloneRequest zincBundleCloneRequest = new ZincBundleCloneRequest(sourceURL, bundleID, distribution, flavorName, repoFolder);
-        final Future<ZincBundle> bundleFuture = submitJob(new ZincDownloadBundleJob(zincBundleCloneRequest, catalogFuture, this), false);
+        return submitJob(new ZincCloneBundleJob(request, catalogFuture, this), false);
+    }
 
-        return submitJob(new ZincUnarchiveBundleJob(bundleFuture, zincBundleCloneRequest, this, new FileHelper()), false);
+    @Override
+    public Future<ZincBundle> downloadBundle(final ZincCloneBundleRequest request,
+                                             final Future<ZincCatalog> catalogFuture) {
+        return submitJob(new ZincDownloadBundleJob(request, catalogFuture, this), false);
+    }
+
+    @Override
+    public Future<ZincBundle> unarchiveBundle(final Future<ZincBundle> downloadedBundle,
+                                              final ZincCloneBundleRequest request) {
+        return submitJob(new ZincUnarchiveBundleJob(downloadedBundle, request, this, new FileHelper()), false);
     }
 
     private <V> Future<V> submitJob(final ZincJob<V> job, boolean limitedConcurrency) {

@@ -112,7 +112,7 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
     }
 
     private ZincDownloadBundleJob initializeJob(final SourceURL sourceURL) {
-        return new ZincDownloadBundleJob(new ZincBundleCloneRequest(sourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder), mZincCatalogFuture, mFutureFactory);
+        return new ZincDownloadBundleJob(new ZincCloneBundleRequest(sourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder), mZincCatalogFuture, mFutureFactory);
     }
 
     private void verifyDownloadArchiveJobCreation(final int version) {

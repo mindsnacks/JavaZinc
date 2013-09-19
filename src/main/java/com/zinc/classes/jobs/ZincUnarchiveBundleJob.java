@@ -16,16 +16,16 @@ import java.util.concurrent.Future;
  */
 public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
     private final Future<ZincBundle> mDownloadedBundle;
-    private final ZincBundleCloneRequest mBundleCloneRequest;
+    private final ZincCloneBundleRequest mRequest;
     private final ZincFutureFactory mFutureFactory;
     private final FileHelper mFileHelper;
 
     public ZincUnarchiveBundleJob(final Future<ZincBundle> downloadedBundle,
-                                  final ZincBundleCloneRequest bundleCloneRequest,
+                                  final ZincCloneBundleRequest request,
                                   final ZincFutureFactory futureFactory,
                                   final FileHelper fileHelper) {
         mDownloadedBundle = downloadedBundle;
-        mBundleCloneRequest = bundleCloneRequest;
+        mRequest = request;
         mFutureFactory = futureFactory;
         mFileHelper = fileHelper;
     }
@@ -35,9 +35,9 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
         final ZincBundle downloadedBundle = mDownloadedBundle.get();
 
         final int version = downloadedBundle.getVersion();
-        final BundleID bundleID = mBundleCloneRequest.getBundleID();
+        final BundleID bundleID = mRequest.getBundleID();
 
-        final File localBundleFolder = new File(mBundleCloneRequest.getRepoFolder().getAbsolutePath() + "/" + SourceURL.getLocalBundlesFolder(bundleID, version, mBundleCloneRequest.getFlavorName()));
+        final File localBundleFolder = new File(mRequest.getRepoFolder().getAbsolutePath() + "/" + SourceURL.getLocalBundlesFolder(bundleID, version, mRequest.getFlavorName()));
         final ZincBundle result = new ZincBundle(localBundleFolder, bundleID, version);
 
         if (!localBundleFolder.exists()) {
@@ -58,7 +58,7 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
     private ZincManifest getManifest(final int version,
                                      final BundleID bundleID) throws InterruptedException, ExecutionException {
         return mFutureFactory.downloadManifest(
-                        mBundleCloneRequest.getSourceURL(),
+                        mRequest.getSourceURL(),
                         bundleID.getBundleName(),
                         version
                 ).get();
@@ -67,7 +67,7 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
     private void unarchiveBundle(final ZincBundle downloadedBundle,
                                  final ZincBundle result,
                                  final ZincManifest manifest) throws IOException {
-        final Map<String, ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mBundleCloneRequest.getFlavorName());
+        final Map<String, ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mRequest.getFlavorName());
 
         for (final Map.Entry<String, ZincManifest.FileInfo> entry : files.entrySet()) {
             final ZincManifest.FileInfo fileInfo = entry.getValue();
@@ -85,6 +85,6 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
 
     @Override
     protected String getJobName() {
-        return super.getJobName() + " (" + mBundleCloneRequest.getBundleID() + ")";
+        return super.getJobName() + " (" + mRequest.getBundleID() + ")";
     }
 }

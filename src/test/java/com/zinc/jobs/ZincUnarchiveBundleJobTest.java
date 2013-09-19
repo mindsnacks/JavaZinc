@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
  */
 public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
-    private ZincBundleCloneRequest mBundleCloneRequest;
+    private ZincCloneBundleRequest mBundleCloneRequest;
 
     private ZincUnarchiveBundleJob mJob;
 
@@ -62,7 +62,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
     public void setUp() throws Exception {
         mRepoFolder = rootFolder.getRoot();
 
-        mBundleCloneRequest = new ZincBundleCloneRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
+        mBundleCloneRequest = new ZincCloneBundleRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
         mBundleFuture = MockFactory.createFutureWithResult(mBundle);
         mManifestFuture = MockFactory.createFutureWithResult(mManifest);
 
