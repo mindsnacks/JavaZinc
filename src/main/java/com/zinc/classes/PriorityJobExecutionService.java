@@ -28,7 +28,7 @@ public class PriorityJobExecutionService<Input, Output> {
     private ExecutorService mExecutorService;
 
     private final PriorityBlockingQueue<Input> mQueue;
-    private final Map<Input, Future<Output>> mFutures = new ConcurrentHashMap<Input, Future<Output>>();
+    private final Map<Input, Future<Output>> mFutures = new HashMap<Input, Future<Output>>();
     private final Set<Input> mAddedElements = new HashSet<Input>();
 
     private final Lock lock = new ReentrantLock();
