@@ -80,8 +80,15 @@ public class PriorityJobExecutionServiceTest extends ZincBaseTest {
     }
 
     @Test
+    public void notRunningByDefault() throws Exception {
+        assertFalse(service.isRunning());
+    }
+
+    @Test
     public void canBeStarted() throws Exception {
         service.start();
+
+        assertTrue(service.isRunning());
     }
 
     @Test(expected = ZincRuntimeException.class)
@@ -94,6 +101,15 @@ public class PriorityJobExecutionServiceTest extends ZincBaseTest {
     public void canBeStopped() throws Exception {
         service.start();
         assertTrue(service.stop());
+    }
+
+    @Test
+    public void notRunningAfterBeingStopped() throws Exception {
+        service.start();
+        service.stop();
+
+        assertFalse(service.isRunning());
+
     }
 
     @Test(expected = ZincRuntimeException.class)

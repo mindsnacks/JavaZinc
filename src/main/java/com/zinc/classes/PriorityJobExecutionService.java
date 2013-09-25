@@ -45,7 +45,7 @@ public class PriorityJobExecutionService<Input, Output> {
         mQueue = new PriorityBlockingQueue<Input>(INITIAL_QUEUE_CAPACITY, priorityComparator);
     }
 
-    private boolean isRunning() {
+    public boolean isRunning() {
         return (mScheduler != null || mExecutorService != null);
     }
 
