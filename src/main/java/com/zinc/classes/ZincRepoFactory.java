@@ -51,7 +51,7 @@ public final class ZincRepoFactory {
             final SecurityManager s = System.getSecurityManager();
             group = (s != null) ? s.getThreadGroup() :
                     Thread.currentThread().getThreadGroup();
-            namePrefix = "pool-" +
+            namePrefix = "zinc-pool-" +
                     poolNumber.getAndIncrement() +
                     "-thread-";
         }
