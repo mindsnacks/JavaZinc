@@ -36,20 +36,6 @@ public class ZincRepo {
         downloadTrackedBundles();
     }
 
-    private void downloadCatalogsForTrackedSources() {
-        for (final SourceURL sourceURL : mIndexWriter.getIndex().getSources()) {
-            getCatalog(sourceURL);
-        }
-    }
-
-    private void downloadTrackedBundles() {
-        final ZincRepoIndex index = mIndexWriter.getIndex();
-
-        for (final BundleID bundleID : index.getTrackedBundleIDs()) {
-            getBundle(bundleID);
-        }
-    }
-
     public void addSourceURL(final SourceURL sourceURL) {
         if (mIndexWriter.getIndex().addSourceURL(sourceURL)) {
             mIndexWriter.saveIndex();
@@ -66,14 +52,6 @@ public class ZincRepo {
         getBundle(bundleID);
     }
 
-    private Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
-        if (!mCatalogs.containsKey(sourceURL)) {
-            mCatalogs.put(sourceURL, mJobFactory.downloadCatalog(sourceURL));
-        }
-
-        return mCatalogs.get(sourceURL);
-    }
-
     /**
      * Returns the existing promise for this bundle, or creates a new one if it was not being tracked.
      */
@@ -83,6 +61,28 @@ public class ZincRepo {
         }
 
         return mBundles.get(bundleID);
+    }
+
+    private void downloadCatalogsForTrackedSources() {
+        for (final SourceURL sourceURL : mIndexWriter.getIndex().getSources()) {
+            getCatalog(sourceURL);
+        }
+    }
+
+    private void downloadTrackedBundles() {
+        final ZincRepoIndex index = mIndexWriter.getIndex();
+
+        for (final BundleID bundleID : index.getTrackedBundleIDs()) {
+            getBundle(bundleID);
+        }
+    }
+
+    private Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
+        if (!mCatalogs.containsKey(sourceURL)) {
+            mCatalogs.put(sourceURL, mJobFactory.downloadCatalog(sourceURL));
+        }
+
+        return mCatalogs.get(sourceURL);
     }
 
     private ZincRepoIndex.TrackingInfo getTrackingInfo(final BundleID bundleID) {
