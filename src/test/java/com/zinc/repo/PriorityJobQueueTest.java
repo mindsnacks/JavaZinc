@@ -1,6 +1,6 @@
 package com.zinc.repo;
 
-import com.zinc.classes.PriorityJobExecutionService;
+import com.zinc.classes.PriorityJobQueue;
 import com.zinc.exceptions.ZincRuntimeException;
 import com.zinc.utils.MockFactory;
 import com.zinc.utils.ZincBaseTest;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
  * User: NachoSoto
  * Date: 9/25/13
  */
-public class PriorityJobExecutionServiceTest extends ZincBaseTest {
+public class PriorityJobQueueTest extends ZincBaseTest {
 
     public static final int CONCURRENCY = 1;
 
@@ -66,13 +66,13 @@ public class PriorityJobExecutionServiceTest extends ZincBaseTest {
         }
     }
 
-    private PriorityJobExecutionService<Data, String> service;
+    private PriorityJobQueue<Data, String> queue;
 
-    @Mock PriorityJobExecutionService.DataProcessor<Data, String> mDataProcessor;
+    @Mock PriorityJobQueue.DataProcessor<Data, String> mDataProcessor;
 
     @Before
     public void setUp() throws Exception {
-        service = new PriorityJobExecutionService<Data, String>(
+        queue = new PriorityJobQueue<Data, String>(
                 CONCURRENCY,
                 new MockFactory.DaemonThreadFactory(),
                 new DataComparator(),
@@ -81,45 +81,45 @@ public class PriorityJobExecutionServiceTest extends ZincBaseTest {
 
     @Test
     public void notRunningByDefault() throws Exception {
-        assertFalse(service.isRunning());
+        assertFalse(queue.isRunning());
     }
 
     @Test
     public void canBeStarted() throws Exception {
-        service.start();
+        queue.start();
 
-        assertTrue(service.isRunning());
+        assertTrue(queue.isRunning());
     }
 
     @Test(expected = ZincRuntimeException.class)
     public void cannotBeStartedTwice() throws Exception {
-        service.start();
-        service.start();
+        queue.start();
+        queue.start();
     }
 
     @Test
     public void canBeStopped() throws Exception {
-        service.start();
-        assertTrue(service.stop());
+        queue.start();
+        assertTrue(queue.stop());
     }
 
     @Test
     public void notRunningAfterBeingStopped() throws Exception {
-        service.start();
-        service.stop();
+        queue.start();
+        queue.stop();
 
-        assertFalse(service.isRunning());
+        assertFalse(queue.isRunning());
 
     }
 
     @Test(expected = ZincRuntimeException.class)
     public void cannotBeStoppedIfNotStarted() throws Exception {
-        service.stop();
+        queue.stop();
     }
 
     @Test
     public void dataCanBeAdded() throws Exception {
-        service.add(new Data(1, "result"));
+        queue.add(new Data(1, "result"));
     }
 
     @Test
@@ -127,8 +127,8 @@ public class PriorityJobExecutionServiceTest extends ZincBaseTest {
         final Data data = processAndAddRandomData();
 
         // run
-        service.start();
-        final Future<String> result = service.get(data);
+        queue.start();
+        final Future<String> result = queue.get(data);
 
         verify(mDataProcessor).process(data);
         assertNotNull(result);
@@ -144,20 +144,20 @@ public class PriorityJobExecutionServiceTest extends ZincBaseTest {
         processAndAddRandomData();
 
         // run
-        service.start();
-        final Future<String> result = service.get(data);
+        queue.start();
+        final Future<String> result = queue.get(data);
 
         verify(mDataProcessor).process(data);
         assertNotNull(result);
         assertEquals(data.getResult(), result.get());
     }
 
-    @Test(expected = PriorityJobExecutionService.JobNotFoundException.class)
+    @Test(expected = PriorityJobQueue.JobNotFoundException.class)
     public void dataCannotBeRetrievedIfItWasNeverAdded() throws Exception {
         final Data data = randomData();
 
-        service.start();
-        service.get(data);
+        queue.start();
+        queue.get(data);
     }
 
     private Data randomData() {
@@ -168,7 +168,7 @@ public class PriorityJobExecutionServiceTest extends ZincBaseTest {
         final Data data = randomData();
 
         processData(data);
-        service.add(data);
+        queue.add(data);
 
         return data;
     }

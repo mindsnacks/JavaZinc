@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * User: NachoSoto
  * Date: 9/21/13
  */
-public class PriorityJobExecutionService<Input, Output> {
+public class PriorityJobQueue<Input, Output> {
     private static final int INITIAL_QUEUE_CAPACITY = 20;
     private static final int SCHEDULER_TERMINATION_TIMEOUT = 30;
     private static final int EXECUTOR_SERVICE_TERMINATION_TIMEOUT = 300;
@@ -31,10 +31,10 @@ public class PriorityJobExecutionService<Input, Output> {
     private final Lock mLock = new ReentrantLock();
     private final Condition mEnqueued = mLock.newCondition();
 
-    public PriorityJobExecutionService(final int concurrency,
-                                       final ThreadFactory threadFactory,
-                                       final Comparator<Input> priorityComparator,
-                                       final DataProcessor<Input, Output> dataProcessor) {
+    public PriorityJobQueue(final int concurrency,
+                            final ThreadFactory threadFactory,
+                            final Comparator<Input> priorityComparator,
+                            final DataProcessor<Input, Output> dataProcessor) {
         mConcurrency = concurrency;
         mThreadFactory = threadFactory;
         mDataProcessor = dataProcessor;
@@ -103,7 +103,7 @@ public class PriorityJobExecutionService<Input, Output> {
         mQueue.put(element);
     }
 
-    public Future<Output> get(final Input element) {
+    public Future<Output> get(final Input element) throws JobNotFoundException {
         if (mAddedElements.contains(element)) {
             return waitForFuture(element);
         } else {
