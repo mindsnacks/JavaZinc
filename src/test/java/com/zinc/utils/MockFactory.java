@@ -8,8 +8,10 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -69,6 +71,16 @@ public final class MockFactory {
         return mock(Future.class);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <V> Callable<V> callableWithResult(V result) {
+        final Callable<V> mock = mock(Callable.class);
+        try {
+            when(mock.call()).thenReturn(result);
+        } catch (Exception thisCantHappen) { assert false; }
+
+        return mock;
+    }
+
     public static int randomInt(int min, int max) {
         return random.nextInt(max) + min;
     }
@@ -79,5 +91,14 @@ public final class MockFactory {
 
     public static int randomInt() {
         return random.nextInt();
+    }
+
+    public static class DaemonThreadFactory implements ThreadFactory {
+        @Override
+        public Thread newThread(final Runnable r) {
+            final Thread t = new Thread(r);
+            t.setDaemon(true);
+            return t;
+        }
     }
 }
