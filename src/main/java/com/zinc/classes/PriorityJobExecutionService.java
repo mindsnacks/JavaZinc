@@ -2,10 +2,7 @@ package com.zinc.classes;
 
 import com.zinc.exceptions.ZincRuntimeException;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -31,8 +28,8 @@ public class PriorityJobExecutionService<Input, Output> {
     private final Map<Input, Future<Output>> mFutures = new HashMap<Input, Future<Output>>();
     private final Set<Input> mAddedElements = new HashSet<Input>();
 
-    private final Lock lock = new ReentrantLock();
-    private final Condition enqueued = lock.newCondition();
+    private final Lock mLock = new ReentrantLock();
+    private final Condition mEnqueued = mLock.newCondition();
 
     public PriorityJobExecutionService(final int concurrency,
                                        final ThreadFactory threadFactory,
@@ -54,7 +51,7 @@ public class PriorityJobExecutionService<Input, Output> {
             throw new ZincRuntimeException("Service is already running.");
         }
 
-        mScheduler =  Executors.newSingleThreadExecutor();
+        mScheduler =  Executors.newSingleThreadExecutor(mThreadFactory);
         mExecutorService = Executors.newFixedThreadPool(mConcurrency, mThreadFactory);
 
         mScheduler.submit(createSchedulerTask());
@@ -66,13 +63,13 @@ public class PriorityJobExecutionService<Input, Output> {
                 try {
                     Input data;
                     while ((data = mQueue.take()) != null) {
-                        lock.lock();
+                        mLock.lock();
 
                         try {
                             mFutures.put(data, submit(data));
-                            enqueued.signal();
+                            mEnqueued.signal();
                         } finally {
-                            lock.unlock();
+                            mLock.unlock();
                         }
                     }
                 } catch (InterruptedException ex) {
@@ -120,14 +117,14 @@ public class PriorityJobExecutionService<Input, Output> {
 
     private Future<Output> waitForFuture(final Input element) {
         Future<Output> result;
-        lock.lock();
+        mLock.lock();
 
         try {
             while ((result = mFutures.get(element)) == null) {
-                enqueued.awaitUninterruptibly();
+                mEnqueued.awaitUninterruptibly();
             }
         } finally {
-            lock.unlock();
+            mLock.unlock();
         }
 
         return result;
