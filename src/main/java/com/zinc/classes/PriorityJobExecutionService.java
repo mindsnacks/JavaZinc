@@ -57,7 +57,11 @@ public class PriorityJobExecutionService<Input, Output> {
         mScheduler =  Executors.newSingleThreadExecutor();
         mExecutorService = Executors.newFixedThreadPool(mConcurrency, mThreadFactory);
 
-        mScheduler.submit(new Runnable() {
+        mScheduler.submit(createSchedulerTask());
+    }
+
+    private Runnable createSchedulerTask() {
+        return new Runnable() {
             public void run() {
                 try {
                     Input data;
@@ -75,7 +79,7 @@ public class PriorityJobExecutionService<Input, Output> {
                     Thread.currentThread().interrupt();
                 }
             }
-        });
+        };
     }
 
     public synchronized boolean stop() throws InterruptedException {
@@ -114,17 +118,17 @@ public class PriorityJobExecutionService<Input, Output> {
         return mExecutorService.submit(mDataProcessor.process(element));
     }
 
-        private Future<Output> waitForFuture(final Input element) {
-            Future<Output> result;
-            lock.lock();
+    private Future<Output> waitForFuture(final Input element) {
+        Future<Output> result;
+        lock.lock();
 
-            try {
-                while ((result = mFutures.get(element)) == null) {
-                    enqueued.awaitUninterruptibly();
-                }
-            } finally {
-                lock.unlock();
+        try {
+            while ((result = mFutures.get(element)) == null) {
+                enqueued.awaitUninterruptibly();
             }
+        } finally {
+            lock.unlock();
+        }
 
         return result;
     }
