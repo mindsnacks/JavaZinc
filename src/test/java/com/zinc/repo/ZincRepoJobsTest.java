@@ -52,6 +52,26 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
     }
 
     @Test
+    public void repoIsNotStartedByDefault() throws Exception {
+        verify(mQueue, times(0)).start();
+    }
+
+    @Test
+    public void startRepo() throws Exception {
+        mRepo.start();
+
+        verify(mQueue).start();
+    }
+
+    @Test
+    public void pauseRepo() throws Exception {
+        mRepo.start();
+        mRepo.pause();
+
+        verify(mQueue).stop();
+    }
+
+    @Test
     public void trackingBundleAddsItToTheIndex() throws Exception {
         final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
         final String distribution = "master";

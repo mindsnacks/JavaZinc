@@ -24,6 +24,7 @@ public class ZincRepo {
 
     /**
      * @todo remove cached promises that failed?
+     * @note repo is paused after initialization. You must call `start` after tracking the bundles.
      */
     public ZincRepo(final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue, final URI root, final ZincRepoIndexWriter repoIndexWriter, final String flavorName) {
         mQueue = queue;
@@ -32,6 +33,14 @@ public class ZincRepo {
         mIndexWriter = repoIndexWriter;
 
         cloneTrackedBundles();
+    }
+
+    public void start() {
+        mQueue.start();
+    }
+
+    public void pause() throws InterruptedException {
+        mQueue.stop();
     }
 
     public void addSourceURL(final SourceURL sourceURL) {
@@ -48,7 +57,10 @@ public class ZincRepo {
         cloneBundle(bundleID, distribution);
     }
 
-    // TODO: add "start" method and document that this can't be called before that method
+    /**
+     * @warning calling this method will block if the clone task
+     * has not been scheduled yet and the repo is paused.
+     */
     public Future<ZincBundle> getBundle(final BundleID bundleID) {
         try {
             return mQueue.get(mBundles.get(bundleID));
