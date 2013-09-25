@@ -1,6 +1,6 @@
 package com.zinc.jobs;
 
-import com.zinc.classes.ZincFutureFactory;
+import com.zinc.classes.ZincJobFactory;
 import com.zinc.classes.data.*;
 import com.zinc.classes.fileutils.FileHelper;
 import com.zinc.classes.jobs.ZincUnarchiveBundleJob;
@@ -17,7 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
 
 import static com.zinc.utils.MockFactory.randomInt;
 import static com.zinc.utils.MockFactory.randomString;
@@ -46,10 +46,9 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
 
     @Mock private ZincBundle mBundle;
-    private Future<ZincBundle> mBundleFuture;
     @Mock private ZincManifest mManifest;
-    private Future<ZincManifest> mManifestFuture;
-    @Mock private ZincFutureFactory mFutureFactory;
+    private Callable<ZincManifest> mManifestJob;
+    @Mock private ZincJobFactory mJobFactory;
     @Mock private SourceURL mSourceURL;
     @Mock private FileHelper mFileHelper;
     private File mRepoFolder;
@@ -63,8 +62,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         mRepoFolder = rootFolder.getRoot();
 
         mBundleCloneRequest = new ZincCloneBundleRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
-        mBundleFuture = MockFactory.createFutureWithResult(mBundle);
-        mManifestFuture = MockFactory.createFutureWithResult(mManifest);
+        mManifestJob = MockFactory.createCallable(mManifest);
 
         when(mBundle.getBundleID()).thenReturn(mBundleID);
         when(mBundle.getVersion()).thenReturn(mVersion);
@@ -72,23 +70,16 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         when(mSourceURL.getUrl()).thenReturn(mSourceHost);
         when(mSourceURL.getCatalogID()).thenReturn(mCatalogID);
 
-        when(mFutureFactory.downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion))).thenReturn(mManifestFuture);
+        when(mJobFactory.downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion))).thenReturn(mManifestJob);
 
-        mJob = new ZincUnarchiveBundleJob(mBundleFuture, mBundleCloneRequest, mFutureFactory, mFileHelper);
-    }
-
-    @Test
-    public void downloadsTheBundle() throws Exception {
-        run();
-
-        verify(mBundleFuture).get();
+        mJob = new ZincUnarchiveBundleJob(mBundle, mBundleCloneRequest, mJobFactory, mFileHelper);
     }
 
     @Test
     public void downloadsTheManifest() throws Exception {
         run();
 
-        verify(mFutureFactory).downloadManifest(mSourceURL, mBundleName, mVersion);
+        verify(mJobFactory).downloadManifest(mSourceURL, mBundleName, mVersion);
     }
 
     @Test
@@ -132,7 +123,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
         run();
 
-        verify(mFutureFactory, times(0)).downloadManifest(any(SourceURL.class), anyString(), anyInt());
+        verify(mJobFactory, times(0)).downloadManifest(any(SourceURL.class), anyString(), anyInt());
     }
 
     private ZincBundle run() throws Exception {

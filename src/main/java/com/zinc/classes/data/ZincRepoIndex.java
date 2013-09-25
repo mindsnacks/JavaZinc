@@ -2,6 +2,7 @@ package com.zinc.classes.data;
 
 import com.google.gson.annotations.SerializedName;
 import com.zinc.exceptions.ZincException;
+import com.zinc.exceptions.ZincRuntimeException;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -106,7 +107,7 @@ public class ZincRepoIndex {
         }
     }
 
-    public static class BundleNotBeingTrackedException extends ZincException {
+    public static class BundleNotBeingTrackedException extends ZincRuntimeException {
         public BundleNotBeingTrackedException(final BundleID bundleID) {
             super(String.format("Bundle '%s' is not currently being tracked", bundleID));
         }

@@ -40,4 +40,30 @@ public class ZincCloneBundleRequest {
     public File getRepoFolder() {
         return mRepoFolder;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final ZincCloneBundleRequest that = (ZincCloneBundleRequest) o;
+
+        return (mBundleID.equals(that.mBundleID) &&
+                mDistribution.equals(that.mDistribution) &&
+                mFlavorName.equals(that.mFlavorName) &&
+                mRepoFolder.equals(that.mRepoFolder) &&
+                mSourceURL.equals(that.mSourceURL));
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mSourceURL.hashCode();
+        result = 31 * result + mBundleID.hashCode();
+        result = 31 * result + mDistribution.hashCode();
+        result = 31 * result + mFlavorName.hashCode();
+        result = 31 * result + mRepoFolder.hashCode();
+
+        return result;
+    }
 }

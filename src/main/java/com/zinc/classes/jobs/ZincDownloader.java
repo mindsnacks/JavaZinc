@@ -2,7 +2,7 @@ package com.zinc.classes.jobs;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
-import com.zinc.classes.ZincFutureFactory;
+import com.zinc.classes.ZincJobFactory;
 import com.zinc.classes.ZincLogging;
 import com.zinc.classes.data.*;
 import com.zinc.classes.fileutils.FileHelper;
@@ -13,28 +13,21 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
 
 /**
  * User: NachoSoto
  * Date: 9/3/13
  */
-public class ZincDownloader implements ZincFutureFactory {
+public class ZincDownloader implements ZincJobFactory {
     private final Gson mGson;
-    private final ExecutorService mMainExecutorService;
-    private final ExecutorService mLimitedConcurrencyExecutorService;
 
-    public ZincDownloader(final Gson gson,
-                          final ExecutorService mainExecutorService,
-                          final ExecutorService limitedConcurrencyExecutorService) {
+    public ZincDownloader(final Gson gson) {
         mGson = gson;
-        mMainExecutorService = mainExecutorService;
-        mLimitedConcurrencyExecutorService = limitedConcurrencyExecutorService;
     }
 
     @Override
-    public Future<ZincCatalog> downloadCatalog(final SourceURL sourceURL) {
+    public Callable<ZincCatalog> downloadCatalog(final SourceURL sourceURL) {
         final URL url;
         try {
             url = sourceURL.getCatalogFileURL();
@@ -42,49 +35,39 @@ public class ZincDownloader implements ZincFutureFactory {
             throw new ZincRuntimeException("Error getting catalog file URL for source: " + sourceURL, e);
         }
 
-        return submitJob(new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class), false);
+        return new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class);
     }
 
     @Override
-    public Future<ZincManifest> downloadManifest(final SourceURL sourceURL, final String bundleName, final int version) {
+    public Callable<ZincManifest> downloadManifest(final SourceURL sourceURL, final String bundleName, final int version) {
         final URL manifestFileURL;
         try {
             manifestFileURL = sourceURL.getManifestFileURL(bundleName, version);
         } catch (MalformedURLException e) {
             throw new ZincRuntimeException("Invalid manifest URL: " + sourceURL, e);
         }
-        return submitJob(new ZincDownloadObjectJob<ZincManifest>(createRequestExecutor(), manifestFileURL, mGson, ZincManifest.class), false);
+        return new ZincDownloadObjectJob<ZincManifest>(createRequestExecutor(), manifestFileURL, mGson, ZincManifest.class);
     }
 
     @Override
-    public Future<File> downloadArchive(final URL url, final File root, final String child, final boolean override) {
-        return submitJob(new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child, override), true);
+    public Callable<File> downloadArchive(final URL url, final File root, final String child, final boolean override) {
+        return new ZincDownloadArchiveJob(createRequestExecutor(), url, root, child, override);
     }
 
     @Override
-    public Future<ZincBundle> cloneBundle(final ZincCloneBundleRequest request,
-                                          final Future<ZincCatalog> catalogFuture) {
-        return submitJob(new ZincCloneBundleJob(request, catalogFuture, this), false);
+    public Callable<ZincBundle> cloneBundle(final ZincCloneBundleRequest request) {
+        return new ZincCloneBundleJob(request, this);
     }
 
     @Override
-    public Future<ZincBundle> downloadBundle(final ZincCloneBundleRequest request,
-                                             final Future<ZincCatalog> catalogFuture) {
-        return submitJob(new ZincDownloadBundleJob(request, catalogFuture, this), false);
+    public Callable<ZincBundle> downloadBundle(final ZincCloneBundleRequest request) {
+        return new ZincDownloadBundleJob(request, this);
     }
 
     @Override
-    public Future<ZincBundle> unarchiveBundle(final Future<ZincBundle> downloadedBundle,
+    public Callable<ZincBundle> unarchiveBundle(final ZincBundle downloadedBundle,
                                               final ZincCloneBundleRequest request) {
-        return submitJob(new ZincUnarchiveBundleJob(downloadedBundle, request, this, new FileHelper()), false);
-    }
-
-    private <V> Future<V> submitJob(final ZincJob<V> job, boolean limitedConcurrency) {
-        return executorService(limitedConcurrency).submit(job);
-    }
-
-    private ExecutorService executorService(boolean limitedConcurrency) {
-        return (limitedConcurrency) ? mLimitedConcurrencyExecutorService : mMainExecutorService;
+        return new ZincUnarchiveBundleJob(downloadedBundle, request, this, new FileHelper());
     }
 
     private ZincRequestExecutor createRequestExecutor() {

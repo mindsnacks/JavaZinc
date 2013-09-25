@@ -2,9 +2,11 @@ package com.zinc.repo;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.zinc.classes.ZincFutureFactory;
+import com.zinc.classes.PriorityJobQueue;
 import com.zinc.classes.ZincRepo;
 import com.zinc.classes.ZincRepoIndexWriter;
+import com.zinc.classes.data.ZincBundle;
+import com.zinc.classes.data.ZincCloneBundleRequest;
 import com.zinc.classes.data.ZincRepoIndex;
 import com.zinc.exceptions.ZincRuntimeException;
 import com.zinc.utils.TestUtils;
@@ -22,12 +24,12 @@ import java.io.IOException;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public abstract class RepoBaseTest extends ZincBaseTest {
+public abstract class ZincRepoBaseTest extends ZincBaseTest {
     protected ZincRepo mRepo;
     protected ZincRepoIndexWriter mIndexWriter;
     protected final String mFlavorName = "retina";
 
-    @Mock protected ZincFutureFactory mFutureFactory;
+    @Mock protected PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> mQueue;
 
     protected Gson mGson;
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
@@ -41,7 +43,7 @@ public abstract class RepoBaseTest extends ZincBaseTest {
 
     protected void initializeRepo() {
         mIndexWriter = newRepoIndexWriter();
-        mRepo = new ZincRepo(mFutureFactory, rootFolder.getRoot().toURI(), mIndexWriter, mFlavorName);
+        mRepo = new ZincRepo(mQueue, rootFolder.getRoot().toURI(), mIndexWriter, mFlavorName);
     }
 
     protected ZincRepoIndexWriter newRepoIndexWriter() {

@@ -1,7 +1,10 @@
 package com.zinc.jobs;
 
-import com.zinc.classes.ZincFutureFactory;
-import com.zinc.classes.data.*;
+import com.zinc.classes.ZincJobFactory;
+import com.zinc.classes.data.BundleID;
+import com.zinc.classes.data.SourceURL;
+import com.zinc.classes.data.ZincBundle;
+import com.zinc.classes.data.ZincCloneBundleRequest;
 import com.zinc.classes.jobs.ZincCloneBundleJob;
 import com.zinc.utils.MockFactory;
 import com.zinc.utils.ZincBaseTest;
@@ -10,7 +13,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import java.io.File;
-import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
@@ -24,53 +27,50 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     @Mock private SourceURL mSourceURL;
     @Mock private BundleID mBundleID;
     @Mock private File mRepoFolder;
-    @Mock private Future<ZincCatalog> mCatalogFuture;
-    @Mock private Future<ZincBundle> mDownloadedBundleFuture;
-    @Mock private Future<ZincBundle> mResultBundleFuture;
+    @Mock private Callable<ZincBundle> mDownloadBundleJob;
+    @Mock private Callable<ZincBundle> mResultBundleJob;
     @Mock private ZincBundle mResultBundle;
-    @Mock private ZincFutureFactory mFutureFactory;
+    @Mock private ZincBundle mDownloadedBundle;
+    @Mock private ZincJobFactory mJobFactory;
 
     private final String mDistribution = "master";
-
     private final String mFlavorName = "retina";
+
     private ZincCloneBundleRequest mRequest;
     private ZincCloneBundleJob job;
 
     @Before
-    @SuppressWarnings("unchecked")
     public void setUp() throws Exception {
         mRequest = new ZincCloneBundleRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
-        job = new ZincCloneBundleJob(mRequest, mCatalogFuture, mFutureFactory);
+        job = new ZincCloneBundleJob(mRequest, mJobFactory);
 
-        when(mFutureFactory.unarchiveBundle(any(Future.class), eq(mRequest))).thenReturn(mResultBundleFuture);
-        MockFactory.setFutureResult(mResultBundleFuture, mResultBundle);
+        when(mJobFactory.downloadBundle(eq(mRequest))).thenReturn(mDownloadBundleJob);
+        when(mJobFactory.unarchiveBundle(any(ZincBundle.class), eq(mRequest))).thenReturn(mResultBundleJob);
+
+        MockFactory.setCallableResult(mDownloadBundleJob, mDownloadedBundle);
+        MockFactory.setCallableResult(mResultBundleJob, mResultBundle);
     }
 
     @Test
     public void bundleIsDownloaded() throws Exception {
         run();
 
-        verify(mFutureFactory).downloadBundle(eq(mRequest), eq(mCatalogFuture));
+        verify(mJobFactory).downloadBundle(eq(mRequest));
     }
 
     @Test
     public void bundleIsUnarchived() throws Exception {
-        when(mFutureFactory.downloadBundle(mRequest, mCatalogFuture)).thenReturn(mDownloadedBundleFuture);
-
         run();
 
-        verify(mFutureFactory).unarchiveBundle(eq(mDownloadedBundleFuture), eq(mRequest));
+        verify(mJobFactory).unarchiveBundle(eq(mDownloadedBundle), eq(mRequest));
     }
 
     @Test
     public void resultIsCorrect() throws Exception {
-        final ZincBundle result = run();
-
-        assertEquals(mResultBundle, result);
+        assertEquals(mResultBundle, run());
     }
 
     private ZincBundle run() throws Exception {
         return job.call();
     }
-
 }

@@ -14,34 +14,30 @@ import java.util.concurrent.Future;
  * Date: 9/3/13
  */
 public class ZincRepo {
-    private final ZincFutureFactory mJobFactory;
+    private final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> mQueue;
     private final ZincRepoIndexWriter mIndexWriter;
     private final String mFlavorName;
 
     private final File mRoot;
 
-    private final Map<SourceURL, Future<ZincCatalog>> mCatalogs = new HashMap<SourceURL, Future<ZincCatalog>>();
-    private final Map<BundleID, Future<ZincBundle>> mBundles = new HashMap<BundleID, Future<ZincBundle>>();
+    private final Map<BundleID, ZincCloneBundleRequest> mBundles = new HashMap<BundleID, ZincCloneBundleRequest>();
 
     /**
      * @todo remove cached promises that failed?
      */
-    public ZincRepo(final ZincFutureFactory jobFactory, final URI root, final ZincRepoIndexWriter repoIndexWriter, final String flavorName) {
-        mJobFactory = jobFactory;
+    public ZincRepo(final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue, final URI root, final ZincRepoIndexWriter repoIndexWriter, final String flavorName) {
+        mQueue = queue;
         mFlavorName = flavorName;
         mRoot = new File(root);
         mIndexWriter = repoIndexWriter;
 
-        downloadCatalogsForTrackedSources();
-        downloadTrackedBundles();
+        cloneTrackedBundles();
     }
 
     public void addSourceURL(final SourceURL sourceURL) {
         if (mIndexWriter.getIndex().addSourceURL(sourceURL)) {
             mIndexWriter.saveIndex();
         }
-
-        getCatalog(sourceURL);
     }
 
     public void startTrackingBundle(final BundleID bundleID, final String distribution) {
@@ -49,51 +45,27 @@ public class ZincRepo {
             mIndexWriter.saveIndex();
         }
 
-        getBundle(bundleID);
+        cloneBundle(bundleID, distribution);
     }
 
-    /**
-     * Returns the existing promise for this bundle, or creates a new one if it was not being tracked.
-     */
+    // TODO: add "start" method and document that this can't be called before that method
     public Future<ZincBundle> getBundle(final BundleID bundleID) {
-        if (!mBundles.containsKey(bundleID)) {
-            mBundles.put(bundleID, cloneBundle(bundleID, getTrackingInfo(bundleID).getDistribution()));
-        }
-
-        return mBundles.get(bundleID);
-    }
-
-    private void downloadCatalogsForTrackedSources() {
-        for (final SourceURL sourceURL : mIndexWriter.getIndex().getSources()) {
-            getCatalog(sourceURL);
+        try {
+            return mQueue.get(mBundles.get(bundleID));
+        } catch (PriorityJobQueue.JobNotFoundException e) {
+            throw new ZincRuntimeException(String.format("Bundle '%s' was not being tracked", bundleID), e);
         }
     }
 
-    private void downloadTrackedBundles() {
+    private void cloneTrackedBundles() {
         final ZincRepoIndex index = mIndexWriter.getIndex();
 
         for (final BundleID bundleID : index.getTrackedBundleIDs()) {
-            getBundle(bundleID);
+            cloneBundle(bundleID, index.getTrackingInfo(bundleID).getDistribution());
         }
     }
 
-    private Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
-        if (!mCatalogs.containsKey(sourceURL)) {
-            mCatalogs.put(sourceURL, mJobFactory.downloadCatalog(sourceURL));
-        }
-
-        return mCatalogs.get(sourceURL);
-    }
-
-    private ZincRepoIndex.TrackingInfo getTrackingInfo(final BundleID bundleID) {
-        try {
-            return  mIndexWriter.getIndex().getTrackingInfo(bundleID);
-        } catch (ZincRepoIndex.BundleNotBeingTrackedException e) {
-            throw new ZincRuntimeException(e.getMessage(), e);
-        }
-    }
-
-    private Future<ZincBundle> cloneBundle(final BundleID bundleID, final String distribution) {
+    private void cloneBundle(final BundleID bundleID, final String distribution) {
         final String catalogID = bundleID.getCatalogID();
         final SourceURL sourceURL;
 
@@ -103,6 +75,17 @@ public class ZincRepo {
             throw new ZincRuntimeException(String.format("No sources for catalog '%s'", catalogID));
         }
 
-        return mJobFactory.cloneBundle(new ZincCloneBundleRequest(sourceURL, bundleID, distribution, mFlavorName, mRoot), getCatalog(sourceURL));
+        final ZincCloneBundleRequest cloneBundleRequest = new ZincCloneBundleRequest(sourceURL, bundleID, distribution, mFlavorName, mRoot);
+
+        mQueue.add(cloneBundleRequest);
+        mBundles.put(bundleID, cloneBundleRequest);
+    }
+
+    public static interface BundlePriorityComparator {
+        /**
+         * Compares the two bundles for order.
+         * @return negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+         */
+        int compare(BundleID bundle1, BundleID bundle2);
     }
 }

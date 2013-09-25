@@ -1,11 +1,8 @@
 package com.zinc.classes.jobs;
 
-import com.zinc.classes.ZincFutureFactory;
+import com.zinc.classes.ZincJobFactory;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.classes.data.ZincCloneBundleRequest;
-import com.zinc.classes.data.ZincCatalog;
-
-import java.util.concurrent.Future;
 
 /**
  * User: NachoSoto
@@ -15,19 +12,16 @@ import java.util.concurrent.Future;
  */
 public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
     private final ZincCloneBundleRequest mRequest;
-    private final Future<ZincCatalog> mCatalogFuture;
-    private final ZincFutureFactory mFutureFactory;
+    private final ZincJobFactory mJobFactory;
 
     public ZincCloneBundleJob(final ZincCloneBundleRequest request,
-                              final Future<ZincCatalog> catalogFuture,
-                              final ZincFutureFactory futureFactory) {
+                              final ZincJobFactory jobFactory) {
         mRequest = request;
-        mCatalogFuture = catalogFuture;
-        mFutureFactory = futureFactory;
+        mJobFactory = jobFactory;
     }
 
     @Override
     protected ZincBundle run() throws Exception {
-        return mFutureFactory.unarchiveBundle(mFutureFactory.downloadBundle(mRequest, mCatalogFuture), mRequest).get();
+        return mJobFactory.unarchiveBundle(mJobFactory.downloadBundle(mRequest).call(), mRequest).call();
     }
 }

@@ -13,8 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * User: NachoSoto
@@ -46,10 +45,10 @@ public final class MockFactory {
 
     public static <V> Future<V> setFutureResult(Future<V> mock, V result) {
         try {
-            when(mock.get()).thenReturn(result);
+            doReturn(result).when(mock).get();
         }
-        catch (InterruptedException thisIsJustAMock) {}
-        catch (ExecutionException thisIsJustAMock) {}
+        catch (InterruptedException thisIsJustAMock) { assert false; }
+        catch (ExecutionException thisIsJustAMock) { assert false; }
 
         return mock;
     }
@@ -58,10 +57,10 @@ public final class MockFactory {
     public static <V> Future<V> createFutureWithExecutionException() {
         final Future<V> mock = futureMock();
         try {
-            when(mock.get()).thenThrow(ExecutionException.class);
+            doThrow(ExecutionException.class).when(mock).get();
         }
-        catch (InterruptedException thisIsJustAMock) {}
-        catch (ExecutionException thisIsJustAMock) {}
+        catch (InterruptedException thisIsJustAMock) { assert false; }
+        catch (ExecutionException thisIsJustAMock) { assert false; }
 
         return mock;
     }
@@ -71,11 +70,28 @@ public final class MockFactory {
         return mock(Future.class);
     }
 
+    public static <V> Callable<V> createCallable(V result) throws Exception {
+        final Callable<V> mock = callableMock();
+
+        setCallableResult(mock, result);
+
+        return mock;
+    }
+
+    public static <V> void setCallableResult(Callable<V> mock, V result) throws Exception {
+        doReturn(result).when(mock).call();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <V> Callable<V> callableMock() {
+        return mock(Callable.class);
+    }
+
     @SuppressWarnings("unchecked")
     public static <V> Callable<V> callableWithResult(V result) {
         final Callable<V> mock = mock(Callable.class);
         try {
-            when(mock.call()).thenReturn(result);
+            doReturn(result).when(mock).call();
         } catch (Exception thisCantHappen) { assert false; }
 
         return mock;

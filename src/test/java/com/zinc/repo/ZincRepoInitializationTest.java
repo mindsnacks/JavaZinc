@@ -21,10 +21,10 @@ import static org.junit.Assert.assertTrue;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public class RepoInitializationTest extends RepoBaseTest {
+public class ZincRepoInitializationTest extends ZincRepoBaseTest {
     private final SourceURL mSourceURL;
 
-    public RepoInitializationTest() throws MalformedURLException {
+    public ZincRepoInitializationTest() throws MalformedURLException {
         mSourceURL = new SourceURL(new URL("https://mindsnacks.com"), "com.mindsnacks.lessons");
     }
 

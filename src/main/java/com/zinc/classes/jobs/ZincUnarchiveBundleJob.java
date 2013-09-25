@@ -1,40 +1,36 @@
 package com.zinc.classes.jobs;
 
-import com.zinc.classes.ZincFutureFactory;
+import com.zinc.classes.ZincJobFactory;
 import com.zinc.classes.data.*;
 import com.zinc.classes.fileutils.FileHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 /**
  * User: NachoSoto
  * Date: 9/10/13
  */
 public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
-    private final Future<ZincBundle> mDownloadedBundle;
+    private final ZincBundle mDownloadedBundle;
     private final ZincCloneBundleRequest mRequest;
-    private final ZincFutureFactory mFutureFactory;
+    private final ZincJobFactory mJobFactory;
     private final FileHelper mFileHelper;
 
-    public ZincUnarchiveBundleJob(final Future<ZincBundle> downloadedBundle,
+    public ZincUnarchiveBundleJob(final ZincBundle downloadedBundle,
                                   final ZincCloneBundleRequest request,
-                                  final ZincFutureFactory futureFactory,
+                                  final ZincJobFactory jobFactory,
                                   final FileHelper fileHelper) {
         mDownloadedBundle = downloadedBundle;
         mRequest = request;
-        mFutureFactory = futureFactory;
+        mJobFactory = jobFactory;
         mFileHelper = fileHelper;
     }
 
     @Override
     public ZincBundle run() throws Exception {
-        final ZincBundle downloadedBundle = mDownloadedBundle.get();
-
-        final int version = downloadedBundle.getVersion();
+        final int version = mDownloadedBundle.getVersion();
         final BundleID bundleID = mRequest.getBundleID();
 
         final File localBundleFolder = new File(mRequest.getRepoFolder().getAbsolutePath() + "/" + SourceURL.getLocalBundlesFolder(bundleID, version, mRequest.getFlavorName()));
@@ -44,10 +40,10 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
             final ZincManifest manifest = getManifest(version, bundleID);
 
             logMessage("unarchiving");
-            unarchiveBundle(downloadedBundle, result, manifest);
+            unarchiveBundle(mDownloadedBundle, result, manifest);
 
             logMessage("cleaning up archive");
-            mFileHelper.removeFile(downloadedBundle);
+            mFileHelper.removeFile(mDownloadedBundle);
         } else {
             logMessage("skipping unarchiving - bundle already found");
         }
@@ -56,12 +52,12 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
     }
 
     private ZincManifest getManifest(final int version,
-                                     final BundleID bundleID) throws InterruptedException, ExecutionException {
-        return mFutureFactory.downloadManifest(
+                                     final BundleID bundleID) throws Exception {
+        return mJobFactory.downloadManifest(
                         mRequest.getSourceURL(),
                         bundleID.getBundleName(),
                         version
-                ).get();
+                ).call();
     }
 
     private void unarchiveBundle(final ZincBundle downloadedBundle,
