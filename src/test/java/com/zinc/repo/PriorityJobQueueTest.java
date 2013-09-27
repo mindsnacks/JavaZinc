@@ -1,6 +1,6 @@
 package com.zinc.repo;
 
-import com.zinc.classes.PriorityJobQueue;
+import com.zinc.classes.downloads.PriorityJobQueue;
 import com.zinc.exceptions.ZincRuntimeException;
 import com.zinc.utils.MockFactory;
 import com.zinc.utils.ZincBaseTest;

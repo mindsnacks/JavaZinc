@@ -1,4 +1,4 @@
-package com.zinc.classes;
+package com.zinc.classes.downloads;
 
 import com.zinc.exceptions.ZincRuntimeException;
 

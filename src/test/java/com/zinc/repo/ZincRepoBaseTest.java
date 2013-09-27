@@ -2,7 +2,7 @@ package com.zinc.repo;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.zinc.classes.PriorityJobQueue;
+import com.zinc.classes.downloads.PriorityJobQueue;
 import com.zinc.classes.ZincRepo;
 import com.zinc.classes.ZincRepoIndexWriter;
 import com.zinc.classes.data.ZincBundle;

@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.classes.data.ZincCloneBundleRequest;
+import com.zinc.classes.downloads.PriorityJobQueue;
 import com.zinc.classes.jobs.ZincDownloader;
 
 import java.io.File;

@@ -1,6 +1,7 @@
 package com.zinc.classes;
 
 import com.zinc.classes.data.*;
+import com.zinc.classes.downloads.PriorityJobQueue;
 import com.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
