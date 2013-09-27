@@ -91,8 +91,8 @@
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
-            <artifactId>guava-io</artifactId>
-            <version>r03</version>
+            <artifactId>guava</artifactId>
+            <version>15.0</version>
         </dependency>
     </dependencies>
 </project>
