@@ -1,5 +1,9 @@
 package com.zinc.classes.downloads;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,13 +15,16 @@ public class DownloadPriorityCalculator<V> implements PriorityCalculator<V> {
     private final Set<Handler<V>> mHandlers = new HashSet<Handler<V>>();
 
     public DownloadPriority getPriorityForObject(final V object) {
-        DownloadPriority result = DownloadPriority.UNKNOWN;
-
-        for (final Handler<V> handler : mHandlers) {
-            result = result.getMaxPriority(handler.getPriorityForObject(object));
+        if (mHandlers.size() > 0) {
+            return Collections.max(Collections2.transform(mHandlers, new Function<Handler<V>, DownloadPriority>() {
+                @Override
+                public DownloadPriority apply(final Handler<V> handler) {
+                    return handler.getPriorityForObject(object);
+                }
+            }));
+        } else {
+            return DownloadPriority.UNKNOWN;
         }
-
-        return result;
     }
 
     public void addHandler(final Handler<V> handler) {
