@@ -14,6 +14,7 @@ Only a very limited of features is supported:
 You can create a ```ZincRepo``` using ```ZincRepoFactory```:
 ```java
 final int bundleCloneConcurrency = 2;
+
 new ZincRepoFactory().createRepo(
     new File(currentDirectory),
     "flavor",
@@ -45,7 +46,7 @@ priorityCalculator.addHandler(new DownloadPriorityCalculator.Handler<BundleID>()
 
 If a particular handler does not know about a subset of the bundle IDs (for example, a handler might only work with a catalog), then it can return ```DownloadPriority.UNKNOWN```.
 
-Once you've started tracking the bundles you need, you need to start the repo:
+Once you've started tracking the bundles you need, you have to start the repo:
 ```java
 repo.start();
 ```

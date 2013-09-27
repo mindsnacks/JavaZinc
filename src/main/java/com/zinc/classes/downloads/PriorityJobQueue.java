@@ -1,6 +1,5 @@
 package com.zinc.classes.downloads;
 
-import com.sun.istack.internal.Nullable;
 import com.zinc.exceptions.ZincRuntimeException;
 
 import java.util.*;
@@ -149,7 +148,7 @@ public class PriorityJobQueue<Input, Output> {
     }
 
     public static class JobNotFoundException extends ZincRuntimeException {
-        public JobNotFoundException(@Nullable final Object object) {
+        public JobNotFoundException(final Object object) {
             super((object == null) ? "Object is null" : "Object '" + object.toString() + "' had not been added");
         }
     }
