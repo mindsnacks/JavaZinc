@@ -43,6 +43,18 @@ public class DownloadPriorityCalculatorTest extends ZincBaseTest {
         verify(handler).getPriorityForObject(object);
     }
 
+    @Test
+    public void priorityWithTwoHandlersReturnsHigher() throws Exception {
+        final DownloadPriority expectedResult = DownloadPriority.NEEDED_IMMEDIATELY;
+
+        // run
+        calculator.addHandler(handlerWithPriority(expectedResult));
+        calculator.addHandler(handlerWithPriority(DownloadPriority.NEEDED_SOON));
+
+        // verify
+        assertEquals(expectedResult, calculator.getPriorityForObject(new Data()));
+    }
+
     @SuppressWarnings("unchecked")
     private DownloadPriorityCalculator.Handler<Data> handlerWithPriority(final DownloadPriority priority) {
         final DownloadPriorityCalculator.Handler result = mock(DownloadPriorityCalculator.Handler.class);
