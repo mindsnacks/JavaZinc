@@ -34,6 +34,9 @@ public enum DownloadPriority {
         }
     }
 
+    /**
+     * @return MAX(this, priority)
+     */
     public DownloadPriority getMaxPriority(final DownloadPriority priority) {
         return (priority.getValue() > getValue()) ? priority : this;
     }
