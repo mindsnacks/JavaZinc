@@ -33,13 +33,24 @@ public class PriorityJobQueue<Input, Output> {
 
     public PriorityJobQueue(final int concurrency,
                             final ThreadFactory threadFactory,
-                            final Comparator<Input> priorityComparator,
+                            final PriorityCalculator<Input> priorityCalculator,
                             final DataProcessor<Input, Output> dataProcessor) {
         mConcurrency = concurrency;
         mThreadFactory = threadFactory;
         mDataProcessor = dataProcessor;
 
-        mQueue = new PriorityBlockingQueue<Input>(INITIAL_QUEUE_CAPACITY, priorityComparator);
+        mQueue = new PriorityBlockingQueue<Input>(INITIAL_QUEUE_CAPACITY, createPriorityComparator(priorityCalculator));
+    }
+
+    private Comparator<Input> createPriorityComparator(final PriorityCalculator<Input> priorityCalculator) {
+        final Comparator<DownloadPriority> comparator = DownloadPriority.createComparator();
+
+        return new Comparator<Input>() {
+            @Override
+            public int compare(final Input o1, final Input o2) {
+                return comparator.compare(priorityCalculator.getPriorityForObject(o1), priorityCalculator.getPriorityForObject(o2));
+            }
+        };
     }
 
     public boolean isRunning() {

@@ -1,5 +1,7 @@
 package com.zinc.repo;
 
+import com.zinc.classes.downloads.DownloadPriority;
+import com.zinc.classes.downloads.PriorityCalculator;
 import com.zinc.classes.downloads.PriorityJobQueue;
 import com.zinc.exceptions.ZincRuntimeException;
 import com.zinc.utils.MockFactory;
@@ -8,13 +10,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import java.util.Comparator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * User: NachoSoto
@@ -58,25 +59,21 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         }
     }
 
-    private static class DataComparator implements Comparator<Data> {
-
-        @Override
-        public int compare(final Data o1, final Data o2) {
-            return (o1.getPriority() < o2.getPriority()) ? 1 : -1;
-        }
-    }
-
     private PriorityJobQueue<Data, String> queue;
 
-    @Mock PriorityJobQueue.DataProcessor<Data, String> mDataProcessor;
+    @Mock private PriorityJobQueue.DataProcessor<Data, String> mDataProcessor;
+    @Mock private PriorityCalculator<Data> mPriorityCalculator;
+
 
     @Before
     public void setUp() throws Exception {
         queue = new PriorityJobQueue<Data, String>(
                 CONCURRENCY,
                 new MockFactory.DaemonThreadFactory(),
-                new DataComparator(),
+                mPriorityCalculator,
                 mDataProcessor);
+
+        doReturn(DownloadPriority.UNKNOWN).when(mPriorityCalculator).getPriorityForObject(any(Data.class));
     }
 
     @Test
