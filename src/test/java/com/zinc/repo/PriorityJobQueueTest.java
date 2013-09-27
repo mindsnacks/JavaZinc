@@ -106,7 +106,6 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         queue.stop();
 
         assertFalse(queue.isRunning());
-
     }
 
     @Test(expected = ZincRuntimeException.class)
@@ -145,6 +144,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         final Future<String> result = queue.get(data);
 
         verify(mDataProcessor).process(data);
+        verify(mPriorityCalculator, atLeast(1)).getPriorityForObject(data);
         assertNotNull(result);
         assertEquals(data.getResult(), result.get());
     }
