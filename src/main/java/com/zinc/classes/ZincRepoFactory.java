@@ -2,14 +2,16 @@ package com.zinc.classes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.zinc.classes.data.BundleID;
 import com.zinc.classes.data.SourceURL;
 import com.zinc.classes.data.ZincBundle;
 import com.zinc.classes.data.ZincCloneBundleRequest;
+import com.zinc.classes.downloads.DownloadPriority;
+import com.zinc.classes.downloads.PriorityCalculator;
 import com.zinc.classes.downloads.PriorityJobQueue;
 import com.zinc.classes.jobs.ZincDownloader;
 
 import java.io.File;
-import java.util.Comparator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,12 +24,12 @@ public final class ZincRepoFactory {
     public ZincRepo createRepo(final File root,
                                final String flavorName,
                                final int bundleCloneConcurrency,
-                               final ZincRepo.BundlePriorityComparator priorityComparator) {
+                               final PriorityCalculator<BundleID> priorityCalculator) {
         final Gson gson = createGson();
         final ZincJobFactory jobFactory = createJobFactory(gson);
         final ZincRepoIndexWriter indexWriter = createRepoIndexWriter(root, gson);
 
-        final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue = createQueue(bundleCloneConcurrency, createBundleDownloader(jobFactory), createPriorityComparator(priorityComparator));
+        final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue = createQueue(bundleCloneConcurrency, createBundleDownloader(jobFactory), createPriorityCalculator(priorityCalculator));
 
         return new ZincRepo(queue, root.toURI(), indexWriter, flavorName);
     }
@@ -58,18 +60,18 @@ public final class ZincRepoFactory {
         return new ZincRepoIndexWriter(root, gson);
     }
 
-    private Comparator<ZincCloneBundleRequest> createPriorityComparator(final ZincRepo.BundlePriorityComparator priorityComparator) {
-        return new Comparator<ZincCloneBundleRequest>() {
+    private PriorityCalculator<ZincCloneBundleRequest> createPriorityCalculator(final PriorityCalculator<BundleID> priorityComparator) {
+        return new PriorityCalculator<ZincCloneBundleRequest>() {
             @Override
-            public int compare(final ZincCloneBundleRequest o1, final ZincCloneBundleRequest o2) {
-                return priorityComparator.compare(o1.getBundleID(), o2.getBundleID());
+            public DownloadPriority getPriorityForObject(final ZincCloneBundleRequest object) {
+                return priorityComparator.getPriorityForObject(object.getBundleID());
             }
         };
     }
 
     private PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> createQueue(final int bundleCloneConcurrency,
                                                                              final PriorityJobQueue.DataProcessor<ZincCloneBundleRequest, ZincBundle> bundleDownloader,
-                                                                             final Comparator<ZincCloneBundleRequest> priorityComparator) {
+                                                                             final PriorityCalculator<ZincCloneBundleRequest> priorityComparator) {
         return new PriorityJobQueue<ZincCloneBundleRequest, ZincBundle>(
                 bundleCloneConcurrency,
                 new DaemonThreadFactory(),

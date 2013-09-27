@@ -93,12 +93,4 @@ public class ZincRepo {
         mQueue.add(cloneBundleRequest);
         mBundles.put(bundleID, cloneBundleRequest);
     }
-
-    public static interface BundlePriorityComparator {
-        /**
-         * Compares the two bundles for order.
-         * @return negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
-         */
-        int compare(BundleID bundle1, BundleID bundle2);
-    }
 }
