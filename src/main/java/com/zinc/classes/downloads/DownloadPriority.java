@@ -1,5 +1,7 @@
 package com.zinc.classes.downloads;
 
+import java.util.Comparator;
+
 /**
  * User: NachoSoto
  * Date: 9/25/13
@@ -34,5 +36,14 @@ public enum DownloadPriority {
 
     public DownloadPriority getMaxPriority(final DownloadPriority priority) {
         return (priority.getValue() > getValue()) ? priority : this;
+    }
+
+    public static Comparator<DownloadPriority> createComparator() {
+        return new Comparator<DownloadPriority>() {
+            @Override
+            public int compare(final DownloadPriority o1, final DownloadPriority o2) {
+                return (o1.getValue() > o2.getValue()) ? 1 : ((o1.getValue() < o2.getValue()) ? -1 : 0);
+            }
+        };
     }
 }

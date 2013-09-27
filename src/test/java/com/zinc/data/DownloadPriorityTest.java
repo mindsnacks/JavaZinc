@@ -4,6 +4,8 @@ import com.zinc.classes.downloads.DownloadPriority;
 import com.zinc.utils.ZincBaseTest;
 import org.junit.Test;
 
+import java.util.Comparator;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 
@@ -30,5 +32,26 @@ public class DownloadPriorityTest extends ZincBaseTest {
     @Test
     public void getMaxPriorityWithHigherPriority() throws Exception {
         assertEquals(DownloadPriority.NEEDED_IMMEDIATELY, DownloadPriority.NEEDED_SOON.getMaxPriority(DownloadPriority.NEEDED_IMMEDIATELY));
+    }
+
+    @Test
+    public void comparatorReturns0IfEqual() throws Exception {
+        final Comparator<DownloadPriority> comparator = DownloadPriority.createComparator();
+
+        assertEquals(0, comparator.compare(DownloadPriority.NOT_NEEDED, DownloadPriority.NOT_NEEDED));
+    }
+
+    @Test
+    public void comparatorReturns1IfGreaterPriority() throws Exception {
+        final Comparator<DownloadPriority> comparator = DownloadPriority.createComparator();
+
+        assertEquals(1, comparator.compare(DownloadPriority.NEEDED_SOON, DownloadPriority.NOT_NEEDED));
+    }
+
+    @Test
+    public void comparatorReturnsMinus1IfLowerPriority() throws Exception {
+        final Comparator<DownloadPriority> comparator = DownloadPriority.createComparator();
+
+        assertEquals(-1, comparator.compare(DownloadPriority.NEEDED_SOON, DownloadPriority.NEEDED_IMMEDIATELY));
     }
 }
