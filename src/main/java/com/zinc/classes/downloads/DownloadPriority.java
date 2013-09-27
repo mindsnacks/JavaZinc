@@ -42,7 +42,7 @@ public enum DownloadPriority {
         return new Comparator<DownloadPriority>() {
             @Override
             public int compare(final DownloadPriority o1, final DownloadPriority o2) {
-                return (o1.getValue() > o2.getValue()) ? 1 : ((o1.getValue() < o2.getValue()) ? -1 : 0);
+                return (o1.getValue() > o2.getValue()) ? -1 : ((o1.getValue() < o2.getValue()) ? 1 : 0);
             }
         };
     }

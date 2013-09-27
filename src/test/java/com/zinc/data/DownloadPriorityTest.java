@@ -42,16 +42,16 @@ public class DownloadPriorityTest extends ZincBaseTest {
     }
 
     @Test
-    public void comparatorReturns1IfGreaterPriority() throws Exception {
+    public void comparatorReturns1IfLowerPriority() throws Exception {
         final Comparator<DownloadPriority> comparator = DownloadPriority.createComparator();
 
-        assertEquals(1, comparator.compare(DownloadPriority.NEEDED_SOON, DownloadPriority.NOT_NEEDED));
+        assertEquals(1, comparator.compare(DownloadPriority.NEEDED_SOON, DownloadPriority.NEEDED_IMMEDIATELY));
     }
 
     @Test
-    public void comparatorReturnsMinus1IfLowerPriority() throws Exception {
+    public void comparatorReturnsMinus1IfGreaterPriority() throws Exception {
         final Comparator<DownloadPriority> comparator = DownloadPriority.createComparator();
 
-        assertEquals(-1, comparator.compare(DownloadPriority.NEEDED_SOON, DownloadPriority.NEEDED_IMMEDIATELY));
+        assertEquals(-1, comparator.compare(DownloadPriority.NEEDED_SOON, DownloadPriority.NOT_NEEDED));
     }
 }
