@@ -7,7 +7,7 @@ import java.util.Set;
  * User: NachoSoto
  * Date: 9/27/13
  */
-public class DownloadPriorityCalculator<V> {
+public class DownloadPriorityCalculator<V> implements PriorityCalculator<V> {
     private final Set<Handler<V>> mHandlers = new HashSet<Handler<V>>();
 
     public DownloadPriority getPriorityForObject(final V object) {
