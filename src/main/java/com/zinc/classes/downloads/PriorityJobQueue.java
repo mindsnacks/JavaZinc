@@ -48,7 +48,9 @@ public class PriorityJobQueue<Input, Output> {
         return new Comparator<Input>() {
             @Override
             public int compare(final Input o1, final Input o2) {
-                return comparator.compare(priorityCalculator.getPriorityForObject(o1), priorityCalculator.getPriorityForObject(o2));
+                return comparator.compare(
+                        priorityCalculator.getPriorityForObject(o1),
+                        priorityCalculator.getPriorityForObject(o2));
             }
         };
     }

@@ -1,5 +1,8 @@
 package com.zinc.repo;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.zinc.classes.downloads.DownloadPriority;
 import com.zinc.classes.downloads.PriorityCalculator;
 import com.zinc.classes.downloads.PriorityJobQueue;
@@ -8,8 +11,12 @@ import com.zinc.utils.MockFactory;
 import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -26,15 +33,15 @@ public class PriorityJobQueueTest extends ZincBaseTest {
     public static final int CONCURRENCY = 1;
 
     private static class Data {
-        private final int mPriority;
+        private final DownloadPriority mPriority;
         private final String mResult;
 
-        public Data(final int priority, final String result) {
+        public Data(final DownloadPriority priority, final String result) {
             mPriority = priority;
             mResult = result;
         }
 
-        private int getPriority() {
+        private DownloadPriority getPriority() {
             return mPriority;
         }
 
@@ -55,7 +62,12 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
         @Override
         public int hashCode() {
-            return 31 * mPriority + (mResult != null ? mResult.hashCode() : 0);
+            return 31 * mPriority.getValue() + (mResult != null ? mResult.hashCode() : 0);
+        }
+
+        @Override
+        public String toString() {
+            return "Data {" + mResult + ": " + mPriority + "}";
         }
     }
 
@@ -73,7 +85,12 @@ public class PriorityJobQueueTest extends ZincBaseTest {
                 mPriorityCalculator,
                 mDataProcessor);
 
-        doReturn(DownloadPriority.UNKNOWN).when(mPriorityCalculator).getPriorityForObject(any(Data.class));
+        when(mPriorityCalculator.getPriorityForObject(any(Data.class))).then(new Answer<Object>() {
+            @Override
+            public DownloadPriority answer(final InvocationOnMock invocationOnMock) throws Throwable {
+                return ((Data)invocationOnMock.getArguments()[0]).getPriority();
+            }
+        });
     }
 
     @Test
@@ -115,7 +132,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     @Test
     public void dataCanBeAdded() throws Exception {
-        queue.add(new Data(1, "result"));
+        queue.add(new Data(DownloadPriority.NEEDED_SOON, "result"));
     }
 
     @Test
@@ -149,6 +166,30 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         assertEquals(data.getResult(), result.get());
     }
 
+    @Test
+    public void dataIsProcessedInOrderOfPriority() throws Exception {
+        final Data data = processAndAddRandomData();
+        processAndAddRandomData();
+        processAndAddRandomData();
+        processAndAddRandomData();
+
+        // run
+        queue.start();
+        queue.get(data);
+
+        ArgumentCaptor<Data> argument = ArgumentCaptor.forClass(Data.class);
+        verify(mDataProcessor, atLeast(1)).process(argument.capture());
+
+        final List<Integer> priorities = Lists.transform(argument.getAllValues(), new Function<Data, Integer>() {
+            @Override
+            public Integer apply(final Data data) {
+                return data.getPriority().getValue();
+            }
+        });
+
+        assertTrue(Ordering.natural().reverse().isOrdered(priorities));
+    }
+
     @Test(expected = PriorityJobQueue.JobNotFoundException.class)
     public void dataCannotBeRetrievedIfItWasNeverAdded() throws Exception {
         final Data data = randomData();
@@ -158,7 +199,11 @@ public class PriorityJobQueueTest extends ZincBaseTest {
     }
 
     private Data randomData() {
-        return new Data(MockFactory.randomInt(1, 10), MockFactory.randomString());
+        return new Data(randomPriority(), MockFactory.randomString());
+    }
+
+    private DownloadPriority randomPriority() {
+        return DownloadPriority.values()[MockFactory.randomInt(0, DownloadPriority.values().length - 1)];
     }
 
     private Data processAndAddRandomData() {
