@@ -7,8 +7,9 @@ import java.io.*;
 import java.net.URL;
 
 /**
- * User: NachoSoto
- * Date: 9/4/13
+ * @author NachoSoto
+ *
+ * This job downloads an archive and untars it.
  */
 public class ZincDownloadArchiveJob extends AbstractZincDownloadFileJob {
     public static final int BUFFER_SIZE = 2048;

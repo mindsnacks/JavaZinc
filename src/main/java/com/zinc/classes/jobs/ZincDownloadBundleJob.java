@@ -7,8 +7,9 @@ import java.io.File;
 import java.net.URL;
 
 /**
- * User: NachoSoto
- * Date: 9/4/13
+ * @author NachoSoto
+ *
+ * This job downloads the appropriate bundle for the ZincCloneBundleRequest
  */
 public class ZincDownloadBundleJob extends ZincJob<ZincBundle> {
     protected final ZincJobFactory mJobFactory;

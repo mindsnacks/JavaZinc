@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * User: NachoSoto
- * Date: 9/10/13
+ * @author NachoSoto
+ *
+ * This job creates the result bundle by extracting the contents of the archive,
+ * with the information in the ZincManifest.
  */
 public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
     private final ZincBundle mDownloadedBundle;
