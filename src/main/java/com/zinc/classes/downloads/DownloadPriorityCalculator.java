@@ -12,13 +12,13 @@ import java.util.Set;
  * Date: 9/27/13
  */
 public class DownloadPriorityCalculator<V> implements PriorityCalculator<V> {
-    private final Set<Handler<V>> mHandlers = new HashSet<Handler<V>>();
+    private final Set<PriorityCalculator<V>> mHandlers = new HashSet<PriorityCalculator<V>>();
 
     public DownloadPriority getPriorityForObject(final V object) {
         if (mHandlers.size() > 0) {
-            return Collections.max(Collections2.transform(mHandlers, new Function<Handler<V>, DownloadPriority>() {
+            return Collections.max(Collections2.transform(mHandlers, new Function<PriorityCalculator<V>, DownloadPriority>() {
                 @Override
-                public DownloadPriority apply(final Handler<V> handler) {
+                public DownloadPriority apply(final PriorityCalculator<V> handler) {
                     return handler.getPriorityForObject(object);
                 }
             }));
@@ -27,11 +27,7 @@ public class DownloadPriorityCalculator<V> implements PriorityCalculator<V> {
         }
     }
 
-    public void addHandler(final Handler<V> handler) {
+    public void addHandler(final PriorityCalculator<V> handler) {
         mHandlers.add(handler);
-    }
-
-    public static interface Handler<V> {
-        DownloadPriority getPriorityForObject(V object);
     }
 }

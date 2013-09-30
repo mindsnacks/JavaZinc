@@ -2,6 +2,7 @@ package com.zinc.downloads;
 
 import com.zinc.classes.downloads.DownloadPriority;
 import com.zinc.classes.downloads.DownloadPriorityCalculator;
+import com.zinc.classes.downloads.PriorityCalculator;
 import com.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +33,7 @@ public class DownloadPriorityCalculatorTest extends ZincBaseTest {
         final DownloadPriority expectedResult = DownloadPriority.NEEDED_SOON;
         final Data object = new Data();
 
-        final DownloadPriorityCalculator.Handler<Data> handler = handlerWithPriority(expectedResult);
+        final PriorityCalculator<Data> handler = calculatorWithPriority(expectedResult);
 
         // run
         calculator.addHandler(handler);
@@ -48,16 +49,16 @@ public class DownloadPriorityCalculatorTest extends ZincBaseTest {
         final DownloadPriority expectedResult = DownloadPriority.NEEDED_IMMEDIATELY;
 
         // run
-        calculator.addHandler(handlerWithPriority(expectedResult));
-        calculator.addHandler(handlerWithPriority(DownloadPriority.NEEDED_SOON));
+        calculator.addHandler(calculatorWithPriority(expectedResult));
+        calculator.addHandler(calculatorWithPriority(DownloadPriority.NEEDED_SOON));
 
         // verify
         assertEquals(expectedResult, calculator.getPriorityForObject(new Data()));
     }
 
     @SuppressWarnings("unchecked")
-    private DownloadPriorityCalculator.Handler<Data> handlerWithPriority(final DownloadPriority priority) {
-        final DownloadPriorityCalculator.Handler result = mock(DownloadPriorityCalculator.Handler.class);
+    private PriorityCalculator<Data> calculatorWithPriority(final DownloadPriority priority) {
+        final PriorityCalculator result = mock(PriorityCalculator.class);
 
         doReturn(priority).when(result).getPriorityForObject(anyObject());
 
