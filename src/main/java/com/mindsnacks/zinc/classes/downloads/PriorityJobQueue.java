@@ -30,6 +30,7 @@ public class PriorityJobQueue<Input, Output> {
 
     private final Lock mLock = new ReentrantLock();
     private final Condition mEnqueued = mLock.newCondition();
+    private final Semaphore mEnqueuedDataSemahore;
 
     public PriorityJobQueue(final int concurrency,
                             final ThreadFactory threadFactory,
@@ -38,6 +39,7 @@ public class PriorityJobQueue<Input, Output> {
         mConcurrency = concurrency;
         mThreadFactory = threadFactory;
         mDataProcessor = dataProcessor;
+        mEnqueuedDataSemahore = new Semaphore(concurrency);
 
         mQueue = new PriorityBlockingQueue<Input>(INITIAL_QUEUE_CAPACITY, createPriorityComparator(priorityCalculator));
     }
@@ -65,7 +67,19 @@ public class PriorityJobQueue<Input, Output> {
         }
 
         mScheduler =  Executors.newSingleThreadExecutor(mThreadFactory);
-        mExecutorService = Executors.newFixedThreadPool(mConcurrency, mThreadFactory);
+        mExecutorService = new ThreadPoolExecutor(
+                mConcurrency,
+                mConcurrency,
+                0L, TimeUnit.MICROSECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                mThreadFactory) {
+            @Override
+            protected void afterExecute(final Runnable r, final Throwable t) {
+                super.afterExecute(r, t);
+
+                mEnqueuedDataSemahore.release();
+            }
+        };
 
         mScheduler.submit(createSchedulerTask());
     }
@@ -106,6 +120,7 @@ public class PriorityJobQueue<Input, Output> {
 
         if (stopped) {
             mScheduler = mExecutorService = null;
+            mEnqueuedDataSemahore.drainPermits();
         }
 
         return stopped;
