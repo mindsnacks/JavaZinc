@@ -24,4 +24,9 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
     protected ZincBundle run() throws Exception {
         return mJobFactory.unarchiveBundle(mJobFactory.downloadBundle(mRequest).call(), mRequest).call();
     }
+
+    @Override
+    protected String getJobName() {
+        return super.getJobName() + " (" + mRequest.getBundleID() + ")";
+    }
 }
