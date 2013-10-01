@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
  */
 public abstract class ZincJob<V> implements Callable<V> {
     protected String getJobName() {
-        return this.getClass().getSimpleName() + " - " + hashCode();
+        return this.getClass().getSimpleName();
     }
 
     protected final void logMessage(final String message) {
