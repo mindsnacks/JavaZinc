@@ -120,7 +120,6 @@ public class PriorityJobQueue<Input, Output> {
 
         if (stopped) {
             mScheduler = mExecutorService = null;
-            mEnqueuedDataSemahore.drainPermits();
         }
 
         return stopped;
