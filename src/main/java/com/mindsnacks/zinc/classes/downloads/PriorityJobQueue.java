@@ -90,6 +90,8 @@ public class PriorityJobQueue<Input, Output> {
                 try {
                     Input data;
                     while ((data = mQueue.take()) != null) {
+                        mEnqueuedDataSemahore.acquire();
+
                         mLock.lock();
 
                         try {
