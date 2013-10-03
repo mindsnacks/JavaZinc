@@ -36,7 +36,7 @@ repo.startTrackingBundle(new BundleID(catalogID, "english-kidsvocab-astronomy"),
 ```DownloadPriorityCalculator``` allows you to add objects that handle calculating priorities for a subset of the bundles.
 For example:
 ```java
-priorityCalculator.addHandler(new DownloadPriorityCalculator.Handler<BundleID>() {
+priorityCalculator.addHandler(new PriorityCalculator<BundleID>() {
                                @Override
                                public DownloadPriority getPriorityForObject(final BundleID bundleID) {
                                    return DownloadPriority.NEEDED_IMMEDIATELY;
