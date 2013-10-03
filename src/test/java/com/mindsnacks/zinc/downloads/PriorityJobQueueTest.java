@@ -160,10 +160,13 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         queue.start();
         final Future<String> result = queue.get(data);
 
+        // run
+        assertEquals(data.getResult(), result.get());
+
+        // verify
         verify(mDataProcessor).process(data);
         verify(mPriorityCalculator, atLeast(1)).getPriorityForObject(data);
         assertNotNull(result);
-        assertEquals(data.getResult(), result.get());
     }
 
     @Test
@@ -183,7 +186,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         final List<Integer> priorities = Lists.transform(argument.getAllValues(), new Function<Data, Integer>() {
             @Override
             public Integer apply(final Data data) {
-                return data.getPriority().getValue();
+            return data.getPriority().getValue();
             }
         });
 
