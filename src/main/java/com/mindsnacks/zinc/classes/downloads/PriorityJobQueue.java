@@ -62,9 +62,7 @@ public class PriorityJobQueue<Input, Output> {
     }
 
     public synchronized void start() {
-        if (isRunning()) {
-            throw new ZincRuntimeException("Service is already running.");
-        }
+        checkServiceIsRunning(false, "Service is already running");
 
         mScheduler =  Executors.newSingleThreadExecutor(mThreadFactory);
         mExecutorService = new ThreadPoolExecutor(
@@ -109,9 +107,7 @@ public class PriorityJobQueue<Input, Output> {
     }
 
     public synchronized boolean stop() throws InterruptedException {
-        if (!isRunning()) {
-            throw new ZincRuntimeException("Service is already stopped.");
-        }
+        checkServiceIsRunning(true, "Service is already stopped");
 
         boolean stopped = false;
         mScheduler.shutdownNow();
@@ -125,6 +121,12 @@ public class PriorityJobQueue<Input, Output> {
         }
 
         return stopped;
+    }
+
+    private void checkServiceIsRunning(final boolean shouldBeRunning, final String errorMessage) {
+        if (isRunning() != shouldBeRunning) {
+            throw new ZincRuntimeException(errorMessage);
+        }
     }
 
     public void add(final Input element) {
