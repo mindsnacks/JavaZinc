@@ -10,6 +10,18 @@ Only a very limited of features is supported:
   - Flavors.
   - Tracking distributions.
 
+### Download
+
+Grab via Maven:
+
+```xml
+<dependency>
+    <groupId>com.mindsnacks.javazinc</groupId>
+    <artifactId>JavaZinc</artifactId>
+    <version>(insert latest version)</version>
+</dependency>
+```
+
 ### Usage
 You can create a ```ZincRepo``` using ```ZincRepoFactory```:
 ```java
