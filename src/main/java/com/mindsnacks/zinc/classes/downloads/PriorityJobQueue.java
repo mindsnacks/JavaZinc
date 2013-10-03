@@ -1,5 +1,7 @@
 package com.mindsnacks.zinc.classes.downloads;
 
+import com.google.common.base.Function;
+import com.google.common.util.concurrent.Futures;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.util.*;
@@ -23,6 +25,7 @@ public class PriorityJobQueue<Input, Output> {
 
     private ExecutorService mScheduler;
     private ExecutorService mExecutorService;
+    private ExecutorService mFuturesExecutorService;
 
     private final PriorityBlockingQueue<Input> mQueue;
     private final Map<Input, Future<Output>> mFutures = new HashMap<Input, Future<Output>>();
@@ -64,7 +67,8 @@ public class PriorityJobQueue<Input, Output> {
     public synchronized void start() {
         checkServiceIsRunning(false, "Service is already running");
 
-        mScheduler =  Executors.newSingleThreadExecutor(mThreadFactory);
+        mScheduler = Executors.newSingleThreadExecutor(mThreadFactory);
+        mFuturesExecutorService = Executors.newCachedThreadPool(mThreadFactory);
         mExecutorService = new ThreadPoolExecutor(
                 mConcurrency,
                 mConcurrency,
@@ -116,8 +120,11 @@ public class PriorityJobQueue<Input, Output> {
         mExecutorService.shutdown();
         stopped &= mExecutorService.awaitTermination(EXECUTOR_SERVICE_TERMINATION_TIMEOUT, TimeUnit.SECONDS);
 
+        mFuturesExecutorService.shutdown();
+        stopped &= mFuturesExecutorService.awaitTermination(EXECUTOR_SERVICE_TERMINATION_TIMEOUT, TimeUnit.SECONDS);
+
         if (stopped) {
-            mScheduler = mExecutorService = null;
+            mScheduler = mExecutorService = mFuturesExecutorService = null;
         }
 
         return stopped;
@@ -147,21 +154,36 @@ public class PriorityJobQueue<Input, Output> {
     }
 
     private Future<Output> waitForFuture(final Input element) {
-        Future<Output> result;
-        mLock.lock();
+        return Futures.lazyTransform(mFuturesExecutorService.submit(new Callable<Future<Output>>() {
+            @Override
+            public Future<Output> call() throws Exception {
+                Future<Output> result;
 
-        try {
-            while ((result = mFutures.get(element)) == null) {
-                mEnqueued.awaitUninterruptibly();
+                mLock.lock();
+
+                try {
+                    while ((result = mFutures.get(element)) == null) {
+                        mEnqueued.awaitUninterruptibly();
+                    }
+                } finally {
+                    mLock.unlock();
+                }
+
+                return result;
             }
-        } finally {
-            mLock.unlock();
-        }
-
-        return result;
+        }), new Function<Future<Output>, Output>() {
+            @Override
+            public Output apply(final Future<Output> future) {
+                try {
+                    return future.get();
+                } catch (Exception e) {
+                    throw new ZincRuntimeException("Error waiting for future", e);
+                }
+            }
+        });
     }
 
-    public static interface DataProcessor <Input, Output> {
+    public static interface DataProcessor<Input, Output> {
         Callable<Output> process(Input data);
     }
 
