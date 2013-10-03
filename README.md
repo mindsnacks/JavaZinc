@@ -13,7 +13,13 @@ Only a very limited of features is supported:
 ### Usage
 You can create a ```ZincRepo``` using ```ZincRepoFactory```:
 ```java
-new ZincRepoFactory().createRepo(new File(currentDirectory), "flavor");
+final int bundleCloneConcurrency = 2;
+
+new ZincRepoFactory().createRepo(
+    new File(currentDirectory),
+    "flavor",
+    bundleCloneConcurrency,
+    new DownloadPriorityCalculator<BundleID>());
 ```
 
 Then you can add your sources:
@@ -27,7 +33,25 @@ And start tracking bundles:
 repo.startTrackingBundle(new BundleID(catalogID, "english-kidsvocab-astronomy"), "master");
 ```
 
-Once you've started tracking the bundles you need, you can get ```Future```s for them:
+```DownloadPriorityCalculator``` allows you to add objects that handle calculating priorities for a subset of the bundles.
+For example:
+```java
+priorityCalculator.addHandler(new DownloadPriorityCalculator.Handler<BundleID>() {
+                               @Override
+                               public DownloadPriority getPriorityForObject(final BundleID bundleID) {
+                                   return DownloadPriority.NEEDED_IMMEDIATELY;
+                               }
+                           });
+```
+
+If a particular handler does not know about a subset of the bundle IDs (for example, a handler might only work with a catalog), then it can return ```DownloadPriority.UNKNOWN```.
+
+Once you've started tracking the bundles you need, you have to start the repo:
+```java
+repo.start();
+```
+
+And then you can get ```Future```s for the bundles:
 ```java
 final Future<ZincBundle> bundle = repo.getBundle(bundleID);
 ```
