@@ -1,4 +1,4 @@
-package com.mindsnacks.zinc.data;
+package com.mindsnacks.zinc.downloads;
 
 import com.mindsnacks.zinc.classes.downloads.DownloadPriority;
 import com.mindsnacks.zinc.utils.ZincBaseTest;

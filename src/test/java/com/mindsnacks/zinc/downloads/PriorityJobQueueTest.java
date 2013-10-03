@@ -1,4 +1,4 @@
-package com.mindsnacks.zinc.repo;
+package com.mindsnacks.zinc.downloads;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
