@@ -143,9 +143,12 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         queue.start();
         final Future<String> result = queue.get(data);
 
+        // run
+        assertEquals(data.getResult(), result.get());
+
+        // verify
         verify(mDataProcessor).process(data);
         assertNotNull(result);
-        assertEquals(data.getResult(), result.get());
     }
 
     @Test
