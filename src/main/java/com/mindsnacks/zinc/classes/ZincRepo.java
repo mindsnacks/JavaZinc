@@ -25,7 +25,7 @@ public class ZincRepo {
 
     /**
      * @todo remove cached promises that failed?
-     * @note repo is paused after initialization. You must call `start` after tracking the bundles.
+     * Instances are paused after initialization. You must call `start` after tracking the bundles.
      */
     public ZincRepo(final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue, final URI root, final ZincRepoIndexWriter repoIndexWriter, final String flavorName) {
         mQueue = queue;
