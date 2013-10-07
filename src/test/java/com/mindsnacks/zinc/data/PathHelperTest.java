@@ -24,7 +24,7 @@ public class PathHelperTest extends ZincBaseTest {
         final int version = randomInt(1, 1000);
         final String flavorName = "retina";
 
-        final String result = PathHelper.getLocalDownloadsFolder(bundleID, version, flavorName);
+        final String result = PathHelper.getLocalDownloadFolder(bundleID, version, flavorName);
 
         assertTrue(result.contains(Integer.toString(version)));
         assertTrue(result.contains(bundleID.toString()));
@@ -37,7 +37,7 @@ public class PathHelperTest extends ZincBaseTest {
         final int version = randomInt(1, 1000);
         final String flavorName = "retina";
 
-        final String result = PathHelper.getLocalBundlesFolder(bundleID, version, flavorName);
+        final String result = PathHelper.getLocalBundleFolder(bundleID, version, flavorName);
 
         assertTrue(result.contains(Integer.toString(version)));
         assertTrue(result.contains(bundleID.toString()));
@@ -50,6 +50,6 @@ public class PathHelperTest extends ZincBaseTest {
         final int version = randomInt(1, 1000);
         final String flavorName = "retina";
 
-        assertThat(PathHelper.getLocalBundlesFolder(bundleID, version, flavorName), not(equalTo(PathHelper.getLocalDownloadsFolder(bundleID, version, flavorName))));
+        assertThat(PathHelper.getLocalBundleFolder(bundleID, version, flavorName), not(equalTo(PathHelper.getLocalDownloadFolder(bundleID, version, flavorName))));
     }
 }

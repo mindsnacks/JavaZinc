@@ -35,7 +35,7 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
         final int version = mDownloadedBundle.getVersion();
         final BundleID bundleID = mRequest.getBundleID();
 
-        final File localBundleFolder = new File(mRequest.getRepoFolder().getAbsolutePath() + "/" + PathHelper.getLocalBundlesFolder(bundleID, version, mRequest.getFlavorName()));
+        final File localBundleFolder = new File(mRequest.getRepoFolder().getAbsolutePath() + "/" + PathHelper.getLocalBundleFolder(bundleID, version, mRequest.getFlavorName()));
         final ZincBundle result = new ZincBundle(localBundleFolder, bundleID, version);
 
         if (!localBundleFolder.exists()) {

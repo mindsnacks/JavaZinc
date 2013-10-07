@@ -10,11 +10,11 @@ public class PathHelper {
 
     public static final String FLAVOR_SEPARATOR = "~";
 
-    public static String getLocalDownloadsFolder(final BundleID bundleID, final int version, final String flavorName) {
+    public static String getLocalDownloadFolder(final BundleID bundleID, final int version, final String flavorName) {
         return String.format("%s/%s-%d%s%s", DOWNLOADS_FOLDER, bundleID, version, FLAVOR_SEPARATOR, flavorName);
     }
 
-    public static String getLocalBundlesFolder(final BundleID bundleID, final int version, final String flavorName) {
+    public static String getLocalBundleFolder(final BundleID bundleID, final int version, final String flavorName) {
         return String.format("%s/%s-%d%s%s", BUNDLES_FOLDER, bundleID, version, FLAVOR_SEPARATOR, flavorName);
     }
 }

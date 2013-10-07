@@ -31,7 +31,7 @@ public class ZincDownloadBundleJob extends ZincJob<ZincBundle> {
         final int version = catalog.getVersionForBundleName(bundleName, mRequest.getDistribution());
 
         final URL archiveURL = mRequest.getSourceURL().getArchiveURL(bundleName, version, mRequest.getFlavorName());
-        final String folderName = PathHelper.getLocalDownloadsFolder(bundleID, version, mRequest.getFlavorName());
+        final String folderName = PathHelper.getLocalDownloadFolder(bundleID, version, mRequest.getFlavorName());
 
         final File file = mJobFactory.downloadArchive(archiveURL, mRequest.getRepoFolder(), folderName, false).call();
 
