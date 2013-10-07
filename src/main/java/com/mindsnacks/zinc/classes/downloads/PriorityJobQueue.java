@@ -1,5 +1,9 @@
 package com.mindsnacks.zinc.classes.downloads;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.util.*;
@@ -22,15 +26,16 @@ public class PriorityJobQueue<Input, Output> {
     private final DataProcessor<Input, Output> mDataProcessor;
 
     private ExecutorService mScheduler;
-    private ExecutorService mExecutorService;
+    private ListeningExecutorService mExecutorService;
+    private ListeningExecutorService mFuturesExecutorService;
 
     private final PriorityBlockingQueue<Input> mQueue;
-    private final Map<Input, Future<Output>> mFutures = new HashMap<Input, Future<Output>>();
+    private final Map<Input, ListenableFuture<Output>> mFutures = new HashMap<Input, ListenableFuture<Output>>();
     private final Set<Input> mAddedElements = new HashSet<Input>();
 
     private final Lock mLock = new ReentrantLock();
     private final Condition mEnqueued = mLock.newCondition();
-    private final Semaphore mEnqueuedDataSemahore;
+    private final Semaphore mEnqueuedDataSemaphore;
 
     public PriorityJobQueue(final int concurrency,
                             final ThreadFactory threadFactory,
@@ -39,7 +44,7 @@ public class PriorityJobQueue<Input, Output> {
         mConcurrency = concurrency;
         mThreadFactory = threadFactory;
         mDataProcessor = dataProcessor;
-        mEnqueuedDataSemahore = new Semaphore(concurrency);
+        mEnqueuedDataSemaphore = new Semaphore(concurrency);
 
         mQueue = new PriorityBlockingQueue<Input>(INITIAL_QUEUE_CAPACITY, createPriorityComparator(priorityCalculator));
     }
@@ -62,12 +67,11 @@ public class PriorityJobQueue<Input, Output> {
     }
 
     public synchronized void start() {
-        if (isRunning()) {
-            throw new ZincRuntimeException("Service is already running.");
-        }
+        checkServiceIsRunning(false, "Service is already running");
 
-        mScheduler =  Executors.newSingleThreadExecutor(mThreadFactory);
-        mExecutorService = new ThreadPoolExecutor(
+        mScheduler = Executors.newSingleThreadExecutor(mThreadFactory);
+        mFuturesExecutorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool(mThreadFactory));
+        mExecutorService = MoreExecutors.listeningDecorator(new ThreadPoolExecutor(
                 mConcurrency,
                 mConcurrency,
                 0L, TimeUnit.MICROSECONDS,
@@ -77,9 +81,9 @@ public class PriorityJobQueue<Input, Output> {
             protected void afterExecute(final Runnable r, final Throwable t) {
                 super.afterExecute(r, t);
 
-                mEnqueuedDataSemahore.release();
+                mEnqueuedDataSemaphore.release();
             }
-        };
+        });
 
         mScheduler.submit(createSchedulerTask());
     }
@@ -90,7 +94,7 @@ public class PriorityJobQueue<Input, Output> {
                 try {
                     Input data;
                     while ((data = mQueue.take()) != null) {
-                        mEnqueuedDataSemahore.acquire();
+                        mEnqueuedDataSemaphore.acquire();
 
                         mLock.lock();
 
@@ -109,9 +113,7 @@ public class PriorityJobQueue<Input, Output> {
     }
 
     public synchronized boolean stop() throws InterruptedException {
-        if (!isRunning()) {
-            throw new ZincRuntimeException("Service is already stopped.");
-        }
+        checkServiceIsRunning(true, "Service is already stopped");
 
         boolean stopped = false;
         mScheduler.shutdownNow();
@@ -120,11 +122,20 @@ public class PriorityJobQueue<Input, Output> {
         mExecutorService.shutdown();
         stopped &= mExecutorService.awaitTermination(EXECUTOR_SERVICE_TERMINATION_TIMEOUT, TimeUnit.SECONDS);
 
+        mFuturesExecutorService.shutdown();
+        stopped &= mFuturesExecutorService.awaitTermination(EXECUTOR_SERVICE_TERMINATION_TIMEOUT, TimeUnit.SECONDS);
+
         if (stopped) {
-            mScheduler = mExecutorService = null;
+            mScheduler = mExecutorService = mFuturesExecutorService = null;
         }
 
         return stopped;
+    }
+
+    private void checkServiceIsRunning(final boolean shouldBeRunning, final String errorMessage) {
+        if (isRunning() != shouldBeRunning) {
+            throw new ZincRuntimeException(errorMessage);
+        }
     }
 
     public void add(final Input element) {
@@ -140,26 +151,32 @@ public class PriorityJobQueue<Input, Output> {
         }
     }
 
-    private Future<Output> submit(final Input element) {
+    private ListenableFuture<Output> submit(final Input element) {
         return mExecutorService.submit(mDataProcessor.process(element));
     }
 
     private Future<Output> waitForFuture(final Input element) {
-        Future<Output> result;
-        mLock.lock();
+        return Futures.dereference(mFuturesExecutorService.submit(new Callable<ListenableFuture<Output>>() {
+            @Override
+            public ListenableFuture<Output> call() throws Exception {
+                ListenableFuture<Output> result;
 
-        try {
-            while ((result = mFutures.get(element)) == null) {
-                mEnqueued.awaitUninterruptibly();
+                mLock.lock();
+
+                try {
+                    while ((result = mFutures.get(element)) == null) {
+                        mEnqueued.awaitUninterruptibly();
+                    }
+                } finally {
+                    mLock.unlock();
+                }
+
+                return result;
             }
-        } finally {
-            mLock.unlock();
-        }
-
-        return result;
+        }));
     }
 
-    public static interface DataProcessor <Input, Output> {
+    public static interface DataProcessor<Input, Output> {
         Callable<Output> process(Input data);
     }
 
