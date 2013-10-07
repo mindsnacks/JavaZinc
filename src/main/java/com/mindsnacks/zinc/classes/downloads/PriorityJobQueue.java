@@ -1,7 +1,9 @@
 package com.mindsnacks.zinc.classes.downloads;
 
-import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.util.*;
@@ -24,16 +26,16 @@ public class PriorityJobQueue<Input, Output> {
     private final DataProcessor<Input, Output> mDataProcessor;
 
     private ExecutorService mScheduler;
-    private ExecutorService mExecutorService;
-    private ExecutorService mFuturesExecutorService;
+    private ListeningExecutorService mExecutorService;
+    private ListeningExecutorService mFuturesExecutorService;
 
     private final PriorityBlockingQueue<Input> mQueue;
-    private final Map<Input, Future<Output>> mFutures = new HashMap<Input, Future<Output>>();
+    private final Map<Input, ListenableFuture<Output>> mFutures = new HashMap<Input, ListenableFuture<Output>>();
     private final Set<Input> mAddedElements = new HashSet<Input>();
 
     private final Lock mLock = new ReentrantLock();
     private final Condition mEnqueued = mLock.newCondition();
-    private final Semaphore mEnqueuedDataSemahore;
+    private final Semaphore mEnqueuedDataSemaphore;
 
     public PriorityJobQueue(final int concurrency,
                             final ThreadFactory threadFactory,
@@ -42,7 +44,7 @@ public class PriorityJobQueue<Input, Output> {
         mConcurrency = concurrency;
         mThreadFactory = threadFactory;
         mDataProcessor = dataProcessor;
-        mEnqueuedDataSemahore = new Semaphore(concurrency);
+        mEnqueuedDataSemaphore = new Semaphore(concurrency);
 
         mQueue = new PriorityBlockingQueue<Input>(INITIAL_QUEUE_CAPACITY, createPriorityComparator(priorityCalculator));
     }
@@ -68,8 +70,8 @@ public class PriorityJobQueue<Input, Output> {
         checkServiceIsRunning(false, "Service is already running");
 
         mScheduler = Executors.newSingleThreadExecutor(mThreadFactory);
-        mFuturesExecutorService = Executors.newCachedThreadPool(mThreadFactory);
-        mExecutorService = new ThreadPoolExecutor(
+        mFuturesExecutorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool(mThreadFactory));
+        mExecutorService = MoreExecutors.listeningDecorator(new ThreadPoolExecutor(
                 mConcurrency,
                 mConcurrency,
                 0L, TimeUnit.MICROSECONDS,
@@ -79,9 +81,9 @@ public class PriorityJobQueue<Input, Output> {
             protected void afterExecute(final Runnable r, final Throwable t) {
                 super.afterExecute(r, t);
 
-                mEnqueuedDataSemahore.release();
+                mEnqueuedDataSemaphore.release();
             }
-        };
+        });
 
         mScheduler.submit(createSchedulerTask());
     }
@@ -92,7 +94,7 @@ public class PriorityJobQueue<Input, Output> {
                 try {
                     Input data;
                     while ((data = mQueue.take()) != null) {
-                        mEnqueuedDataSemahore.acquire();
+                        mEnqueuedDataSemaphore.acquire();
 
                         mLock.lock();
 
@@ -149,15 +151,15 @@ public class PriorityJobQueue<Input, Output> {
         }
     }
 
-    private Future<Output> submit(final Input element) {
+    private ListenableFuture<Output> submit(final Input element) {
         return mExecutorService.submit(mDataProcessor.process(element));
     }
 
     private Future<Output> waitForFuture(final Input element) {
-        return Futures.lazyTransform(mFuturesExecutorService.submit(new Callable<Future<Output>>() {
+        return Futures.dereference(mFuturesExecutorService.submit(new Callable<ListenableFuture<Output>>() {
             @Override
-            public Future<Output> call() throws Exception {
-                Future<Output> result;
+            public ListenableFuture<Output> call() throws Exception {
+                ListenableFuture<Output> result;
 
                 mLock.lock();
 
@@ -171,16 +173,7 @@ public class PriorityJobQueue<Input, Output> {
 
                 return result;
             }
-        }), new Function<Future<Output>, Output>() {
-            @Override
-            public Output apply(final Future<Output> future) {
-                try {
-                    return future.get();
-                } catch (Exception e) {
-                    throw new ZincRuntimeException("Error waiting for future", e);
-                }
-            }
-        });
+        }));
     }
 
     public static interface DataProcessor<Input, Output> {
