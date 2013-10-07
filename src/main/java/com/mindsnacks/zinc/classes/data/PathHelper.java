@@ -7,6 +7,9 @@ package com.mindsnacks.zinc.classes.data;
 public class PathHelper {
     private static final String DOWNLOADS_FOLDER = "downloads";
     private static final String BUNDLES_FOLDER = "bundles";
+    private static final String CATALOGS_FOLDER = "catalogs";
+
+    private static final String CATALOGS_FORMAT = "json";
 
     public static final String FLAVOR_SEPARATOR = "~";
 
@@ -16,5 +19,9 @@ public class PathHelper {
 
     public static String getLocalBundleFolder(final BundleID bundleID, final int version, final String flavorName) {
         return String.format("%s/%s-%d%s%s", BUNDLES_FOLDER, bundleID, version, FLAVOR_SEPARATOR, flavorName);
+    }
+
+    public static String getLocalCatalogFilePath(final String catalogID) {
+        return String.format("%s/%s.%s", CATALOGS_FOLDER, catalogID, CATALOGS_FORMAT);
     }
 }

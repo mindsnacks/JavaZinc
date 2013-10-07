@@ -19,7 +19,7 @@ public class PathHelperTest extends ZincBaseTest {
     private final String catalogID = "com.mindsnacks.games";
 
     @Test
-    public void localDownloadsFolder() throws Exception {
+    public void localDownloadFolder() throws Exception {
         final BundleID bundleID = new BundleID(catalogID, "swell");
         final int version = randomInt(1, 1000);
         final String flavorName = "retina";
@@ -32,7 +32,7 @@ public class PathHelperTest extends ZincBaseTest {
     }
 
     @Test
-    public void localBundlesFolder() throws Exception {
+    public void localBundleFolder() throws Exception {
         final BundleID bundleID = new BundleID(catalogID, "swell");
         final int version = randomInt(1, 1000);
         final String flavorName = "retina";
@@ -45,11 +45,21 @@ public class PathHelperTest extends ZincBaseTest {
     }
 
     @Test
-    public void localBundlesFolderIsDifferentThanDownloads() throws Exception {
+    public void localBundleFolderIsDifferentThanDownload() throws Exception {
         final BundleID bundleID = new BundleID(catalogID, "swell");
         final int version = randomInt(1, 1000);
         final String flavorName = "retina";
 
         assertThat(PathHelper.getLocalBundleFolder(bundleID, version, flavorName), not(equalTo(PathHelper.getLocalDownloadFolder(bundleID, version, flavorName))));
+    }
+
+    @Test
+    public void localCatalogFolder() throws Exception {
+        final String catalogID = "com.mindsnacks.games";
+
+        final String result = PathHelper.getLocalCatalogFilePath(catalogID);
+
+        assertTrue(result.contains(catalogID));
+        assertTrue(result.endsWith(".json"));
     }
 }
