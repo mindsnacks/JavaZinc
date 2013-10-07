@@ -1,7 +1,6 @@
 package com.mindsnacks.zinc.data;
 
 import com.google.gson.Gson;
-import com.mindsnacks.zinc.classes.data.BundleID;
 import com.mindsnacks.zinc.classes.data.SourceURL;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Test;
@@ -10,9 +9,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import static com.mindsnacks.zinc.utils.MockFactory.randomInt;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * User: NachoSoto
@@ -93,41 +91,6 @@ public class SourceURLTest extends ZincBaseTest {
         assertTrue(result.toString().contains(Integer.toString(version)));
         assertTrue(result.toString().contains(bundleName));
         assertTrue(result.toString().contains(flavorName));
-    }
-
-    @Test
-    public void localDownloadsFolder() throws Exception {
-        final BundleID bundleID = new BundleID(catalogID, "swell");
-        final int version = randomInt(1, 1000);
-        final String flavorName = "retina";
-
-        final String result = SourceURL.getLocalDownloadsFolder(bundleID, version, flavorName);
-
-        assertTrue(result.contains(Integer.toString(version)));
-        assertTrue(result.contains(bundleID.toString()));
-        assertTrue(result.contains(flavorName));
-    }
-
-    @Test
-    public void localBundlesFolder() throws Exception {
-        final BundleID bundleID = new BundleID(catalogID, "swell");
-        final int version = randomInt(1, 1000);
-        final String flavorName = "retina";
-
-        final String result = SourceURL.getLocalBundlesFolder(bundleID, version, flavorName);
-
-        assertTrue(result.contains(Integer.toString(version)));
-        assertTrue(result.contains(bundleID.toString()));
-        assertTrue(result.contains(flavorName));
-    }
-
-    @Test
-    public void localBundlesFolderIsDifferentThanDownloads() throws Exception {
-        final BundleID bundleID = new BundleID(catalogID, "swell");
-        final int version = randomInt(1, 1000);
-        final String flavorName = "retina";
-
-        assertThat(SourceURL.getLocalBundlesFolder(bundleID, version, flavorName), not(equalTo(SourceURL.getLocalDownloadsFolder(bundleID, version, flavorName))));
     }
 
     @Test
