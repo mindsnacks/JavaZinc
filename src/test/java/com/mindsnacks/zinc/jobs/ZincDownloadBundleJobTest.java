@@ -33,10 +33,10 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
     final private String mDistribution = "master";
     final private String mFlavorName = "retina";
     final private int mVersion = randomInt(1, 100);
-    final private URL mSourceHost;
+    final private URL mSourceHost = TestFactory.createURL("https://mindsnacks.com/");
     final private URL mArchiveURL;
-
     final private String mResultPath = "result path";
+
     @Mock private SourceURL mSourceURL;
     @Mock private ZincCatalog mCatalog;
     @Mock private ZincJobFactory mJobFactory;
@@ -47,7 +47,6 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
     private Callable<File> mResultJob;
 
     public ZincDownloadBundleJobTest() throws MalformedURLException {
-        mSourceHost = new URL("https://mindsnacks.com/");
         mArchiveURL = new URL(mSourceHost, mCatalogID + "/" + mBundleName + "-" + mDistribution + "-" + mFlavorName);
     }
 

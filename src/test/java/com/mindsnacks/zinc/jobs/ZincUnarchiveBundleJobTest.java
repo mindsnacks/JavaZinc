@@ -13,7 +13,6 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +40,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
     final private String mDistribution = "master";
     final private String mFlavorName = "retina";
     final private int mVersion = randomInt(5, 100);
-    final private URL mSourceHost;
+    final private URL mSourceHost = TestFactory.createURL("https://mindsnacks.com/");
 
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
 
@@ -51,11 +50,8 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
     @Mock private ZincJobFactory mJobFactory;
     @Mock private SourceURL mSourceURL;
     @Mock private FileHelper mFileHelper;
-    private File mRepoFolder;
 
-    public ZincUnarchiveBundleJobTest() throws MalformedURLException {
-        mSourceHost = new URL("https://mindsnacks.com/");
-    }
+    private File mRepoFolder;
 
     @Before
     public void setUp() throws Exception {

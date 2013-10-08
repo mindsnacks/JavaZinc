@@ -112,6 +112,11 @@ public final class TestFactory {
         return random.nextInt();
     }
 
+    public static URL createURL(final String url) {
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
+            throw new ZincRuntimeException("Invalid URL in test", e);
         }
     }
 

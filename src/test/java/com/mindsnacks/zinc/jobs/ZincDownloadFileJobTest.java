@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import static com.mindsnacks.zinc.utils.TestUtils.readFile;
@@ -27,21 +26,14 @@ import static org.mockito.Mockito.*;
  * Date: 9/4/13
  */
 public class ZincDownloadFileJobTest extends ZincBaseTest {
-    @Mock
-    private ZincRequestExecutor mRequestExecutor;
+    @Mock private ZincRequestExecutor mRequestExecutor;
 
-    @Rule
-    public final TemporaryFolder rootFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
 
-    private final String mFilename;
+    private final URL mUrl = TestFactory.createURL("http://mindsnacks.com");
+    private final String mFilename = "file";
 
-    private final URL mUrl;
     private ZincDownloadFileJob mJob;
-
-    public ZincDownloadFileJobTest() throws MalformedURLException {
-        mUrl = new URL("http://mindsnacks.com");
-        mFilename = "file";
-    }
 
     @Before
     public void setUp() throws Exception {
