@@ -26,7 +26,7 @@ public class SourceURL {
         mCatalogID = catalogID;
     }
 
-    public SourceURL(final URL sourceURL) throws MalformedURLException {
+    public SourceURL(final URL sourceURL) {
         mUrl = sourceURL;
         mCatalogID = extractCatalogID(sourceURL);
     }
