@@ -2,17 +2,16 @@ package com.mindsnacks.zinc.classes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mindsnacks.zinc.classes.data.BundleID;
-import com.mindsnacks.zinc.classes.data.SourceURL;
-import com.mindsnacks.zinc.classes.data.ZincBundle;
-import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
+import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.downloads.DownloadPriority;
 import com.mindsnacks.zinc.classes.downloads.PriorityCalculator;
 import com.mindsnacks.zinc.classes.downloads.PriorityJobQueue;
+import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import com.mindsnacks.zinc.classes.jobs.ZincDownloader;
 
 import java.io.File;
-import java.util.concurrent.Callable;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,6 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Date: 9/10/13
  */
 public final class ZincRepoFactory {
+    private static final int CATALOG_DOWNLOAD_THREAD_POOL_SIZE = 3;
+
     public ZincRepo createRepo(final File root,
                                final String flavorName,
                                final int bundleCloneConcurrency,
@@ -29,18 +30,25 @@ public final class ZincRepoFactory {
         final ZincJobFactory jobFactory = createJobFactory(gson);
         final ZincRepoIndexWriter indexWriter = createRepoIndexWriter(root, gson);
 
-        final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue = createQueue(bundleCloneConcurrency, createBundleDownloader(jobFactory), createPriorityCalculator(priorityCalculator));
+        final ThreadFactory threadFactory = new DaemonThreadFactory();
+
+        final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue = createQueue(
+                bundleCloneConcurrency, 
+                createBundleDownloader(jobFactory, root, gson, threadFactory),
+                createPriorityCalculator(priorityCalculator));
 
         return new ZincRepo(queue, root.toURI(), indexWriter, flavorName);
     }
 
-    private PriorityJobQueue.DataProcessor<ZincCloneBundleRequest, ZincBundle> createBundleDownloader(final ZincJobFactory jobFactory) {
-        return new PriorityJobQueue.DataProcessor<ZincCloneBundleRequest, ZincBundle>() {
-            @Override
-            public Callable<ZincBundle> process(final ZincCloneBundleRequest request) {
-                return jobFactory.cloneBundle(request);
-            }
-        };
+    private PriorityJobQueue.DataProcessor<ZincCloneBundleRequest, ZincBundle> createBundleDownloader(
+            final ZincJobFactory jobFactory,
+            final File root,
+            final Gson gson,
+            final ThreadFactory threadFactory) {
+        final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(CATALOG_DOWNLOAD_THREAD_POOL_SIZE, threadFactory);
+        final ZincCatalogs catalogs = new ZincCatalogs(root, new FileHelper(gson), jobFactory, executorService, executorService);
+
+        return new ZincBundleDownloader(jobFactory, catalogs);
     }
 
     private Gson createGson() {
