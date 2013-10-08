@@ -1,6 +1,7 @@
 package com.mindsnacks.zinc.classes.fileutils;
 
 import com.google.common.io.Files;
+import com.google.gson.Gson;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.*;
@@ -12,7 +13,13 @@ import java.util.zip.ZipException;
  * Date: 9/10/13
  */
 public class FileHelper {
-    public static final int BUFFER_SIZE = 8192;
+    private static final int BUFFER_SIZE = 8192;
+
+    private final Gson mGson;
+
+    public FileHelper(final Gson gson) {
+        mGson = gson;
+    }
 
     public void unzipFile(final File originFolder, final String originFilename, final File destinationFolder, final String destinationFilename) throws IOException {
         final File input = new File(originFolder, originFilename),
@@ -67,6 +74,10 @@ public class FileHelper {
 
     public boolean removeFile(final File file) {
         return file.delete();
+    }
+
+    public <V> V readJSON(final File file, final Class<V> vClass) throws FileNotFoundException {
+        return mGson.fromJson(readerForFile(file), vClass);
     }
 
     private boolean createDirectories(final File file) {

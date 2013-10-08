@@ -1,6 +1,7 @@
 package com.mindsnacks.zinc.classes.fileutils;
 
 import com.google.common.io.CharStreams;
+import com.google.gson.Gson;
 import com.mindsnacks.zinc.classes.data.BundleID;
 import com.mindsnacks.zinc.classes.data.ZincBundle;
 import com.mindsnacks.zinc.utils.TestFactory;
@@ -22,6 +23,7 @@ import static org.junit.Assert.*;
  * Date: 9/10/13
  */
 public class FileHelperTest extends ZincBaseTest {
+    private Gson mGson;
     private FileHelper mHelper;
     private ZincBundle mBundle;
 
@@ -36,7 +38,8 @@ public class FileHelperTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        mHelper = new FileHelper();
+        mGson = createGson();
+        mHelper = new FileHelper(mGson);
         mBundle = new ZincBundle(rootFolder.getRoot(), new BundleID("com.mindsnacks.catalog", "mBundle name"), 2);
         mOriginalFile = new File(mBundle, mFilename);
         mDestinationFile = new File(mBundle, mDestinationFilename);
@@ -103,6 +106,20 @@ public class FileHelperTest extends ZincBaseTest {
 
         // verify
         assertEquals(contents, CharStreams.toString(reader));
+    }
+
+    @Test
+    public void readJSON() throws Exception {
+        // prepare
+        final String stringContents = TestFactory.randomString();
+        final String JSON = mGson.toJson(stringContents);
+        TestFactory.writeToFile(mOriginalFile, JSON);
+
+        // run
+        final String result = mHelper.readJSON(mOriginalFile, String.class);
+
+        // verify
+        assertEquals(stringContents, result);
     }
 
     private void createGzipFile(final String contents, final File file) throws IOException {
