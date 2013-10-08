@@ -67,7 +67,7 @@ public class ZincDownloader implements ZincJobFactory {
     @Override
     public Callable<ZincBundle> unarchiveBundle(final ZincBundle downloadedBundle,
                                               final ZincCloneBundleRequest request) {
-        return new ZincUnarchiveBundleJob(downloadedBundle, request, this, new FileHelper());
+        return new ZincUnarchiveBundleJob(downloadedBundle, request, this, new FileHelper(mGson));
     }
 
     private ZincRequestExecutor createRequestExecutor() {

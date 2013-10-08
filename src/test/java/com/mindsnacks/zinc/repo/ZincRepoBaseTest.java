@@ -16,6 +16,7 @@ import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public abstract class ZincRepoBaseTest extends ZincBaseTest {
         final File indexFile = getIndexFile();
 
         try {
-            return mGson.fromJson(new FileReader(indexFile), ZincRepoIndex.class);
+            return mGson.fromJson(new BufferedReader(new FileReader(indexFile)), ZincRepoIndex.class);
         } catch (JsonSyntaxException e) {
             throw new ZincRuntimeException("Invalid JSON: " + TestUtils.readFile(indexFile), e);
         }
