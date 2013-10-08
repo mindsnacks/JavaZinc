@@ -5,6 +5,7 @@ import com.mindsnacks.zinc.classes.data.*;
 
 import java.io.File;
 import java.net.URL;
+import java.util.concurrent.Future;
 
 /**
  * @author NachoSoto
@@ -13,17 +14,21 @@ import java.net.URL;
  */
 public class ZincDownloadBundleJob extends ZincJob<ZincBundle> {
     protected final ZincJobFactory mJobFactory;
+
     private final ZincCloneBundleRequest mRequest;
+    private final Future<ZincCatalog> mCatalogFuture;
 
     public ZincDownloadBundleJob(final ZincCloneBundleRequest request,
-                                 final ZincJobFactory jobFactory) {
+                                 final ZincJobFactory jobFactory,
+                                 final Future<ZincCatalog> catalogFuture) {
         mRequest = request;
         mJobFactory = jobFactory;
+        mCatalogFuture = catalogFuture;
     }
 
     @Override
     public ZincBundle run() throws Exception {
-        final ZincCatalog catalog = mJobFactory.downloadCatalog(mRequest.getSourceURL()).call();
+        final ZincCatalog catalog = mCatalogFuture.get();
 
         final BundleID bundleID = mRequest.getBundleID();
 

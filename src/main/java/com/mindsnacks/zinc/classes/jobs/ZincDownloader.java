@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * User: NachoSoto
@@ -55,13 +56,13 @@ public class ZincDownloader implements ZincJobFactory {
     }
 
     @Override
-    public Callable<ZincBundle> cloneBundle(final ZincCloneBundleRequest request) {
-        return new ZincCloneBundleJob(request, this);
+    public Callable<ZincBundle> cloneBundle(final ZincCloneBundleRequest request, final Future<ZincCatalog> catalogFuture) {
+        return new ZincCloneBundleJob(request, this, catalogFuture);
     }
 
     @Override
-    public Callable<ZincBundle> downloadBundle(final ZincCloneBundleRequest request) {
-        return new ZincDownloadBundleJob(request, this);
+    public Callable<ZincBundle> downloadBundle(final ZincCloneBundleRequest request, final Future<ZincCatalog> catalogFuture) {
+        return new ZincDownloadBundleJob(request, this, catalogFuture);
     }
 
     @Override

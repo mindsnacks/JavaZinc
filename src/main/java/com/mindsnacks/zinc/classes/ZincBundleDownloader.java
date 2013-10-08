@@ -22,6 +22,6 @@ public class ZincBundleDownloader implements PriorityJobQueue.DataProcessor<Zinc
 
     @Override
     public Callable<ZincBundle> process(final ZincCloneBundleRequest request) {
-        return mJobFactory.cloneBundle(request);
+        return mJobFactory.cloneBundle(request, mCatalogs.getCatalog(request.getSourceURL()));
     }
 }

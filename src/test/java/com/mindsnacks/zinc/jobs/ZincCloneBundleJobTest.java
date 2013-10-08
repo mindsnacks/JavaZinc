@@ -1,10 +1,7 @@
 package com.mindsnacks.zinc.jobs;
 
 import com.mindsnacks.zinc.classes.ZincJobFactory;
-import com.mindsnacks.zinc.classes.data.BundleID;
-import com.mindsnacks.zinc.classes.data.SourceURL;
-import com.mindsnacks.zinc.classes.data.ZincBundle;
-import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
+import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.jobs.ZincCloneBundleJob;
 import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
@@ -14,6 +11,7 @@ import org.mockito.Mock;
 
 import java.io.File;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
@@ -32,6 +30,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     @Mock private ZincBundle mResultBundle;
     @Mock private ZincBundle mDownloadedBundle;
     @Mock private ZincJobFactory mJobFactory;
+    @Mock private Future<ZincCatalog> mZincCatalogFuture;
 
     private final String mDistribution = "master";
     private final String mFlavorName = "retina";
@@ -42,9 +41,9 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     @Before
     public void setUp() throws Exception {
         mRequest = new ZincCloneBundleRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
-        job = new ZincCloneBundleJob(mRequest, mJobFactory);
+        job = new ZincCloneBundleJob(mRequest, mJobFactory, mZincCatalogFuture);
 
-        when(mJobFactory.downloadBundle(eq(mRequest))).thenReturn(mDownloadBundleJob);
+        when(mJobFactory.downloadBundle(eq(mRequest), eq(mZincCatalogFuture))).thenReturn(mDownloadBundleJob);
         when(mJobFactory.unarchiveBundle(any(ZincBundle.class), eq(mRequest))).thenReturn(mResultBundleJob);
 
         TestFactory.setCallableResult(mDownloadBundleJob, mDownloadedBundle);
@@ -55,7 +54,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     public void bundleIsDownloaded() throws Exception {
         run();
 
-        verify(mJobFactory).downloadBundle(eq(mRequest));
+        verify(mJobFactory).downloadBundle(eq(mRequest), eq(mZincCatalogFuture));
     }
 
     @Test
