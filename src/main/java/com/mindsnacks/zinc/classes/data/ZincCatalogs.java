@@ -31,7 +31,7 @@ public class ZincCatalogs {
         mExecutorService = executorService;
     }
 
-    public Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
+    public synchronized Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
         final File catalogFile = getCatalogFile(sourceURL.getCatalogID());
 
         try {
@@ -47,19 +47,24 @@ public class ZincCatalogs {
             Futures.addCallback(future, new FutureCallback<ZincCatalog>() {
                 @Override
                 public void onSuccess(final ZincCatalog result) {
-                    try {
-                        mFileHelper.writeObject(catalogFile, result, ZincCatalog.class);
-                    } catch (final IOException e) {
-                        logMessage("Error persisting catalog to disk: " + e);
-                    }
+                    persistCatalog(result, catalogFile);
                 }
                 @Override
                 public void onFailure(final Throwable t) {
                     // the download failed
                 }
-            }, MoreExecutors.sameThreadExecutor());
+            });
 
             return future;
+        }
+    }
+
+    private synchronized void persistCatalog(final ZincCatalog result, final File catalogFile) {
+        try {
+            logMessage("Persisting catalog to disk: " + result.getIdentifier());
+            mFileHelper.writeObject(catalogFile, result, ZincCatalog.class);
+        } catch (final IOException e) {
+            logMessage("Error persisting catalog to disk: " + e);
         }
     }
 
