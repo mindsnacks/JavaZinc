@@ -3,7 +3,7 @@ package com.mindsnacks.zinc.jobs;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.jobs.ZincDownloadBundleJob;
-import com.mindsnacks.zinc.utils.MockFactory;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Callable;
 
-import static com.mindsnacks.zinc.utils.MockFactory.randomInt;
+import static com.mindsnacks.zinc.utils.TestFactory.randomInt;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -57,8 +57,8 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
         when(mSourceURL.getCatalogID()).thenReturn(mCatalogID);
         when(mSourceURL.getArchiveURL(eq(mBundleName), anyInt(), eq(mFlavorName))).thenReturn(mArchiveURL);
 
-        mCatalogJob = MockFactory.createCallable(mCatalog);
-        mResultJob = MockFactory.createCallable(mResult);
+        mCatalogJob = TestFactory.createCallable(mCatalog);
+        mResultJob = TestFactory.createCallable(mResult);
 
         when(mJobFactory.downloadCatalog(eq(mSourceURL))).thenReturn(mCatalogJob);
         when(mJobFactory.downloadArchive(any(URL.class), any(File.class), anyString(), eq(false))).thenReturn(mResultJob);

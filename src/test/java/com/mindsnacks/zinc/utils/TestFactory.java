@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public final class MockFactory {
+public final class TestFactory {
     private static final SecureRandom random = new SecureRandom();
 
     public static ZincCatalog createCatalog() {
@@ -114,9 +114,7 @@ public final class MockFactory {
                                   final String contents) throws IOException {
         final File file = createFolderAndFile(rootFolder, filename);
 
-        final FileWriter writer = new FileWriter(file);
-        writer.write(contents);
-        writer.close();
+        writeToFile(file, contents);
 
         return file;
     }
@@ -130,6 +128,12 @@ public final class MockFactory {
         }
 
         return rootFolder.newFile(filename);
+    }
+
+    public static void writeToFile(final File file, String contents) throws IOException {
+        final FileWriter writer = new FileWriter(file);
+        writer.write(contents);
+        writer.close();
     }
 
     public static class DaemonThreadFactory implements ThreadFactory {

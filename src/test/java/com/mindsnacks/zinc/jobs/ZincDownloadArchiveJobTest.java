@@ -4,7 +4,7 @@ import com.ice.tar.TarEntry;
 import com.ice.tar.TarOutputStream;
 import com.mindsnacks.zinc.classes.jobs.ZincDownloadArchiveJob;
 import com.mindsnacks.zinc.classes.jobs.ZincRequestExecutor;
-import com.mindsnacks.zinc.utils.MockFactory;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.TestUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -57,8 +57,8 @@ public class ZincDownloadArchiveJobTest extends ZincBaseTest {
                      fileName2 = "file2.txt";
 
         final File[] filesToTar = new File[2];
-        filesToTar[0] = MockFactory.createFile(rootFolder, fileName1, fileContents1);
-        filesToTar[1] = MockFactory.createFile(rootFolder, fileName2, fileContents2);
+        filesToTar[0] = TestFactory.createFile(rootFolder, fileName1, fileContents1);
+        filesToTar[1] = TestFactory.createFile(rootFolder, fileName2, fileContents2);
 
         final File tar = createTar(filesToTar);
 

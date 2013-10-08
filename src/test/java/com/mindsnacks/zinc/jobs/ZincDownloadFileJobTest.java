@@ -2,7 +2,7 @@ package com.mindsnacks.zinc.jobs;
 
 import com.mindsnacks.zinc.classes.jobs.ZincDownloadFileJob;
 import com.mindsnacks.zinc.classes.jobs.ZincRequestExecutor;
-import com.mindsnacks.zinc.utils.MockFactory;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Rule;
@@ -108,7 +108,7 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
     }
 
     private void setURLContents(final String contents) {
-        final InputStream reader = MockFactory.inputStreamWithString(contents);
+        final InputStream reader = TestFactory.inputStreamWithString(contents);
 
         when(mRequestExecutor.get(mUrl)).thenReturn(reader);
     }

@@ -6,7 +6,7 @@ import com.mindsnacks.zinc.classes.data.SourceURL;
 import com.mindsnacks.zinc.classes.data.ZincBundle;
 import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
 import com.mindsnacks.zinc.classes.jobs.ZincCloneBundleJob;
-import com.mindsnacks.zinc.utils.MockFactory;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,8 +47,8 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         when(mJobFactory.downloadBundle(eq(mRequest))).thenReturn(mDownloadBundleJob);
         when(mJobFactory.unarchiveBundle(any(ZincBundle.class), eq(mRequest))).thenReturn(mResultBundleJob);
 
-        MockFactory.setCallableResult(mDownloadBundleJob, mDownloadedBundle);
-        MockFactory.setCallableResult(mResultBundleJob, mResultBundle);
+        TestFactory.setCallableResult(mDownloadBundleJob, mDownloadedBundle);
+        TestFactory.setCallableResult(mResultBundleJob, mResultBundle);
     }
 
     @Test

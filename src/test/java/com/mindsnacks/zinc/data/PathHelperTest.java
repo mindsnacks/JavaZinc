@@ -5,7 +5,7 @@ import com.mindsnacks.zinc.classes.data.PathHelper;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Test;
 
-import static com.mindsnacks.zinc.utils.MockFactory.randomInt;
+import static com.mindsnacks.zinc.utils.TestFactory.randomInt;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;

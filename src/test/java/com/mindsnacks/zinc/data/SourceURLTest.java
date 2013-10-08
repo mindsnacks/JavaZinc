@@ -8,7 +8,7 @@ import org.junit.Test;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static com.mindsnacks.zinc.utils.MockFactory.randomInt;
+import static com.mindsnacks.zinc.utils.TestFactory.randomInt;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

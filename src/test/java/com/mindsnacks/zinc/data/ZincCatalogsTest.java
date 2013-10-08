@@ -5,7 +5,7 @@ import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.PathHelper;
 import com.mindsnacks.zinc.classes.data.ZincCatalog;
 import com.mindsnacks.zinc.classes.data.ZincCatalogs;
-import com.mindsnacks.zinc.utils.MockFactory;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Rule;
@@ -46,7 +46,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
     public void returnsLocalCatalogIfExists() throws Exception {
         final ZincCatalog expectedResult = mock(ZincCatalog.class);
 
-        MockFactory.createFile(rootFolder, PathHelper.getLocalCatalogFilePath(mCatalogID), "");
+        TestFactory.createFile(rootFolder, PathHelper.getLocalCatalogFilePath(mCatalogID), "");
         when(mGson.fromJson(any(Reader.class), ZincCatalog.class)).thenReturn(expectedResult);
 
         // run

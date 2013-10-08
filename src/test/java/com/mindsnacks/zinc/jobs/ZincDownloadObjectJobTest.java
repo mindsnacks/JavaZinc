@@ -1,10 +1,10 @@
 package com.mindsnacks.zinc.jobs;
 
 import com.google.gson.Gson;
+import com.mindsnacks.zinc.utils.TestFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import com.mindsnacks.zinc.utils.MockFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import com.mindsnacks.zinc.classes.data.ZincCatalog;
 import com.mindsnacks.zinc.classes.jobs.AbstractZincDownloadJob;
@@ -33,14 +33,14 @@ public class ZincDownloadObjectJobTest extends ZincBaseTest {
 
     @Test
     public void testCall() throws Exception {
-        final ZincCatalog catalog = MockFactory.createCatalog();
+        final ZincCatalog catalog = TestFactory.createCatalog();
         final URL url = new URL("http://zinc2.mindsnacks.com.s3.amazonaws.com/com.mindsnacks.misc/index.json");
 
         final AbstractZincDownloadJob<ZincCatalog> mJob = new ZincDownloadObjectJob<ZincCatalog>(mRequestExecutor, url, mGson, ZincCatalog.class);
 
         // expectations
         final String catalogJSON = mGson.toJson(catalog);
-        when(mRequestExecutor.get(url)).thenReturn(MockFactory.inputStreamWithString(catalogJSON));
+        when(mRequestExecutor.get(url)).thenReturn(TestFactory.inputStreamWithString(catalogJSON));
 
         // run
         final ZincCatalog result = mJob.call();
