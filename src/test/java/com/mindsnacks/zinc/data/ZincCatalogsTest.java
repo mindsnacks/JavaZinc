@@ -2,6 +2,7 @@ package com.mindsnacks.zinc.data;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.SettableFuture;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.SourceURL;
 import com.mindsnacks.zinc.classes.data.ZincCatalog;
@@ -38,6 +39,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
     @Mock ZincJobFactory mJobFactory;
     @Mock FileHelper mFileHelper;
     @Mock ListeningScheduledExecutorService mExecutorService;
+    @Mock ZincCatalog mResultCatalog;
 
     private ZincCatalogs catalogs;
 
@@ -55,20 +57,19 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Test
     public void returnsLocalCatalogIfExists() throws Exception {
-        final ZincCatalog expectedResult = mock(ZincCatalog.class);
-
-        setLocalCatalogFileContent(expectedResult);
+        setLocalCatalogFileContent(mResultCatalog);
 
         final Future<ZincCatalog> catalog = run();
 
         // verify
         assertNotNull(catalog);
-        assertEquals(expectedResult, catalog.get());
+        assertEquals(mResultCatalog, catalog.get());
     }
 
     @Test
     public void catalogIsDownloaded() throws Exception {
         setLocalCatalogFileDoesNotExist();
+        setMockFutureAsResult();
 
         run();
 
@@ -80,6 +81,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
         final Callable downloadTask = mock(Callable.class);
 
         setLocalCatalogFileDoesNotExist();
+        setMockFutureAsResult();
         doReturn(downloadTask).when(mJobFactory).downloadCatalog(mSourceURL);
 
         run();
@@ -89,20 +91,43 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Test
     public void returnedFutureComesFromExecutorService() throws Exception {
-        final ListenableFuture future = mock(ListenableFuture.class);
-
         setLocalCatalogFileDoesNotExist();
-        doReturn(future).when(mExecutorService).submit(Matchers.<Callable>any());
+        final ListenableFuture future = setMockFutureAsResult();
 
         assertEquals(future, run());
     }
-    
+
+    @Test
+    public void catalogIsPersisted() throws Exception {
+        final SettableFuture<ZincCatalog> future = SettableFuture.create();
+        future.set(mResultCatalog);
+
+        setLocalCatalogFileDoesNotExist();
+        setFuture(future);
+
+        run();
+
+        verify(mFileHelper).writeObject(any(File.class), eq(mResultCatalog), eq(ZincCatalog.class));
+    }
+
     private void setLocalCatalogFileContent(final ZincCatalog expectedResult) throws FileNotFoundException {
         doReturn(expectedResult).when(mFileHelper).readJSON(any(File.class), eq(ZincCatalog.class));
     }
 
     private void setLocalCatalogFileDoesNotExist() throws FileNotFoundException {
         doThrow(FileNotFoundException.class).when(mFileHelper).readJSON(any(File.class), any(Class.class));
+    }
+
+    private ListenableFuture setMockFutureAsResult() {
+        final ListenableFuture future = mock(ListenableFuture.class);
+
+        setFuture(future);
+
+        return future;
+    }
+
+    private void setFuture(final ListenableFuture<ZincCatalog> future) {
+        doReturn(future).when(mExecutorService).submit(Matchers.<Callable>any());
     }
 
     private Future<ZincCatalog> run() {

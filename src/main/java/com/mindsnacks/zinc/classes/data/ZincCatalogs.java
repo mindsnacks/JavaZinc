@@ -1,12 +1,13 @@
 package com.mindsnacks.zinc.classes.data;
 
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.*;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
+import com.mindsnacks.zinc.classes.ZincLogging;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.concurrent.Future;
 
 /**
@@ -31,15 +32,34 @@ public class ZincCatalogs {
     }
 
     public Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
+        final File catalogFile = getCatalogFile(sourceURL.getCatalogID());
+
         try {
-            final ZincCatalog zincCatalog = readCatalogFile(getCatalogFile(sourceURL.getCatalogID()));
+            final ZincCatalog zincCatalog = readCatalogFile(catalogFile);
 
             final SettableFuture<ZincCatalog> future = SettableFuture.create();
             future.set(zincCatalog);
 
             return future;
         } catch (final FileNotFoundException e) {
-            return mExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
+            final ListenableFuture<ZincCatalog> future = mExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
+
+            Futures.addCallback(future, new FutureCallback<ZincCatalog>() {
+                @Override
+                public void onSuccess(final ZincCatalog result) {
+                    try {
+                        mFileHelper.writeObject(catalogFile, result, ZincCatalog.class);
+                    } catch (final IOException e) {
+                        logMessage("Error persisting catalog to disk: " + e);
+                    }
+                }
+                @Override
+                public void onFailure(final Throwable t) {
+                    // the download failed
+                }
+            }, MoreExecutors.sameThreadExecutor());
+
+            return future;
         }
     }
 
@@ -49,5 +69,9 @@ public class ZincCatalogs {
 
     private ZincCatalog readCatalogFile(final File catalogFile) throws FileNotFoundException {
         return mFileHelper.readJSON(catalogFile, ZincCatalog.class);
+    }
+
+    private void logMessage(final String message) {
+        ZincLogging.log(getClass().getName(), message);
     }
 }
