@@ -1,13 +1,11 @@
 package com.mindsnacks.zinc.classes.data;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.google.gson.Gson;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
+import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.concurrent.Future;
 
 /**
@@ -17,12 +15,12 @@ import java.util.concurrent.Future;
  */
 public class ZincCatalogs {
     private final File mRoot;
-    private final Gson mGson;
+    private final FileHelper mFileHelper;
     private final ZincJobFactory mJobFactory;
 
-    public ZincCatalogs(final File root, final Gson gson, final ZincJobFactory jobFactory) {
+    public ZincCatalogs(final File root, final FileHelper fileHelper, final ZincJobFactory jobFactory) {
         mRoot = root;
-        mGson = gson;
+        mFileHelper = fileHelper;
         mJobFactory = jobFactory;
     }
 
@@ -36,7 +34,7 @@ public class ZincCatalogs {
             future.set(zincCatalog);
 
             return future;
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             // TODO: create download job
             return null;
         }
@@ -47,6 +45,6 @@ public class ZincCatalogs {
     }
 
     private ZincCatalog readCatalogFile(final File catalogFile) throws FileNotFoundException {
-        return mGson.fromJson(new BufferedReader(new FileReader(catalogFile)), ZincCatalog.class);
+        return mFileHelper.readJSON(catalogFile, ZincCatalog.class);
     }
 }
