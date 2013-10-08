@@ -10,6 +10,7 @@ import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import com.mindsnacks.zinc.classes.jobs.ZincDownloader;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -34,7 +35,7 @@ public final class ZincRepoFactory {
 
         final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue = createQueue(
                 bundleCloneConcurrency, 
-                createBundleDownloader(jobFactory, root, gson, threadFactory),
+                createBundleDownloader(jobFactory, root, gson, indexWriter.getIndex(), threadFactory),
                 createPriorityCalculator(priorityCalculator));
 
         return new ZincRepo(queue, root.toURI(), indexWriter, flavorName);
@@ -44,9 +45,10 @@ public final class ZincRepoFactory {
             final ZincJobFactory jobFactory,
             final File root,
             final Gson gson,
+            final ZincRepoIndex repoIndex,
             final ThreadFactory threadFactory) {
         final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(CATALOG_DOWNLOAD_THREAD_POOL_SIZE, threadFactory);
-        final ZincCatalogs catalogs = new ZincCatalogs(root, new FileHelper(gson), jobFactory, executorService, executorService);
+        final ZincCatalogs catalogs = new ZincCatalogs(root, new FileHelper(gson), new HashSet<SourceURL>(repoIndex.getSources()), jobFactory, executorService, executorService, null);
 
         return new ZincBundleDownloader(jobFactory, catalogs);
     }

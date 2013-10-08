@@ -8,11 +8,10 @@ import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Nacho Soto
@@ -23,34 +22,51 @@ import java.util.concurrent.ScheduledExecutorService;
  * TODO: schedule updates.
  */
 public class ZincCatalogs {
+    private static final long INITIAL_UPDATE_DELAY = TimeUnit.MINUTES.toMillis(5);
+    private static final long UPDATE_FREQUENCY = TimeUnit.MINUTES.toMillis(5);
+
     private final File mRoot;
     private final FileHelper mFileHelper;
+
+    private final Set<SourceURL> mTrackedSourceURLs;
+
     private final ZincJobFactory mJobFactory;
-    private final ListeningScheduledExecutorService mDownloadExecutorService;
+    private final ListeningExecutorService mDownloadExecutorService;
     private final ExecutorService mPersistenceExecutorService;
+    private final Timer mUpdateTimer;
 
     private final Map<SourceURL, Future<ZincCatalog>> mFutures = new HashMap<SourceURL, Future<ZincCatalog>>();
 
     public ZincCatalogs(final File root,
                         final FileHelper fileHelper,
+                        final Set<SourceURL> trackedSourceURLs,
                         final ZincJobFactory jobFactory,
-                        final ScheduledExecutorService downloadExecutorService,
-                        final ExecutorService persistenceExecutorService) {
+                        final ExecutorService downloadExecutorService,
+                        final ExecutorService persistenceExecutorService,
+                        final Timer timer) {
         mRoot = root;
         mFileHelper = fileHelper;
+
+        mTrackedSourceURLs = trackedSourceURLs;
+
         mJobFactory = jobFactory;
         mDownloadExecutorService = MoreExecutors.listeningDecorator(downloadExecutorService);
         mPersistenceExecutorService = persistenceExecutorService;
+        mUpdateTimer = timer;
+        
+        scheduleUpdate();
     }
 
     public synchronized Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
+        mTrackedSourceURLs.add(sourceURL);
+
         if (!mFutures.containsKey(sourceURL)) {
             ListenableFuture<ZincCatalog> result;
 
             final File catalogFile = getCatalogFile(sourceURL.getCatalogID());
 
             try {
-                result  = getPersistedCatalog(sourceURL, catalogFile);
+                result = getPersistedCatalog(sourceURL, catalogFile);
             } catch (final FileNotFoundException e) {
                 result = downloadCatalog(sourceURL, catalogFile);
             }
@@ -61,7 +77,7 @@ public class ZincCatalogs {
         return mFutures.get(sourceURL);
     }
 
-    private SettableFuture<ZincCatalog> getPersistedCatalog(final SourceURL sourceURL,
+    private synchronized SettableFuture<ZincCatalog> getPersistedCatalog(final SourceURL sourceURL,
                                                             final File catalogFile) throws FileNotFoundException {
         final ZincCatalog zincCatalog = readCatalogFile(catalogFile);
 
@@ -73,7 +89,7 @@ public class ZincCatalogs {
         return future;
     }
 
-    private ListenableFuture<ZincCatalog> downloadCatalog(final SourceURL sourceURL, final File catalogFile) {
+    private synchronized ListenableFuture<ZincCatalog> downloadCatalog(final SourceURL sourceURL, final File catalogFile) {
         final ListenableFuture<ZincCatalog> result = mDownloadExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
 
         Futures.addCallback(result, new FutureCallback<ZincCatalog>() {
@@ -82,14 +98,11 @@ public class ZincCatalogs {
             }
 
             @Override public void onFailure(final Throwable downloadFailed) {
+                // TODO: recover previous future if it existed
             }
         }, mPersistenceExecutorService);
 
         return result;
-    }
-
-    private void cacheFuture(final SourceURL sourceURL, final ListenableFuture<ZincCatalog> future) {
-        mFutures.put(sourceURL, future);
     }
 
     private synchronized void persistCatalog(final ZincCatalog result, final File catalogFile) {
@@ -100,6 +113,18 @@ public class ZincCatalogs {
         } catch (final IOException e) {
             logMessage(result.getIdentifier(), "Error persisting catalog to disk: " + e);
         }
+    }
+
+    private synchronized void cacheFuture(final SourceURL sourceURL, final ListenableFuture<ZincCatalog> future) {
+        mFutures.put(sourceURL, future);
+    }
+
+    private void scheduleUpdate() {
+        mUpdateTimer.schedule(new TimerTask() {
+            @Override public void run() {
+
+            }
+        }, INITIAL_UPDATE_DELAY, UPDATE_FREQUENCY);
     }
 
     private File getCatalogFile(final String catalogID) {

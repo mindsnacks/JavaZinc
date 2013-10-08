@@ -1,7 +1,7 @@
 package com.mindsnacks.zinc.data;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
@@ -21,6 +21,9 @@ import org.mockito.Mock;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -39,13 +42,15 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Mock private ZincJobFactory mJobFactory;
     @Mock private FileHelper mFileHelper;
-    @Mock private ListeningScheduledExecutorService mExecutorService;
+    @Mock private Set<SourceURL> mTrackedSourceURLs;
+    @Mock private ListeningExecutorService mExecutorService;
     @Mock private ZincCatalog mResultCatalog;
-
-    private ZincCatalogs catalogs;
+    @Mock private Timer mTimer;
 
     private final String mCatalogID = "com.mindsnacks.games";
     private final SourceURL mSourceURL;
+
+    private ZincCatalogs catalogs;
 
     public ZincCatalogsTest() throws MalformedURLException {
         mSourceURL = new SourceURL(TestFactory.createURL("http://www.mindsnacks.com"), mCatalogID);
@@ -53,7 +58,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        catalogs = new ZincCatalogs(rootFolder.getRoot(), mFileHelper, mJobFactory, mExecutorService, MoreExecutors.sameThreadExecutor());
+        catalogs = new ZincCatalogs(rootFolder.getRoot(), mFileHelper, mTrackedSourceURLs, mJobFactory, mExecutorService, MoreExecutors.sameThreadExecutor(), mTimer);
     }
 
     @Test
@@ -130,6 +135,18 @@ public class ZincCatalogsTest extends ZincBaseTest {
         assertEquals(future1, future2);
 
         verify(mFileHelper, times(1)).readJSON(any(File.class), eq(ZincCatalog.class));
+    }
+
+    @Test
+    public void gettingCatalogForSourceURLAddsItToTheListOfTrackedSources() throws Exception {
+        run();
+
+        verify(mTrackedSourceURLs).add(mSourceURL);
+    }
+
+    @Test
+    public void updateIsScheduled() throws Exception {
+        verify(mTimer).schedule(any(TimerTask.class), anyLong(), anyLong());
     }
 
     private void setLocalCatalogFileContent(final ZincCatalog expectedResult) throws FileNotFoundException {
