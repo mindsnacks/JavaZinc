@@ -80,6 +80,16 @@ public class FileHelper {
         return mGson.fromJson(readerForFile(file), vClass);
     }
 
+    public <V> void writeObject(final File file, final V object, final Class<V> vClass) throws IOException {
+        final BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+
+        try {
+            mGson.toJson(object, vClass, writer);
+        } finally {
+            writer.close();
+        }
+    }
+
     private boolean createDirectories(final File file) {
         return file.getParentFile().mkdirs();
     }

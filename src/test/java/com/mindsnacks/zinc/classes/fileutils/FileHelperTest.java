@@ -122,6 +122,18 @@ public class FileHelperTest extends ZincBaseTest {
         assertEquals(stringContents, result);
     }
 
+    @Test
+    public void writeObject() throws Exception {
+        // prepare
+        final String object = TestFactory.randomString();
+
+        // run
+        mHelper.writeObject(mOriginalFile, object, String.class);
+
+        // verify
+        assertEquals(object, mGson.fromJson(TestUtils.readFile(mOriginalFile), String.class));
+    }
+
     private void createGzipFile(final String contents, final File file) throws IOException {
        final FileOutputStream output = new FileOutputStream(file);
         try {
