@@ -1,10 +1,13 @@
 package com.mindsnacks.zinc.utils;
 
 import com.mindsnacks.zinc.classes.data.ZincCatalog;
-import org.junit.rules.TemporaryFolder;
+import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
@@ -109,31 +112,7 @@ public final class TestFactory {
         return random.nextInt();
     }
 
-    public static File createFile(final TemporaryFolder rootFolder,
-                                  final String filename,
-                                  final String contents) throws IOException {
-        final File file = createFolderAndFile(rootFolder, filename);
-
-        writeToFile(file, contents);
-
-        return file;
-    }
-
-    private static File createFolderAndFile(final TemporaryFolder rootFolder,
-                                            final String filename) throws IOException {
-        final File folder = new File(rootFolder.getRoot(), filename).getParentFile();
-
-        if (!folder.exists()) {
-            assert folder.mkdirs();
         }
-
-        return rootFolder.newFile(filename);
-    }
-
-    public static void writeToFile(final File file, String contents) throws IOException {
-        final FileWriter writer = new FileWriter(file);
-        writer.write(contents);
-        writer.close();
     }
 
     public static class DaemonThreadFactory implements ThreadFactory {

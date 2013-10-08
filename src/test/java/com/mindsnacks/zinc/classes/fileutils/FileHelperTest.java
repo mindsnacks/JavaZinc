@@ -99,7 +99,7 @@ public class FileHelperTest extends ZincBaseTest {
     public void readerForFile() throws Exception {
         // prepare
         final String contents = TestFactory.randomString();
-        TestFactory.writeToFile(mOriginalFile, contents);
+        TestUtils.writeToFile(mOriginalFile, contents);
 
         // run
         final Reader reader = mHelper.readerForFile(mOriginalFile);
@@ -113,7 +113,7 @@ public class FileHelperTest extends ZincBaseTest {
         // prepare
         final String stringContents = TestFactory.randomString();
         final String JSON = mGson.toJson(stringContents);
-        TestFactory.writeToFile(mOriginalFile, JSON);
+        TestUtils.writeToFile(mOriginalFile, JSON);
 
         // run
         final String result = mHelper.readJSON(mOriginalFile, String.class);
