@@ -55,6 +55,8 @@ public class ZincCatalogs {
                 final SettableFuture<ZincCatalog> future = SettableFuture.create();
                 future.set(zincCatalog);
 
+                logMessage(sourceURL.getCatalogID(), "Returning persisted catalog");
+
                 result = future;
             } catch (final FileNotFoundException e) {
                 result = mDownloadExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
@@ -79,10 +81,10 @@ public class ZincCatalogs {
 
     private synchronized void persistCatalog(final ZincCatalog result, final File catalogFile) {
         try {
-            logMessage("Persisting catalog to disk: " + result.getIdentifier());
+            logMessage(result.getIdentifier(), "Persisting catalog to disk: " + result.getIdentifier());
             mFileHelper.writeObject(catalogFile, result, ZincCatalog.class);
         } catch (final IOException e) {
-            logMessage("Error persisting catalog to disk: " + e);
+            logMessage(result.getIdentifier(), "Error persisting catalog to disk: " + e);
         }
     }
 
@@ -94,7 +96,7 @@ public class ZincCatalogs {
         return mFileHelper.readJSON(catalogFile, ZincCatalog.class);
     }
 
-    private void logMessage(final String message) {
-        ZincLogging.log(getClass().getName(), message);
+    private void logMessage(final String catalogID, final String message) {
+        ZincLogging.log(getClass().getSimpleName() + " (" + catalogID + ")", message);
     }
 }
