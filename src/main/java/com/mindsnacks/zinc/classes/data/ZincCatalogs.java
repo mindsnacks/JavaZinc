@@ -8,6 +8,8 @@ import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,6 +18,9 @@ import java.util.concurrent.ScheduledExecutorService;
  * @author Nacho Soto
  *
  * This class deals with persisting and scheduling downloading catalogs.
+ *
+ * TODO: cache futures, and only invalidate them when the scheduler updates all catalogs.
+ * TODO: schedule updates.
  */
 public class ZincCatalogs {
     private final File mRoot;
@@ -23,6 +28,8 @@ public class ZincCatalogs {
     private final ZincJobFactory mJobFactory;
     private final ListeningScheduledExecutorService mDownloadExecutorService;
     private final ExecutorService mPersistenceExecutorService;
+
+    private final Map<SourceURL, Future<ZincCatalog>> mFutures = new HashMap<SourceURL, Future<ZincCatalog>>();
 
     public ZincCatalogs(final File root,
                         final FileHelper fileHelper,
@@ -37,31 +44,41 @@ public class ZincCatalogs {
     }
 
     public synchronized Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
-        final File catalogFile = getCatalogFile(sourceURL.getCatalogID());
+        if (!mFutures.containsKey(sourceURL)) {
+            ListenableFuture<ZincCatalog> result;
 
-        try {
-            final ZincCatalog zincCatalog = readCatalogFile(catalogFile);
+            final File catalogFile = getCatalogFile(sourceURL.getCatalogID());
 
-            final SettableFuture<ZincCatalog> future = SettableFuture.create();
-            future.set(zincCatalog);
+            try {
+                final ZincCatalog zincCatalog = readCatalogFile(catalogFile);
 
-            return future;
-        } catch (final FileNotFoundException e) {
-            final ListenableFuture<ZincCatalog> future = mDownloadExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
+                final SettableFuture<ZincCatalog> future = SettableFuture.create();
+                future.set(zincCatalog);
 
-            Futures.addCallback(future, new FutureCallback<ZincCatalog>() {
-                @Override
-                public void onSuccess(final ZincCatalog result) {
-                    persistCatalog(result, catalogFile);
-                }
-                @Override
-                public void onFailure(final Throwable t) {
-                    // the download failed
-                }
-            }, mPersistenceExecutorService);
+                result = future;
+            } catch (final FileNotFoundException e) {
+                result = mDownloadExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
 
-            return future;
+                Futures.addCallback(result, new FutureCallback<ZincCatalog>() {
+                    @Override
+                    public void onSuccess(final ZincCatalog result) {
+                        persistCatalog(result, catalogFile);
+                    }
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        // the download failed
+                    }
+                }, mPersistenceExecutorService);
+            }
+
+            cacheFuture(sourceURL, result);
         }
+
+        return mFutures.get(sourceURL);
+    }
+
+    private void cacheFuture(final SourceURL sourceURL, final ListenableFuture<ZincCatalog> future) {
+        mFutures.put(sourceURL, future);
     }
 
     private synchronized void persistCatalog(final ZincCatalog result, final File catalogFile) {

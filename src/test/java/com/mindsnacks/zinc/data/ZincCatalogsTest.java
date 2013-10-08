@@ -37,10 +37,10 @@ import static org.mockito.Mockito.*;
 public class ZincCatalogsTest extends ZincBaseTest {
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
 
-    @Mock ZincJobFactory mJobFactory;
-    @Mock FileHelper mFileHelper;
-    @Mock ListeningScheduledExecutorService mExecutorService;
-    @Mock ZincCatalog mResultCatalog;
+    @Mock private ZincJobFactory mJobFactory;
+    @Mock private FileHelper mFileHelper;
+    @Mock private ListeningScheduledExecutorService mExecutorService;
+    @Mock private ZincCatalog mResultCatalog;
 
     private ZincCatalogs catalogs;
 
@@ -65,6 +65,15 @@ public class ZincCatalogsTest extends ZincBaseTest {
         // verify
         assertNotNull(catalog);
         assertEquals(mResultCatalog, catalog.get());
+    }
+
+    @Test
+    public void JSONIsReadFromDisk() throws Exception {
+        setLocalCatalogFileContent(mResultCatalog);
+
+        run();
+
+        verify(mFileHelper).readJSON(any(File.class), eq(ZincCatalog.class));
     }
 
     @Test
@@ -109,6 +118,18 @@ public class ZincCatalogsTest extends ZincBaseTest {
         run();
 
         verify(mFileHelper).writeObject(any(File.class), eq(mResultCatalog), eq(ZincCatalog.class));
+    }
+
+    @Test
+    public void futuresAreCached() throws Exception {
+        setLocalCatalogFileContent(mResultCatalog);
+
+        final Future<ZincCatalog> future1 = run();
+        final Future<ZincCatalog> future2 = run();
+
+        assertEquals(future1, future2);
+
+        verify(mFileHelper, times(1)).readJSON(any(File.class), eq(ZincCatalog.class));
     }
 
     private void setLocalCatalogFileContent(final ZincCatalog expectedResult) throws FileNotFoundException {
