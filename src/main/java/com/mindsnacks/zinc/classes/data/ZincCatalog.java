@@ -38,8 +38,8 @@ public class ZincCatalog {
     @Override
     public String toString() {
         return "ZincCatalog {" +
-                "mIdentifier='" + mIdentifier + '\'' +
-                ", mBundles=" + mBundles +
+                " identifier = '" + mIdentifier + '\'' +
+                ", bundles = " + mBundles +
                 '}';
     }
 
@@ -73,7 +73,7 @@ public class ZincCatalog {
         @Override
         public String toString() {
             return "Info {" +
-                    "mDistributions=" + mDistributions +
+                    "distributions = " + mDistributions +
                     '}';
         }
 
