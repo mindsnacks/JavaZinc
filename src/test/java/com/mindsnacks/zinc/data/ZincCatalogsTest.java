@@ -2,6 +2,7 @@ package com.mindsnacks.zinc.data;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.SourceURL;
@@ -52,7 +53,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        catalogs = new ZincCatalogs(rootFolder.getRoot(), mFileHelper, mJobFactory, mExecutorService);
+        catalogs = new ZincCatalogs(rootFolder.getRoot(), mFileHelper, mJobFactory, mExecutorService, MoreExecutors.sameThreadExecutor());
     }
 
     @Test

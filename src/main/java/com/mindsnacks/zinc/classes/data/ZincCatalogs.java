@@ -8,7 +8,9 @@ import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author Nacho Soto
@@ -19,16 +21,19 @@ public class ZincCatalogs {
     private final File mRoot;
     private final FileHelper mFileHelper;
     private final ZincJobFactory mJobFactory;
-    private final ListeningScheduledExecutorService mExecutorService;
+    private final ListeningScheduledExecutorService mDownloadExecutorService;
+    private final ExecutorService mPersistenceExecutorService;
 
     public ZincCatalogs(final File root,
                         final FileHelper fileHelper,
                         final ZincJobFactory jobFactory,
-                        final ListeningScheduledExecutorService executorService) {
+                        final ScheduledExecutorService downloadExecutorService,
+                        final ExecutorService persistenceExecutorService) {
         mRoot = root;
         mFileHelper = fileHelper;
         mJobFactory = jobFactory;
-        mExecutorService = executorService;
+        mDownloadExecutorService = MoreExecutors.listeningDecorator(downloadExecutorService);
+        mPersistenceExecutorService = persistenceExecutorService;
     }
 
     public synchronized Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
@@ -42,7 +47,7 @@ public class ZincCatalogs {
 
             return future;
         } catch (final FileNotFoundException e) {
-            final ListenableFuture<ZincCatalog> future = mExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
+            final ListenableFuture<ZincCatalog> future = mDownloadExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
 
             Futures.addCallback(future, new FutureCallback<ZincCatalog>() {
                 @Override
@@ -53,7 +58,7 @@ public class ZincCatalogs {
                 public void onFailure(final Throwable t) {
                     // the download failed
                 }
-            });
+            }, mPersistenceExecutorService);
 
             return future;
         }
