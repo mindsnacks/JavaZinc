@@ -50,29 +50,42 @@ public class ZincCatalogs {
             final File catalogFile = getCatalogFile(sourceURL.getCatalogID());
 
             try {
-                final ZincCatalog zincCatalog = readCatalogFile(catalogFile);
-
-                final SettableFuture<ZincCatalog> future = SettableFuture.create();
-                future.set(zincCatalog);
-
-                logMessage(sourceURL.getCatalogID(), "Returning persisted catalog");
-
-                result = future;
+                result  = getPersistedCatalog(sourceURL, catalogFile);
             } catch (final FileNotFoundException e) {
-                result = mDownloadExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
-
-                Futures.addCallback(result, new FutureCallback<ZincCatalog>() {
-                    @Override public void onSuccess(final ZincCatalog result) {
-                        persistCatalog(result, catalogFile);
-                    }
-                    @Override public void onFailure(final Throwable downloadFailed) {}
-                }, mPersistenceExecutorService);
+                result = downloadCatalog(sourceURL, catalogFile);
             }
 
             cacheFuture(sourceURL, result);
         }
 
         return mFutures.get(sourceURL);
+    }
+
+    private SettableFuture<ZincCatalog> getPersistedCatalog(final SourceURL sourceURL,
+                                                            final File catalogFile) throws FileNotFoundException {
+        final ZincCatalog zincCatalog = readCatalogFile(catalogFile);
+
+        final SettableFuture<ZincCatalog> future = SettableFuture.create();
+        future.set(zincCatalog);
+
+        logMessage(sourceURL.getCatalogID(), "Returning persisted catalog");
+
+        return future;
+    }
+
+    private ListenableFuture<ZincCatalog> downloadCatalog(final SourceURL sourceURL, final File catalogFile) {
+        final ListenableFuture<ZincCatalog> result = mDownloadExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
+
+        Futures.addCallback(result, new FutureCallback<ZincCatalog>() {
+            @Override public void onSuccess(final ZincCatalog result) {
+                persistCatalog(result, catalogFile);
+            }
+
+            @Override public void onFailure(final Throwable downloadFailed) {
+            }
+        }, mPersistenceExecutorService);
+
+        return result;
     }
 
     private void cacheFuture(final SourceURL sourceURL, final ListenableFuture<ZincCatalog> future) {
@@ -82,6 +95,7 @@ public class ZincCatalogs {
     private synchronized void persistCatalog(final ZincCatalog result, final File catalogFile) {
         try {
             logMessage(result.getIdentifier(), "Persisting catalog to disk: " + result.getIdentifier());
+
             mFileHelper.writeObject(catalogFile, result, ZincCatalog.class);
         } catch (final IOException e) {
             logMessage(result.getIdentifier(), "Error persisting catalog to disk: " + e);
