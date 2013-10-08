@@ -60,14 +60,10 @@ public class ZincCatalogs {
                 result = mDownloadExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
 
                 Futures.addCallback(result, new FutureCallback<ZincCatalog>() {
-                    @Override
-                    public void onSuccess(final ZincCatalog result) {
+                    @Override public void onSuccess(final ZincCatalog result) {
                         persistCatalog(result, catalogFile);
                     }
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        // the download failed
-                    }
+                    @Override public void onFailure(final Throwable downloadFailed) {}
                 }, mPersistenceExecutorService);
             }
 
