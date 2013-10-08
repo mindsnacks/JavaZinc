@@ -44,6 +44,10 @@ public class FileHelper {
         }
     }
 
+    public Reader readerForFile(final File file) throws FileNotFoundException {
+        return new BufferedReader(new FileReader(file));
+    }
+
     public boolean moveFile(final File originFolder, final String originFilename, final File destinationFolder, final String destinationFilename) {
         final File input = new File(originFolder, originFilename),
                    output = new File(destinationFolder, destinationFilename);

@@ -1,7 +1,9 @@
 package com.mindsnacks.zinc.classes.fileutils;
 
+import com.google.common.io.CharStreams;
 import com.mindsnacks.zinc.classes.data.BundleID;
 import com.mindsnacks.zinc.classes.data.ZincBundle;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.TestUtils;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
@@ -12,10 +14,8 @@ import org.junit.rules.TemporaryFolder;
 import java.io.*;
 import java.util.zip.GZIPOutputStream;
 
-import static com.mindsnacks.zinc.utils.MockFactory.randomString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.mindsnacks.zinc.utils.TestFactory.randomString;
+import static org.junit.Assert.*;
 
 /**
  * User: NachoSoto
@@ -90,6 +90,19 @@ public class FileHelperTest extends ZincBaseTest {
         assertTrue(mDestinationFile.exists());
         assertTrue(mOriginalFile.exists());
         assertEquals(TestUtils.readFile(mOriginalFile), TestUtils.readFile(mDestinationFile));
+    }
+
+    @Test
+    public void readerForFile() throws Exception {
+        // prepare
+        final String contents = TestFactory.randomString();
+        TestFactory.writeToFile(mOriginalFile, contents);
+
+        // run
+        final Reader reader = mHelper.readerForFile(mOriginalFile);
+
+        // verify
+        assertEquals(contents, CharStreams.toString(reader));
     }
 
     private void createGzipFile(final String contents, final File file) throws IOException {
