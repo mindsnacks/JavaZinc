@@ -129,7 +129,7 @@ public class ZincCatalogs {
 
     private synchronized void updateCatalogsForTrackedSourceURLs() {
         for (final SourceURL sourceURL : mTrackedSourceURLs) {
-            downloadCatalog(sourceURL, getCatalogFile(sourceURL));
+            cacheFuture(sourceURL, downloadCatalog(sourceURL, getCatalogFile(sourceURL)));
         }
     }
 

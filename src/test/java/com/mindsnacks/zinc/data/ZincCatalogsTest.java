@@ -167,35 +167,29 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Test
     public void updatingCatalogsDownloadsNewOnes() throws Exception {
-        makeTimerRunTaskWhenScheduled();
-        setMockFutureAsResult();
-
-        mTrackedSourceURLs.add(mSourceURL);
+        setUpUpdateTask();
 
         initialize();
 
         verifyCatalogIsDownloaded();
     }
 
-    private void makeTimerRunTaskWhenScheduled() {
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(final InvocationOnMock invocationOnMock) throws Throwable {
-                ((TimerTask)invocationOnMock.getArguments()[0]).run();
-
-                return null;
-            }
-        }).when(mTimer).schedule(any(TimerTask.class), anyLong(), anyLong());
-    }
-
     @Test
     public void updatingCatalogsIgnoresCachedCatalogs() throws Exception {
+        setUpUpdateTask();
 
+        initialize();
+
+        verify(mFileHelper, times(0)).readJSON(any(File.class), any(Class.class));
     }
 
     @Test
     public void updatingCatalogsReplacesFutures() throws Exception {
+        final ListenableFuture future = setUpUpdateTask();
 
+        initialize();
+
+        assertEquals(future, catalogs.getCatalog(mSourceURL));
     }
 
     @Test
@@ -226,6 +220,23 @@ public class ZincCatalogsTest extends ZincBaseTest {
         setFuture(future);
 
         return future;
+    }
+
+    private ListenableFuture setUpUpdateTask() {
+        makeTimerRunTaskWhenScheduled();
+        mTrackedSourceURLs.add(mSourceURL);
+        return setMockFutureAsResult();
+    }
+
+    private void makeTimerRunTaskWhenScheduled() {
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(final InvocationOnMock invocationOnMock) throws Throwable {
+                ((TimerTask)invocationOnMock.getArguments()[0]).run();
+
+                return null;
+            }
+        }).when(mTimer).schedule(any(TimerTask.class), anyLong(), anyLong());
     }
 
     private void setFuture(final ListenableFuture<ZincCatalog> future) {
