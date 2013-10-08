@@ -1,5 +1,6 @@
 package com.mindsnacks.zinc.classes.data;
 
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.SettableFuture;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
@@ -17,11 +18,16 @@ public class ZincCatalogs {
     private final File mRoot;
     private final FileHelper mFileHelper;
     private final ZincJobFactory mJobFactory;
+    private final ListeningScheduledExecutorService mExecutorService;
 
-    public ZincCatalogs(final File root, final FileHelper fileHelper, final ZincJobFactory jobFactory) {
+    public ZincCatalogs(final File root,
+                        final FileHelper fileHelper,
+                        final ZincJobFactory jobFactory,
+                        final ListeningScheduledExecutorService executorService) {
         mRoot = root;
         mFileHelper = fileHelper;
         mJobFactory = jobFactory;
+        mExecutorService = executorService;
     }
 
     public Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
@@ -33,8 +39,7 @@ public class ZincCatalogs {
 
             return future;
         } catch (final FileNotFoundException e) {
-            // TODO: create download job
-            return null;
+            return mExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
         }
     }
 

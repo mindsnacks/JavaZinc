@@ -1,5 +1,7 @@
 package com.mindsnacks.zinc.data;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.SourceURL;
 import com.mindsnacks.zinc.classes.data.ZincCatalog;
@@ -11,11 +13,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
@@ -33,6 +37,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Mock ZincJobFactory mJobFactory;
     @Mock FileHelper mFileHelper;
+    @Mock ListeningScheduledExecutorService mExecutorService;
 
     private ZincCatalogs catalogs;
 
@@ -45,7 +50,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        catalogs = new ZincCatalogs(rootFolder.getRoot(), mFileHelper, mJobFactory);
+        catalogs = new ZincCatalogs(rootFolder.getRoot(), mFileHelper, mJobFactory, mExecutorService);
     }
 
     @Test
@@ -54,29 +59,53 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
         setLocalCatalogFileContent(expectedResult);
 
-        // run
-        final Future<ZincCatalog> catalog = catalogs.getCatalog(mSourceURL);
+        final Future<ZincCatalog> catalog = run();
 
         // verify
         assertNotNull(catalog);
         assertEquals(expectedResult, catalog.get());
     }
 
-//    @Test
-//    public void catalogIsDownloaded() throws Exception {
-//        setLocalCatalogFileDoesNotExist();
-//
-//        // run
-//        catalogs.getCatalog(mCatalogID);
-//
-//        verify(mJobFactory).downloadCatalog()
-//    }
+    @Test
+    public void catalogIsDownloaded() throws Exception {
+        setLocalCatalogFileDoesNotExist();
 
+        run();
+
+        verify(mJobFactory).downloadCatalog(mSourceURL);
+    }
+
+    @Test
+    public void catalogDownloadIsSubmitted() throws Exception {
+        final Callable downloadTask = mock(Callable.class);
+
+        setLocalCatalogFileDoesNotExist();
+        doReturn(downloadTask).when(mJobFactory).downloadCatalog(mSourceURL);
+
+        run();
+
+        verify(mExecutorService).submit(downloadTask);
+    }
+
+    @Test
+    public void returnedFutureComesFromExecutorService() throws Exception {
+        final ListenableFuture future = mock(ListenableFuture.class);
+
+        setLocalCatalogFileDoesNotExist();
+        doReturn(future).when(mExecutorService).submit(Matchers.<Callable>any());
+
+        assertEquals(future, run());
+    }
+    
     private void setLocalCatalogFileContent(final ZincCatalog expectedResult) throws FileNotFoundException {
         doReturn(expectedResult).when(mFileHelper).readJSON(any(File.class), eq(ZincCatalog.class));
     }
 
     private void setLocalCatalogFileDoesNotExist() throws FileNotFoundException {
         doThrow(FileNotFoundException.class).when(mFileHelper).readJSON(any(File.class), any(Class.class));
+    }
+
+    private Future<ZincCatalog> run() {
+        return catalogs.getCatalog(mSourceURL);
     }
 }
