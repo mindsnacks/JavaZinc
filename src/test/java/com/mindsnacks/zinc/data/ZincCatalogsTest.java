@@ -17,13 +17,14 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -42,7 +43,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Mock private ZincJobFactory mJobFactory;
     @Mock private FileHelper mFileHelper;
-    @Mock private Set<SourceURL> mTrackedSourceURLs;
+    @Spy private Set<SourceURL> mTrackedSourceURLs = new HashSet<SourceURL>();
     @Mock private ListeningExecutorService mExecutorService;
     @Mock private ZincCatalog mResultCatalog;
     @Mock private Timer mTimer;
@@ -58,7 +59,22 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        catalogs = new ZincCatalogs(rootFolder.getRoot(), mFileHelper, mTrackedSourceURLs, mJobFactory, mExecutorService, MoreExecutors.sameThreadExecutor(), mTimer);
+        initialize();
+    }
+
+    private void initialize() {
+        catalogs = new ZincCatalogs(
+                rootFolder.getRoot(),
+                mFileHelper,
+                mTrackedSourceURLs,
+                mJobFactory,
+                mExecutorService,
+                MoreExecutors.sameThreadExecutor(),
+                mTimer);
+    }
+
+    private Future<ZincCatalog> run() {
+        return catalogs.getCatalog(mSourceURL);
     }
 
     @Test
@@ -88,7 +104,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
         run();
 
-        verify(mJobFactory).downloadCatalog(mSourceURL);
+        verifyCatalogIsDownloaded();
     }
 
     @Test
@@ -149,12 +165,59 @@ public class ZincCatalogsTest extends ZincBaseTest {
         verify(mTimer).schedule(any(TimerTask.class), anyLong(), anyLong());
     }
 
+    @Test
+    public void updatingCatalogsDownloadsNewOnes() throws Exception {
+        makeTimerRunTaskWhenScheduled();
+        setMockFutureAsResult();
+
+        mTrackedSourceURLs.add(mSourceURL);
+
+        initialize();
+
+        verifyCatalogIsDownloaded();
+    }
+
+    private void makeTimerRunTaskWhenScheduled() {
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(final InvocationOnMock invocationOnMock) throws Throwable {
+                ((TimerTask)invocationOnMock.getArguments()[0]).run();
+
+                return null;
+            }
+        }).when(mTimer).schedule(any(TimerTask.class), anyLong(), anyLong());
+    }
+
+    @Test
+    public void updatingCatalogsIgnoresCachedCatalogs() throws Exception {
+
+    }
+
+    @Test
+    public void updatingCatalogsReplacesFutures() throws Exception {
+
+    }
+
+    @Test
+    public void failedCatalogDownloadReplacesFutureWithOriginalOne() throws Exception {
+
+    }
+
+    @Test
+    public void failedCatalogDownloadRemovesCachedFuture() throws Exception {
+
+    }
+
     private void setLocalCatalogFileContent(final ZincCatalog expectedResult) throws FileNotFoundException {
         doReturn(expectedResult).when(mFileHelper).readJSON(any(File.class), eq(ZincCatalog.class));
     }
 
     private void setLocalCatalogFileDoesNotExist() throws FileNotFoundException {
         doThrow(FileNotFoundException.class).when(mFileHelper).readJSON(any(File.class), any(Class.class));
+    }
+
+    private void verifyCatalogIsDownloaded() {
+        verify(mJobFactory).downloadCatalog(mSourceURL);
     }
 
     private ListenableFuture setMockFutureAsResult() {
@@ -167,9 +230,5 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     private void setFuture(final ListenableFuture<ZincCatalog> future) {
         doReturn(future).when(mExecutorService).submit(Matchers.<Callable>any());
-    }
-
-    private Future<ZincCatalog> run() {
-        return catalogs.getCatalog(mSourceURL);
     }
 }

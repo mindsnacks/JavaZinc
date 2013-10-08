@@ -63,7 +63,7 @@ public class ZincCatalogs {
         if (!mFutures.containsKey(sourceURL)) {
             ListenableFuture<ZincCatalog> result;
 
-            final File catalogFile = getCatalogFile(sourceURL.getCatalogID());
+            final File catalogFile = getCatalogFile(sourceURL);
 
             try {
                 result = getPersistedCatalog(sourceURL, catalogFile);
@@ -122,13 +122,19 @@ public class ZincCatalogs {
     private void scheduleUpdate() {
         mUpdateTimer.schedule(new TimerTask() {
             @Override public void run() {
-
+                updateCatalogsForTrackedSourceURLs();
             }
         }, INITIAL_UPDATE_DELAY, UPDATE_FREQUENCY);
     }
 
-    private File getCatalogFile(final String catalogID) {
-        return new File(mRoot, PathHelper.getLocalCatalogFilePath(catalogID));
+    private synchronized void updateCatalogsForTrackedSourceURLs() {
+        for (final SourceURL sourceURL : mTrackedSourceURLs) {
+            downloadCatalog(sourceURL, getCatalogFile(sourceURL));
+        }
+    }
+
+    private File getCatalogFile(final SourceURL sourceURL) {
+        return new File(mRoot, PathHelper.getLocalCatalogFilePath(sourceURL.getCatalogID()));
     }
 
     private ZincCatalog readCatalogFile(final File catalogFile) throws FileNotFoundException {
