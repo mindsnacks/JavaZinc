@@ -81,6 +81,8 @@ public class FileHelper {
     }
 
     public <V> void writeObject(final File file, final V object, final Class<V> vClass) throws IOException {
+        createDirectories(file);
+
         final BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 
         try {
