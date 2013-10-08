@@ -24,11 +24,9 @@ public class ZincCatalogs {
         mJobFactory = jobFactory;
     }
 
-    public Future<ZincCatalog> getCatalog(final String catalogID) {
-        final File catalogFile = getCatalogFile(catalogID);
-
+    public Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
         try {
-            final ZincCatalog zincCatalog = readCatalogFile(catalogFile);
+            final ZincCatalog zincCatalog = readCatalogFile(getCatalogFile(sourceURL.getCatalogID()));
 
             final SettableFuture<ZincCatalog> future = SettableFuture.create();
             future.set(zincCatalog);

@@ -1,7 +1,7 @@
 package com.mindsnacks.zinc.data;
 
 import com.mindsnacks.zinc.classes.ZincJobFactory;
-import com.mindsnacks.zinc.classes.data.PathHelper;
+import com.mindsnacks.zinc.classes.data.SourceURL;
 import com.mindsnacks.zinc.classes.data.ZincCatalog;
 import com.mindsnacks.zinc.classes.data.ZincCatalogs;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
@@ -14,14 +14,15 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 /**
  * User: NachoSoto
@@ -36,6 +37,11 @@ public class ZincCatalogsTest extends ZincBaseTest {
     private ZincCatalogs catalogs;
 
     private final String mCatalogID = "com.mindsnacks.games";
+    private final SourceURL mSourceURL;
+
+    public ZincCatalogsTest() throws MalformedURLException {
+        mSourceURL = new SourceURL(TestFactory.createURL("http://www.mindsnacks.com"), mCatalogID);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -46,14 +52,31 @@ public class ZincCatalogsTest extends ZincBaseTest {
     public void returnsLocalCatalogIfExists() throws Exception {
         final ZincCatalog expectedResult = mock(ZincCatalog.class);
 
-        TestFactory.createFile(rootFolder, PathHelper.getLocalCatalogFilePath(mCatalogID), "");
-        doReturn(expectedResult).when(mFileHelper).readJSON(any(File.class), eq(ZincCatalog.class));
+        setLocalCatalogFileContent(expectedResult);
 
         // run
-        final Future<ZincCatalog> catalog = catalogs.getCatalog(mCatalogID);
+        final Future<ZincCatalog> catalog = catalogs.getCatalog(mSourceURL);
 
         // verify
         assertNotNull(catalog);
         assertEquals(expectedResult, catalog.get());
+    }
+
+//    @Test
+//    public void catalogIsDownloaded() throws Exception {
+//        setLocalCatalogFileDoesNotExist();
+//
+//        // run
+//        catalogs.getCatalog(mCatalogID);
+//
+//        verify(mJobFactory).downloadCatalog()
+//    }
+
+    private void setLocalCatalogFileContent(final ZincCatalog expectedResult) throws FileNotFoundException {
+        doReturn(expectedResult).when(mFileHelper).readJSON(any(File.class), eq(ZincCatalog.class));
+    }
+
+    private void setLocalCatalogFileDoesNotExist() throws FileNotFoundException {
+        doThrow(FileNotFoundException.class).when(mFileHelper).readJSON(any(File.class), any(Class.class));
     }
 }

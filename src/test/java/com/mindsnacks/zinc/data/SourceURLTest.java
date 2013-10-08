@@ -2,10 +2,10 @@ package com.mindsnacks.zinc.data;
 
 import com.google.gson.Gson;
 import com.mindsnacks.zinc.classes.data.SourceURL;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Test;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import static com.mindsnacks.zinc.utils.TestFactory.randomInt;
@@ -17,15 +17,10 @@ import static org.junit.Assert.assertTrue;
  * Date: 9/9/13
  */
 public class SourceURLTest extends ZincBaseTest {
-    private final URL zincURL;
-    private final String catalogID;
+    private final URL zincURL = TestFactory.createURL("http://zinc.repo.com/some-folder/");
+    private final String catalogID = "com.mindsnacks.games";
 
     private final Gson mGson = createGson();
-
-    public SourceURLTest() throws MalformedURLException {
-        zincURL = new URL("http://zinc.repo.com/some-folder/");
-        catalogID = "com.mindsnacks.games";
-    }
 
     @Test
     public void initializeWithHostAndCatalogName() throws Exception {
