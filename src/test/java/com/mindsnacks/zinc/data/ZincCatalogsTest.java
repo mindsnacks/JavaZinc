@@ -53,6 +53,9 @@ public class ZincCatalogsTest extends ZincBaseTest {
     @Mock private ZincCatalog mResultCatalog;
     @Mock private Timer mTimer;
 
+    private TimerTask mScheduledTask;
+    private boolean runTaskImmediately = false;
+
     private final String mCatalogID = "com.mindsnacks.games";
     private final SourceURL mSourceURL;
 
@@ -65,6 +68,8 @@ public class ZincCatalogsTest extends ZincBaseTest {
     @Before
     public void setUp() throws Exception {
         initialize();
+
+        setUpTimerTaskAnswer();
     }
 
     private void initialize() {
@@ -199,17 +204,6 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Test
     public void failedCatalogDownloadReplacesFutureWithOriginalOne() throws Exception {
-        // don't run scheduled task right away. Save it instead.
-        final TimerTask[] task = new TimerTask[1];
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(final InvocationOnMock invocationOnMock) throws Throwable {
-                task[0] = (TimerTask)invocationOnMock.getArguments()[0];
-
-                return null;
-            }
-        }).when(mTimer).schedule(any(TimerTask.class), anyLong(), anyLong());
-
         initialize();
 
         // cache the future with the persisted copy
@@ -219,7 +213,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
         setDownloadTaskFails();
 
         // trigger an update
-        task[0].run();
+        runScheduledTask();
 
         // update task failed, so this should return the original future
         assertEquals(originalFuture, catalogs.getCatalog(mSourceURL));
@@ -276,17 +270,29 @@ public class ZincCatalogsTest extends ZincBaseTest {
     }
 
     private void makeTimerRunTaskWhenScheduled() {
+        runTaskImmediately = true;
+    }
+
+    private void setFuture(final ListenableFuture<ZincCatalog> future) {
+        doReturn(future).when(mExecutorService).submit(Matchers.<Callable>any());
+    }
+
+    private void setUpTimerTaskAnswer() {
         doAnswer(new Answer() {
             @Override
             public Object answer(final InvocationOnMock invocationOnMock) throws Throwable {
-                ((TimerTask)invocationOnMock.getArguments()[0]).run();
+                mScheduledTask = (TimerTask)invocationOnMock.getArguments()[0];
+
+                if (runTaskImmediately) {
+                    runScheduledTask();
+                }
 
                 return null;
             }
         }).when(mTimer).schedule(any(TimerTask.class), anyLong(), anyLong());
     }
 
-    private void setFuture(final ListenableFuture<ZincCatalog> future) {
-        doReturn(future).when(mExecutorService).submit(Matchers.<Callable>any());
+    private void runScheduledTask() {
+        mScheduledTask.run();
     }
 }
