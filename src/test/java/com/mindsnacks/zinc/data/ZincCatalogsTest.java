@@ -9,6 +9,7 @@ import com.mindsnacks.zinc.classes.data.SourceURL;
 import com.mindsnacks.zinc.classes.data.ZincCatalog;
 import com.mindsnacks.zinc.classes.data.ZincCatalogs;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
+import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
@@ -20,11 +21,15 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.mockito.verification.VerificationMode;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -199,7 +204,16 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Test
     public void failedCatalogDownloadRemovesCachedFuture() throws Exception {
+        setUpUpdateTask();
+        setDownloadTaskFails();
+        setLocalCatalogFileDoesNotExist();
 
+        initialize();
+
+        final Future<ZincCatalog> catalogFuture = catalogs.getCatalog(mSourceURL);
+
+        assertNotNull(catalogFuture);
+        verifyCatalogIsDownloaded(times(2));
     }
 
     private void setLocalCatalogFileContent(final ZincCatalog expectedResult) throws FileNotFoundException {
@@ -210,8 +224,18 @@ public class ZincCatalogsTest extends ZincBaseTest {
         doThrow(FileNotFoundException.class).when(mFileHelper).readJSON(any(File.class), any(Class.class));
     }
 
+    private void setDownloadTaskFails() {
+        final SettableFuture<ZincCatalog> future = SettableFuture.create();
+        future.setException(new ZincRuntimeException("Something went wrong downloading catalog"));
+        setFuture(future);
+    }
+
     private void verifyCatalogIsDownloaded() {
-        verify(mJobFactory).downloadCatalog(mSourceURL);
+        verifyCatalogIsDownloaded(atLeastOnce());
+    }
+
+    private void verifyCatalogIsDownloaded(final VerificationMode times) {
+        verify(mJobFactory, times).downloadCatalog(mSourceURL);
     }
 
     private ListenableFuture setMockFutureAsResult() {

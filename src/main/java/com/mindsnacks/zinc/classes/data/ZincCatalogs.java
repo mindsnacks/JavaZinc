@@ -99,6 +99,8 @@ public class ZincCatalogs {
 
             @Override public void onFailure(final Throwable downloadFailed) {
                 // TODO: recover previous future if it existed
+
+                removeFuture(sourceURL);
             }
         }, mPersistenceExecutorService);
 
@@ -119,6 +121,10 @@ public class ZincCatalogs {
         mFutures.put(sourceURL, future);
     }
 
+    private synchronized void removeFuture(final SourceURL sourceURL) {
+        mFutures.remove(sourceURL);
+    }
+
     private void scheduleUpdate() {
         mUpdateTimer.schedule(new TimerTask() {
             @Override public void run() {
@@ -129,7 +135,11 @@ public class ZincCatalogs {
 
     private synchronized void updateCatalogsForTrackedSourceURLs() {
         for (final SourceURL sourceURL : mTrackedSourceURLs) {
-            cacheFuture(sourceURL, downloadCatalog(sourceURL, getCatalogFile(sourceURL)));
+            final ListenableFuture<ZincCatalog> future = downloadCatalog(sourceURL, getCatalogFile(sourceURL));
+
+            if (!future.isDone()) { // otherwise downloadCatalog has already cached the result
+                cacheFuture(sourceURL, future);
+            }
         }
     }
 
