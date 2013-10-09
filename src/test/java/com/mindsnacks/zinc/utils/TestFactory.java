@@ -1,10 +1,13 @@
 package com.mindsnacks.zinc.utils;
 
 import com.mindsnacks.zinc.classes.data.ZincCatalog;
+import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +22,7 @@ import static org.mockito.Mockito.*;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public final class MockFactory {
+public final class TestFactory {
     private static final SecureRandom random = new SecureRandom();
 
     public static ZincCatalog createCatalog() {
@@ -107,6 +110,14 @@ public final class MockFactory {
 
     public static int randomInt() {
         return random.nextInt();
+    }
+
+    public static URL createURL(final String url) {
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
+            throw new ZincRuntimeException("Invalid URL in test", e);
+        }
     }
 
     public static class DaemonThreadFactory implements ThreadFactory {

@@ -7,7 +7,7 @@ import com.mindsnacks.zinc.classes.downloads.DownloadPriority;
 import com.mindsnacks.zinc.classes.downloads.PriorityCalculator;
 import com.mindsnacks.zinc.classes.downloads.PriorityJobQueue;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
-import com.mindsnacks.zinc.utils.MockFactory;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,7 +81,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
     public void setUp() throws Exception {
         queue = new PriorityJobQueue<Data, String>(
                 CONCURRENCY,
-                new MockFactory.DaemonThreadFactory(),
+                new TestFactory.DaemonThreadFactory(),
                 mPriorityCalculator,
                 mDataProcessor);
 
@@ -205,11 +205,11 @@ public class PriorityJobQueueTest extends ZincBaseTest {
     }
 
     private Data randomData() {
-        return new Data(randomPriority(), MockFactory.randomString());
+        return new Data(randomPriority(), TestFactory.randomString());
     }
 
     private DownloadPriority randomPriority() {
-        return DownloadPriority.values()[MockFactory.randomInt(0, DownloadPriority.values().length - 1)];
+        return DownloadPriority.values()[TestFactory.randomInt(0, DownloadPriority.values().length - 1)];
     }
 
     private Data processAndAddRandomData() {
@@ -222,7 +222,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
     }
 
     private void processData(final Data data) {
-        final Callable<String> processor = MockFactory.callableWithResult(data.getResult());
+        final Callable<String> processor = TestFactory.callableWithResult(data.getResult());
         when(mDataProcessor.process(data)).thenReturn(processor);
     }
 }

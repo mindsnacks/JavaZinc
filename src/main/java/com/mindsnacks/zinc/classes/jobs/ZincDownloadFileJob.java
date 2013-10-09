@@ -21,6 +21,7 @@ public class ZincDownloadFileJob extends AbstractZincDownloadFileJob {
         super(requestExecutor, url, root, child, override);
     }
 
+    // TODO: use FileHelper
     @Override
     protected void writeFile(final InputStream inputStream, final File file) throws IOException {
         logMessage("Saving file " + file.getAbsolutePath());

@@ -4,24 +4,22 @@ import com.ice.tar.TarEntry;
 import com.ice.tar.TarOutputStream;
 import com.mindsnacks.zinc.classes.jobs.ZincDownloadArchiveJob;
 import com.mindsnacks.zinc.classes.jobs.ZincRequestExecutor;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.TestUtils;
+import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
-import com.mindsnacks.zinc.utils.ZincBaseTest;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * User: NachoSoto
@@ -32,15 +30,10 @@ public class ZincDownloadArchiveJobTest extends ZincBaseTest {
 
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
 
-    private final String mFolder;
+    private final String mFolder = "results";
+    private final URL mUrl = TestFactory.createURL("http://mindsnacks.com");
 
-    private final URL mUrl;
     private ZincDownloadArchiveJob mJob;
-
-    public ZincDownloadArchiveJobTest() throws MalformedURLException {
-        mUrl = new URL("http://mindsnacks.com");
-        mFolder = "results";
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -56,8 +49,8 @@ public class ZincDownloadArchiveJobTest extends ZincBaseTest {
                      fileName2 = "file2.txt";
 
         final File[] filesToTar = new File[2];
-        filesToTar[0] = createFile(fileName1, fileContents1);
-        filesToTar[1] = createFile(fileName2, fileContents2);
+        filesToTar[0] = TestUtils.createFile(rootFolder, fileName1, fileContents1);
+        filesToTar[1] = TestUtils.createFile(rootFolder, fileName2, fileContents2);
 
         final File tar = createTar(filesToTar);
 
@@ -121,15 +114,5 @@ public class ZincDownloadArchiveJobTest extends ZincBaseTest {
         tar.close();
 
         return tarFile;
-    }
-
-    private File createFile(final String filename, final String contents) throws IOException {
-        final File file = rootFolder.newFile(filename);
-
-        final FileWriter writer = new FileWriter(file);
-        writer.write(contents);
-        writer.close();
-
-        return file;
     }
 }

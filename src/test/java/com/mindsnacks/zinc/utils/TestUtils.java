@@ -1,8 +1,9 @@
 package com.mindsnacks.zinc.utils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import com.google.common.io.CharStreams;
+import org.junit.rules.TemporaryFolder;
+
+import java.io.*;
 
 /**
  * User: NachoSoto
@@ -10,18 +11,41 @@ import java.io.IOException;
  */
 public class TestUtils {
     public static String readFile(final String path) throws IOException {
-        final File file = new File(path);
-        final FileInputStream fis = new FileInputStream(file);
-
-        final byte[] bytes = new byte[(int)file.length()];
-
-        fis.read(bytes);
-        fis.close();
-
-        return new String(bytes);
+        return readFile(new File(path));
     }
 
     public static String readFile(final File file) throws IOException {
-        return readFile(file.getPath());
+        return CharStreams.toString(new BufferedReader(new FileReader(file)));
+    }
+
+    public static File createFile(final TemporaryFolder rootFolder,
+                                  final String filename,
+                                  final String contents) throws IOException {
+        final File file = createFolderAndFile(rootFolder, filename);
+
+        writeToFile(file, contents);
+
+        return file;
+    }
+
+    private static File createFolderAndFile(final TemporaryFolder rootFolder,
+                                            final String filename) throws IOException {
+        final File folder = new File(rootFolder.getRoot(), filename).getParentFile();
+
+        if (!folder.exists()) {
+            assert folder.mkdirs();
+        }
+
+        return rootFolder.newFile(filename);
+    }
+
+    public static void writeToFile(final File file, String contents) throws IOException {
+        final FileWriter writer = new FileWriter(file);
+
+        try {
+            writer.write(contents);
+        } finally {
+            writer.close();
+        }
     }
 }

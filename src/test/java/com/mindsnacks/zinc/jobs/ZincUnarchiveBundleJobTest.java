@@ -4,7 +4,7 @@ import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import com.mindsnacks.zinc.classes.jobs.ZincUnarchiveBundleJob;
-import com.mindsnacks.zinc.utils.MockFactory;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Rule;
@@ -13,14 +13,13 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static com.mindsnacks.zinc.utils.MockFactory.randomInt;
-import static com.mindsnacks.zinc.utils.MockFactory.randomString;
+import static com.mindsnacks.zinc.utils.TestFactory.randomInt;
+import static com.mindsnacks.zinc.utils.TestFactory.randomString;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -41,7 +40,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
     final private String mDistribution = "master";
     final private String mFlavorName = "retina";
     final private int mVersion = randomInt(5, 100);
-    final private URL mSourceHost;
+    final private URL mSourceHost = TestFactory.createURL("https://mindsnacks.com/");
 
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
 
@@ -51,18 +50,15 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
     @Mock private ZincJobFactory mJobFactory;
     @Mock private SourceURL mSourceURL;
     @Mock private FileHelper mFileHelper;
-    private File mRepoFolder;
 
-    public ZincUnarchiveBundleJobTest() throws MalformedURLException {
-        mSourceHost = new URL("https://mindsnacks.com/");
-    }
+    private File mRepoFolder;
 
     @Before
     public void setUp() throws Exception {
         mRepoFolder = rootFolder.getRoot();
 
         mBundleCloneRequest = new ZincCloneBundleRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
-        mManifestJob = MockFactory.createCallable(mManifest);
+        mManifestJob = TestFactory.createCallable(mManifest);
 
         when(mBundle.getBundleID()).thenReturn(mBundleID);
         when(mBundle.getVersion()).thenReturn(mVersion);
@@ -116,7 +112,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
     @Test
     public void doesntUnarchiveAnythingIfFolderIsAlreadyThere() throws Exception {
-        final String folderName = SourceURL.getLocalBundlesFolder(mBundleID, mVersion, mFlavorName);
+        final String folderName = PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName);
 
         final File folder = new File(mRepoFolder, folderName);
         folder.mkdirs();
