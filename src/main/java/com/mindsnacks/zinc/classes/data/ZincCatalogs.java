@@ -77,8 +77,7 @@ public class ZincCatalogs {
         return mFutures.get(sourceURL);
     }
 
-    private synchronized SettableFuture<ZincCatalog> getPersistedCatalog(final SourceURL sourceURL,
-                                                            final File catalogFile) throws FileNotFoundException {
+    private synchronized SettableFuture<ZincCatalog> getPersistedCatalog(final SourceURL sourceURL, final File catalogFile) throws FileNotFoundException {
         final ZincCatalog zincCatalog = readCatalogFile(catalogFile);
 
         final SettableFuture<ZincCatalog> future = SettableFuture.create();
