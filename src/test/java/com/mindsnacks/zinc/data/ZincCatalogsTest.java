@@ -84,7 +84,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Test
     public void returnsLocalCatalogIfExists() throws Exception {
-        setLocalCatalogFileContent(mResultCatalog);
+        setLocalCatalogFileContent();
 
         final Future<ZincCatalog> catalog = run();
 
@@ -95,7 +95,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Test
     public void JSONIsReadFromDisk() throws Exception {
-        setLocalCatalogFileContent(mResultCatalog);
+        setLocalCatalogFileContent();
 
         run();
 
@@ -148,7 +148,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Test
     public void futuresAreCached() throws Exception {
-        setLocalCatalogFileContent(mResultCatalog);
+        setLocalCatalogFileContent();
 
         final Future<ZincCatalog> future1 = run();
         final Future<ZincCatalog> future2 = run();
@@ -199,7 +199,30 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Test
     public void failedCatalogDownloadReplacesFutureWithOriginalOne() throws Exception {
+        // don't run scheduled task right away. Save it instead.
+        final TimerTask[] task = new TimerTask[1];
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(final InvocationOnMock invocationOnMock) throws Throwable {
+                task[0] = (TimerTask)invocationOnMock.getArguments()[0];
 
+                return null;
+            }
+        }).when(mTimer).schedule(any(TimerTask.class), anyLong(), anyLong());
+
+        initialize();
+
+        // cache the future with the persisted copy
+        setLocalCatalogFileContent();
+        final Future<ZincCatalog> originalFuture = run();
+
+        setDownloadTaskFails();
+
+        // trigger an update
+        task[0].run();
+
+        // update task failed, so this should return the original future
+        assertEquals(originalFuture, catalogs.getCatalog(mSourceURL));
     }
 
     @Test
@@ -216,8 +239,8 @@ public class ZincCatalogsTest extends ZincBaseTest {
         verifyCatalogIsDownloaded(times(2));
     }
 
-    private void setLocalCatalogFileContent(final ZincCatalog expectedResult) throws FileNotFoundException {
-        doReturn(expectedResult).when(mFileHelper).readJSON(any(File.class), eq(ZincCatalog.class));
+    private void setLocalCatalogFileContent() throws FileNotFoundException {
+        doReturn(mResultCatalog).when(mFileHelper).readJSON(any(File.class), eq(ZincCatalog.class));
     }
 
     private void setLocalCatalogFileDoesNotExist() throws FileNotFoundException {

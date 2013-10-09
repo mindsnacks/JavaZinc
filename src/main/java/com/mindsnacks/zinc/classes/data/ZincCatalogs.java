@@ -35,7 +35,7 @@ public class ZincCatalogs {
     private final ExecutorService mPersistenceExecutorService;
     private final Timer mUpdateTimer;
 
-    private final Map<SourceURL, Future<ZincCatalog>> mFutures = new HashMap<SourceURL, Future<ZincCatalog>>();
+    private final Map<SourceURL, ListenableFuture<ZincCatalog>> mFutures = new HashMap<SourceURL, ListenableFuture<ZincCatalog>>();
 
     public ZincCatalogs(final File root,
                         final FileHelper fileHelper,
@@ -90,6 +90,7 @@ public class ZincCatalogs {
     }
 
     private synchronized ListenableFuture<ZincCatalog> downloadCatalog(final SourceURL sourceURL, final File catalogFile) {
+        final ListenableFuture<ZincCatalog> originalFuture = mFutures.get(sourceURL);
         final ListenableFuture<ZincCatalog> result = mDownloadExecutorService.submit(mJobFactory.downloadCatalog(sourceURL));
 
         Futures.addCallback(result, new FutureCallback<ZincCatalog>() {
@@ -98,9 +99,11 @@ public class ZincCatalogs {
             }
 
             @Override public void onFailure(final Throwable downloadFailed) {
-                // TODO: recover previous future if it existed
-
-                removeFuture(sourceURL);
+                if (originalFuture != null) {
+                    cacheFuture(sourceURL, originalFuture);
+                } else {
+                    removeFuture(sourceURL);
+                }
             }
         }, mPersistenceExecutorService);
 
