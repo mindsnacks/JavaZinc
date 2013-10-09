@@ -99,6 +99,8 @@ public class ZincCatalogs {
             }
 
             @Override public void onFailure(final Throwable downloadFailed) {
+                logMessage(sourceURL.getCatalogID(), "Failed to download");
+
                 if (originalFuture != null) {
                     cacheFuture(sourceURL, originalFuture);
                 } else {
@@ -137,6 +139,8 @@ public class ZincCatalogs {
     }
 
     private synchronized void updateCatalogsForTrackedSourceURLs() {
+        logMessage("All", "Updating catalogs for tracked source URLs");
+
         for (final SourceURL sourceURL : mTrackedSourceURLs) {
             final ListenableFuture<ZincCatalog> future = downloadCatalog(sourceURL, getCatalogFile(sourceURL));
 
