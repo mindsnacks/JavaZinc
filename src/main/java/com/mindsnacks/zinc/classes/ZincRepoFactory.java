@@ -11,6 +11,7 @@ import com.mindsnacks.zinc.classes.jobs.ZincDownloader;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.Timer;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -48,7 +49,12 @@ public final class ZincRepoFactory {
             final ZincRepoIndex repoIndex,
             final ThreadFactory threadFactory) {
         final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(CATALOG_DOWNLOAD_THREAD_POOL_SIZE, threadFactory);
-        final ZincCatalogs catalogs = new ZincCatalogs(root, new FileHelper(gson), new HashSet<SourceURL>(repoIndex.getSources()), jobFactory, executorService, executorService, null);
+        final ZincCatalogs catalogs = new ZincCatalogs(root, new FileHelper(gson), new HashSet<SourceURL>(
+                repoIndex.getSources()),
+                jobFactory,
+                executorService,
+                executorService,
+                new Timer(ZincCatalogs.class.getSimpleName(), true));
 
         return new ZincBundleDownloader(jobFactory, catalogs);
     }
