@@ -75,7 +75,7 @@ public class ZincDownloader implements ZincJobFactory {
         return new ZincRequestExecutor() {
             @Override
             public InputStream get(final URL url) throws AbstractZincDownloadJob.DownloadFileError {
-                ZincLogging.log("ZincRequestExcecutor", "Downloading " + url);
+                ZincLogging.log("ZincRequestExecutor", "Downloading " + url);
 
                 try {
                     final HttpRequest request = getRequest(url);
