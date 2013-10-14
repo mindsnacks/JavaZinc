@@ -1,7 +1,10 @@
 package com.mindsnacks.zinc.classes.fileutils;
 
+import com.google.common.io.CharStreams;
+import com.google.gson.Gson;
 import com.mindsnacks.zinc.classes.data.BundleID;
 import com.mindsnacks.zinc.classes.data.ZincBundle;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.TestUtils;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
@@ -12,16 +15,15 @@ import org.junit.rules.TemporaryFolder;
 import java.io.*;
 import java.util.zip.GZIPOutputStream;
 
-import static com.mindsnacks.zinc.utils.MockFactory.randomString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.mindsnacks.zinc.utils.TestFactory.randomString;
+import static org.junit.Assert.*;
 
 /**
  * User: NachoSoto
  * Date: 9/10/13
  */
 public class FileHelperTest extends ZincBaseTest {
+    private Gson mGson;
     private FileHelper mHelper;
     private ZincBundle mBundle;
 
@@ -36,7 +38,8 @@ public class FileHelperTest extends ZincBaseTest {
 
     @Before
     public void setUp() throws Exception {
-        mHelper = new FileHelper();
+        mGson = createGson();
+        mHelper = new FileHelper(mGson);
         mBundle = new ZincBundle(rootFolder.getRoot(), new BundleID("com.mindsnacks.catalog", "mBundle name"), 2);
         mOriginalFile = new File(mBundle, mFilename);
         mDestinationFile = new File(mBundle, mDestinationFilename);
@@ -90,6 +93,45 @@ public class FileHelperTest extends ZincBaseTest {
         assertTrue(mDestinationFile.exists());
         assertTrue(mOriginalFile.exists());
         assertEquals(TestUtils.readFile(mOriginalFile), TestUtils.readFile(mDestinationFile));
+    }
+
+    @Test
+    public void readerForFile() throws Exception {
+        // prepare
+        final String contents = TestFactory.randomString();
+        TestUtils.writeToFile(mOriginalFile, contents);
+
+        // run
+        final Reader reader = mHelper.readerForFile(mOriginalFile);
+
+        // verify
+        assertEquals(contents, CharStreams.toString(reader));
+    }
+
+    @Test
+    public void readJSON() throws Exception {
+        // prepare
+        final String stringContents = TestFactory.randomString();
+        final String JSON = mGson.toJson(stringContents);
+        TestUtils.writeToFile(mOriginalFile, JSON);
+
+        // run
+        final String result = mHelper.readJSON(mOriginalFile, String.class);
+
+        // verify
+        assertEquals(stringContents, result);
+    }
+
+    @Test
+    public void writeObject() throws Exception {
+        // prepare
+        final String object = TestFactory.randomString();
+
+        // run
+        mHelper.writeObject(mOriginalFile, object, String.class);
+
+        // verify
+        assertEquals(object, mGson.fromJson(TestUtils.readFile(mOriginalFile), String.class));
     }
 
     private void createGzipFile(final String contents, final File file) throws IOException {

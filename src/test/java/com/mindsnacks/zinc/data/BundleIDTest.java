@@ -4,7 +4,7 @@ import com.mindsnacks.zinc.classes.data.BundleID;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Test;
 
-import static com.mindsnacks.zinc.utils.MockFactory.randomString;
+import static com.mindsnacks.zinc.utils.TestFactory.randomString;
 import static org.junit.Assert.assertEquals;
 
 /**

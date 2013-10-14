@@ -3,7 +3,7 @@ package com.mindsnacks.zinc.jobs;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.jobs.ZincDownloadBundleJob;
-import com.mindsnacks.zinc.utils.MockFactory;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,8 +13,9 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
-import static com.mindsnacks.zinc.utils.MockFactory.randomInt;
+import static com.mindsnacks.zinc.utils.TestFactory.randomInt;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -33,21 +34,20 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
     final private String mDistribution = "master";
     final private String mFlavorName = "retina";
     final private int mVersion = randomInt(1, 100);
-    final private URL mSourceHost;
+    final private URL mSourceHost = TestFactory.createURL("https://mindsnacks.com/");
     final private URL mArchiveURL;
-
     final private String mResultPath = "result path";
+
     @Mock private SourceURL mSourceURL;
     @Mock private ZincCatalog mCatalog;
+    @Mock private Future<ZincCatalog> mCatalogFuture;
     @Mock private ZincJobFactory mJobFactory;
     @Mock private File mRepoFolder;
     @Mock private File mResult;
 
-    private Callable<ZincCatalog> mCatalogJob;
     private Callable<File> mResultJob;
 
     public ZincDownloadBundleJobTest() throws MalformedURLException {
-        mSourceHost = new URL("https://mindsnacks.com/");
         mArchiveURL = new URL(mSourceHost, mCatalogID + "/" + mBundleName + "-" + mDistribution + "-" + mFlavorName);
     }
 
@@ -57,10 +57,10 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
         when(mSourceURL.getCatalogID()).thenReturn(mCatalogID);
         when(mSourceURL.getArchiveURL(eq(mBundleName), anyInt(), eq(mFlavorName))).thenReturn(mArchiveURL);
 
-        mCatalogJob = MockFactory.createCallable(mCatalog);
-        mResultJob = MockFactory.createCallable(mResult);
+        TestFactory.setFutureResult(mCatalogFuture, mCatalog);
 
-        when(mJobFactory.downloadCatalog(eq(mSourceURL))).thenReturn(mCatalogJob);
+        mResultJob = TestFactory.createCallable(mResult);
+
         when(mJobFactory.downloadArchive(any(URL.class), any(File.class), anyString(), eq(false))).thenReturn(mResultJob);
         when(mResult.getPath()).thenReturn(mResultPath);
 
@@ -75,7 +75,7 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
     public void getsCatalog() throws Exception {
         run();
 
-        verify(mCatalogJob).call();
+        verify(mCatalogFuture).get();
     }
 
     @Test
@@ -114,7 +114,10 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
     }
 
     private ZincDownloadBundleJob initializeJob(final SourceURL sourceURL) {
-        return new ZincDownloadBundleJob(new ZincCloneBundleRequest(sourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder), mJobFactory);
+        return new ZincDownloadBundleJob(
+                new ZincCloneBundleRequest(sourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder),
+                mJobFactory,
+                mCatalogFuture);
     }
 
     private void verifyDownloadArchiveJobCreation() {
