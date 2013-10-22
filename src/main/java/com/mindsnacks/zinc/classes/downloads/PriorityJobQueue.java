@@ -118,6 +118,8 @@ public class PriorityJobQueue<Input, Output> {
     }
 
     public Future<Output> get(final Input element) throws JobNotFoundException {
+        checkServiceIsRunning(true, "Service should be running");
+
         if (mAddedElements.contains(element)) {
             return waitForFuture(element);
         } else {

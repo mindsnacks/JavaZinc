@@ -92,7 +92,15 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     @Test
     public void dataCanBeAdded() throws Exception {
-        queue.add(new TestData(DownloadPriority.NEEDED_SOON, "result"));
+        queue.add(TestData.randomTestData());
+    }
+
+    @Test(expected = ZincRuntimeException.class)
+    public void dataCannotBeRetrievedIfStopped() throws Exception {
+        final TestData data = TestData.randomTestData();
+
+        queue.add(data);
+        queue.get(data);
     }
 
     @Test
