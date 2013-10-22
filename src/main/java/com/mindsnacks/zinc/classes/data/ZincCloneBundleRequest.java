@@ -53,7 +53,6 @@ public class ZincCloneBundleRequest {
                 mFlavorName.equals(that.mFlavorName) &&
                 mRepoFolder.equals(that.mRepoFolder) &&
                 mSourceURL.equals(that.mSourceURL));
-
     }
 
     @Override
@@ -65,5 +64,15 @@ public class ZincCloneBundleRequest {
         result = 31 * result + mRepoFolder.hashCode();
 
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ZincCloneBundleRequest {\n" +
+                "SourceURL=" + mSourceURL +
+                ",\nBundleID=" + mBundleID +
+                ",\nDistribution='" + mDistribution + '\'' +
+                ",\nFlavorName='" + mFlavorName + '\'' +
+                '}';
     }
 }
