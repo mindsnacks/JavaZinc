@@ -35,7 +35,7 @@ public class SortablePriorityBlockingQueue<V> extends ForwardingBlockingQueue<V>
         final int i = mQueue.drainTo(collection);
         mQueue.addAll(collection);
 
-        ZincLogging.log(getClass().getSimpleName(), "Reordering " + i + " elements");
+        ZincLogging.log(getClass().getSimpleName(), "Reordered " + i + " elements");
     }
 
     /* -------------------- synchronized methods -------------- */
