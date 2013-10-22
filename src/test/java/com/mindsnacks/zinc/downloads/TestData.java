@@ -11,7 +11,9 @@ public class TestData {
     private final String mResult;
 
     public static TestData randomTestData() {
-        return new TestData(DownloadPriority.NEEDED_SOON, TestFactory.randomString());
+        return new TestData(
+                DownloadPriority.values()[TestFactory.randomInt(0, DownloadPriority.values().length - 1)],
+                TestFactory.randomString());
     }
 
     public TestData(final DownloadPriority priority, final String result) {
@@ -35,7 +37,6 @@ public class TestData {
         final TestData data = (TestData) o;
 
         return (mPriority == data.mPriority) && !(mResult != null ? !mResult.equals(data.mResult) : data.mResult != null);
-
     }
 
     @Override

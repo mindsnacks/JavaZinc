@@ -158,22 +158,14 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     @Test(expected = PriorityJobQueue.JobNotFoundException.class)
     public void dataCannotBeRetrievedIfItWasNeverAdded() throws Exception {
-        final TestData data = randomData();
+        final TestData data = TestData.randomTestData();
 
         queue.start();
         queue.get(data);
     }
 
-    private TestData randomData() {
-        return new TestData(randomPriority(), TestFactory.randomString());
-    }
-
-    private DownloadPriority randomPriority() {
-        return DownloadPriority.values()[TestFactory.randomInt(0, DownloadPriority.values().length - 1)];
-    }
-
     private TestData processAndAddRandomData() {
-        final TestData data = randomData();
+        final TestData data = TestData.randomTestData();
 
         processData(data);
         queue.add(data);
