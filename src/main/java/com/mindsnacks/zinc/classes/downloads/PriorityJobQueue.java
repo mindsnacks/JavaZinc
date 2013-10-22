@@ -76,8 +76,6 @@ public class PriorityJobQueue<Input, Output> {
             }
         });
 
-        setUpdatePrioritiesRunnable();
-
         mScheduler.submit(createSchedulerTask());
     }
 
@@ -131,13 +129,8 @@ public class PriorityJobQueue<Input, Output> {
         Callable<Output> process(Input data);
     }
 
-    private void setUpdatePrioritiesRunnable() {
-        mPriorityCalculator.setUpdatePrioritiesRunnable(new Runnable() {
-            @Override
-            public void run() {
-                mShouldReorder.lazySet(true);
-            }
-        });
+    public void recalculatePriorities() {
+        mShouldReorder.lazySet(true);
     }
 
     private Runnable createSchedulerTask() {

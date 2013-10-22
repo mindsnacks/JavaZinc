@@ -83,16 +83,6 @@ public final class ZincRepoFactory {
             public DownloadPriority getPriorityForObject(final ZincCloneBundleRequest object) {
                 return priorityComparator.getPriorityForObject(object.getBundleID());
             }
-
-            @Override
-            public void setUpdatePrioritiesRunnable(final Runnable runnable) {
-                priorityComparator.setUpdatePrioritiesRunnable(runnable);
-            }
-
-            @Override
-            public void updatePriorities() {
-                priorityComparator.updatePriorities();
-            }
         };
     }
 
