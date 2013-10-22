@@ -101,4 +101,8 @@ public class ZincRepo {
         mQueue.add(cloneBundleRequest);
         mBundles.put(bundleID, cloneBundleRequest);
     }
+
+    public void recalculatePriorities() {
+        mQueue.recalculatePriorities();
+    }
 }
