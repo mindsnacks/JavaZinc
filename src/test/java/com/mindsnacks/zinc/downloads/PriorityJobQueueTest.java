@@ -32,63 +32,23 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     public static final int CONCURRENCY = 1;
 
-    private static class Data {
-        private final DownloadPriority mPriority;
-        private final String mResult;
+    private PriorityJobQueue<TestData, String> queue;
 
-        public Data(final DownloadPriority priority, final String result) {
-            mPriority = priority;
-            mResult = result;
-        }
-
-        private DownloadPriority getPriority() {
-            return mPriority;
-        }
-
-        private String getResult() {
-            return mResult;
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            final Data data = (Data) o;
-
-            return (mPriority == data.mPriority) && !(mResult != null ? !mResult.equals(data.mResult) : data.mResult != null);
-
-        }
-
-        @Override
-        public int hashCode() {
-            return 31 * mPriority.getValue() + (mResult != null ? mResult.hashCode() : 0);
-        }
-
-        @Override
-        public String toString() {
-            return "Data {" + mResult + ": " + mPriority + "}";
-        }
-    }
-
-    private PriorityJobQueue<Data, String> queue;
-
-    @Mock private PriorityJobQueue.DataProcessor<Data, String> mDataProcessor;
-    @Mock private PriorityCalculator<Data> mPriorityCalculator;
-
+    @Mock private PriorityJobQueue.DataProcessor<TestData, String> mDataProcessor;
+    @Mock private PriorityCalculator<TestData> mPriorityCalculator;
 
     @Before
     public void setUp() throws Exception {
-        queue = new PriorityJobQueue<Data, String>(
+        queue = new PriorityJobQueue<TestData, String>(
                 CONCURRENCY,
                 new TestFactory.DaemonThreadFactory(),
                 mPriorityCalculator,
                 mDataProcessor);
 
-        when(mPriorityCalculator.getPriorityForObject(any(Data.class))).then(new Answer<Object>() {
+        when(mPriorityCalculator.getPriorityForObject(any(TestData.class))).then(new Answer<Object>() {
             @Override
             public DownloadPriority answer(final InvocationOnMock invocationOnMock) throws Throwable {
-                return ((Data)invocationOnMock.getArguments()[0]).getPriority();
+                return ((TestData) invocationOnMock.getArguments()[0]).getPriority();
             }
         });
     }
@@ -132,12 +92,12 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     @Test
     public void dataCanBeAdded() throws Exception {
-        queue.add(new Data(DownloadPriority.NEEDED_SOON, "result"));
+        queue.add(new TestData(DownloadPriority.NEEDED_SOON, "result"));
     }
 
     @Test
     public void dataResultCanBeRetrieved() throws Exception {
-        final Data data = processAndAddRandomData();
+        final TestData data = processAndAddRandomData();
 
         // run
         queue.start();
@@ -153,7 +113,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     @Test
     public void dataResultCanBeRetrievedIfOtherObjectsWereAddedBefore() throws Exception {
-        final Data data = processAndAddRandomData();
+        final TestData data = processAndAddRandomData();
 
         processAndAddRandomData();
         processAndAddRandomData();
@@ -174,7 +134,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     @Test
     public void dataIsProcessedInOrderOfPriority() throws Exception {
-        final Data data = processAndAddRandomData();
+        final TestData data = processAndAddRandomData();
         processAndAddRandomData();
         processAndAddRandomData();
         processAndAddRandomData();
@@ -183,12 +143,12 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         queue.start();
         queue.get(data);
 
-        ArgumentCaptor<Data> argument = ArgumentCaptor.forClass(Data.class);
+        ArgumentCaptor<TestData> argument = ArgumentCaptor.forClass(TestData.class);
         verify(mDataProcessor, atLeast(1)).process(argument.capture());
 
-        final List<Integer> priorities = Lists.transform(argument.getAllValues(), new Function<Data, Integer>() {
+        final List<Integer> priorities = Lists.transform(argument.getAllValues(), new Function<TestData, Integer>() {
             @Override
-            public Integer apply(final Data data) {
+            public Integer apply(final TestData data) {
             return data.getPriority().getValue();
             }
         });
@@ -198,22 +158,22 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     @Test(expected = PriorityJobQueue.JobNotFoundException.class)
     public void dataCannotBeRetrievedIfItWasNeverAdded() throws Exception {
-        final Data data = randomData();
+        final TestData data = randomData();
 
         queue.start();
         queue.get(data);
     }
 
-    private Data randomData() {
-        return new Data(randomPriority(), TestFactory.randomString());
+    private TestData randomData() {
+        return new TestData(randomPriority(), TestFactory.randomString());
     }
 
     private DownloadPriority randomPriority() {
         return DownloadPriority.values()[TestFactory.randomInt(0, DownloadPriority.values().length - 1)];
     }
 
-    private Data processAndAddRandomData() {
-        final Data data = randomData();
+    private TestData processAndAddRandomData() {
+        final TestData data = randomData();
 
         processData(data);
         queue.add(data);
@@ -221,7 +181,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         return data;
     }
 
-    private void processData(final Data data) {
+    private void processData(final TestData data) {
         final Callable<String> processor = TestFactory.callableWithResult(data.getResult());
         when(mDataProcessor.process(data)).thenReturn(processor);
     }
