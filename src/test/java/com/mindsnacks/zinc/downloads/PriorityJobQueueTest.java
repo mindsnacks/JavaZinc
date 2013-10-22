@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -37,6 +38,8 @@ public class PriorityJobQueueTest extends ZincBaseTest {
     @Mock private PriorityJobQueue.DataProcessor<TestData, String> mDataProcessor;
     @Mock private PriorityCalculator<TestData> mPriorityCalculator;
 
+    private final List<TestData> mAddedData = new LinkedList<TestData>();
+
     @Before
     public void setUp() throws Exception {
         queue = new PriorityJobQueue<TestData, String>(
@@ -51,6 +54,8 @@ public class PriorityJobQueueTest extends ZincBaseTest {
                 return ((TestData) invocationOnMock.getArguments()[0]).getPriority();
             }
         });
+        
+        mAddedData.clear();
     }
 
     @Test
@@ -142,7 +147,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     @Test
     public void dataIsProcessedInOrderOfPriority() throws Exception {
-        final TestData data = processAndAddData(TestData.randomTestData(DownloadPriority.UNKNOWN));
+        processAndAddData(TestData.randomTestData(DownloadPriority.UNKNOWN));
         processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_VERY_SOON));
         processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_SOON));
         processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_SOON));
@@ -150,10 +155,34 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
         // run
         queue.start();
-        queue.get(data);
+
+        waitForDataToBeProcessed();
 
         // verify
-        verifyDataWasProcessedInOrder();
+        assertDataWasProcessedInOrder();
+    }
+
+    @Test
+    public void dataIsProcessedInOrderOfPriorityAfterChangingPriorities() throws Exception {
+        final TestData lowPriority = processAndAddData(TestData.randomTestData(DownloadPriority.UNKNOWN)),
+                       highestPriority = processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_IMMEDIATELY));
+
+        processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_IMMEDIATELY));
+        processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_SOON));
+        processAndAddData(TestData.randomTestData(DownloadPriority.UNKNOWN));
+        processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_VERY_SOON));
+
+        // change priority
+        lowPriority.setPriority(DownloadPriority.NEEDED_IMMEDIATELY);
+
+        // run
+        queue.start();
+        queue.recalculatePriorities();
+
+        waitForDataToBeProcessed();
+
+        // verify
+        assertDataWasProcessedInOrder();
     }
 
     @Test(expected = PriorityJobQueue.JobNotFoundException.class)
@@ -178,9 +207,21 @@ public class PriorityJobQueueTest extends ZincBaseTest {
     private void processData(final TestData data) {
         final Callable<String> processor = TestFactory.callableWithResult(data.getResult());
         when(mDataProcessor.process(data)).thenReturn(processor);
+
+        mAddedData.add(data);
     }
 
-    private void verifyDataWasProcessedInOrder() {
+    private void waitForDataToBeProcessed() {
+        for (final TestData data : mAddedData) {
+            try {
+                queue.get(data);
+            } catch (PriorityJobQueue.JobNotFoundException e) {
+                // Ignore. Data might have already been retrieved.
+            }
+        }
+    }
+
+    private void assertDataWasProcessedInOrder() {
         ArgumentCaptor<TestData> argument = ArgumentCaptor.forClass(TestData.class);
         verify(mDataProcessor, atLeast(1)).process(argument.capture());
 
@@ -191,6 +232,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
             }
         });
 
+        assertEquals(mAddedData.size(), priorities.size());
         assertTrue(Ordering.natural().reverse().isOrdered(priorities));
     }
 }

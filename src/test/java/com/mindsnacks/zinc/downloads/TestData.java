@@ -7,7 +7,7 @@ import com.mindsnacks.zinc.utils.TestFactory;
  * @author NachoSoto
  */
 public class TestData {
-    private final DownloadPriority mPriority;
+    private DownloadPriority mPriority;
     private final String mResult;
 
     public static TestData randomTestData() {
@@ -32,6 +32,10 @@ public class TestData {
 
     public String getResult() {
         return mResult;
+    }
+
+    public void setPriority(final DownloadPriority priority) {
+        mPriority = priority;
     }
 
     @Override
