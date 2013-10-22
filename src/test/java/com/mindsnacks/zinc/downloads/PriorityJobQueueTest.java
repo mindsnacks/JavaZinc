@@ -222,8 +222,8 @@ public class PriorityJobQueueTest extends ZincBaseTest {
     }
 
     private void assertDataWasProcessedInOrder() {
-        ArgumentCaptor<TestData> argument = ArgumentCaptor.forClass(TestData.class);
-        verify(mDataProcessor, atLeast(1)).process(argument.capture());
+        final ArgumentCaptor<TestData> argument = ArgumentCaptor.forClass(TestData.class);
+        verify(mDataProcessor, times(mAddedData.size())).process(argument.capture());
 
         final List<Integer> priorities = Lists.transform(argument.getAllValues(), new Function<TestData, Integer>() {
             @Override
