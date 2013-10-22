@@ -134,26 +134,18 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     @Test
     public void dataIsProcessedInOrderOfPriority() throws Exception {
-        final TestData data = processAndAddRandomData();
-        processAndAddRandomData();
-        processAndAddRandomData();
-        processAndAddRandomData();
+        final TestData data = processAndAddData(TestData.randomTestData(DownloadPriority.UNKNOWN));
+        processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_VERY_SOON));
+        processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_SOON));
+        processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_SOON));
+        processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_IMMEDIATELY));
 
         // run
         queue.start();
         queue.get(data);
 
-        ArgumentCaptor<TestData> argument = ArgumentCaptor.forClass(TestData.class);
-        verify(mDataProcessor, atLeast(1)).process(argument.capture());
-
-        final List<Integer> priorities = Lists.transform(argument.getAllValues(), new Function<TestData, Integer>() {
-            @Override
-            public Integer apply(final TestData data) {
-            return data.getPriority().getValue();
-            }
-        });
-
-        assertTrue(Ordering.natural().reverse().isOrdered(priorities));
+        // verify
+        verifyDataWasProcessedInOrder();
     }
 
     @Test(expected = PriorityJobQueue.JobNotFoundException.class)
@@ -165,8 +157,10 @@ public class PriorityJobQueueTest extends ZincBaseTest {
     }
 
     private TestData processAndAddRandomData() {
-        final TestData data = TestData.randomTestData();
+        return processAndAddData(TestData.randomTestData());
+    }
 
+    private TestData processAndAddData(final TestData data) {
         processData(data);
         queue.add(data);
 
@@ -176,5 +170,19 @@ public class PriorityJobQueueTest extends ZincBaseTest {
     private void processData(final TestData data) {
         final Callable<String> processor = TestFactory.callableWithResult(data.getResult());
         when(mDataProcessor.process(data)).thenReturn(processor);
+    }
+
+    private void verifyDataWasProcessedInOrder() {
+        ArgumentCaptor<TestData> argument = ArgumentCaptor.forClass(TestData.class);
+        verify(mDataProcessor, atLeast(1)).process(argument.capture());
+
+        final List<Integer> priorities = Lists.transform(argument.getAllValues(), new Function<TestData, Integer>() {
+            @Override
+            public Integer apply(final TestData data) {
+                return data.getPriority().getValue();
+            }
+        });
+
+        assertTrue(Ordering.natural().reverse().isOrdered(priorities));
     }
 }

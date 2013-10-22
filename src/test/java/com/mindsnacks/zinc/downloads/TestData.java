@@ -11,8 +11,13 @@ public class TestData {
     private final String mResult;
 
     public static TestData randomTestData() {
+        return TestData.randomTestData(
+                DownloadPriority.values()[TestFactory.randomInt(0, DownloadPriority.values().length - 1)]);
+    }
+
+    public static TestData randomTestData(final DownloadPriority priority) {
         return new TestData(
-                DownloadPriority.values()[TestFactory.randomInt(0, DownloadPriority.values().length - 1)],
+                priority,
                 TestFactory.randomString());
     }
 
