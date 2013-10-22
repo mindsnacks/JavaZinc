@@ -49,8 +49,7 @@ public final class ZincRepoFactory {
             final ZincRepoIndex repoIndex,
             final ThreadFactory threadFactory) {
         final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(CATALOG_DOWNLOAD_THREAD_POOL_SIZE, threadFactory);
-        final ZincCatalogs catalogs = new ZincCatalogs(
-                root,
+        final ZincCatalogs catalogs = new ZincCatalogs(root,
                 new FileHelper(gson),
                 new HashSet<SourceURL>(repoIndex.getSources()),
                 jobFactory,
