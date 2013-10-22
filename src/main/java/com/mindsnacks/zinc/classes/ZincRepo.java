@@ -59,7 +59,7 @@ public class ZincRepo {
     }
 
     /**
-     * @warning calling this method will block if the clone task
+     * Warning: calling this method will block if the clone task
      * has not been scheduled yet and the repo is paused.
      */
     public Future<ZincBundle> getBundle(final BundleID bundleID) {
@@ -88,7 +88,12 @@ public class ZincRepo {
             throw new ZincRuntimeException(String.format("No sources for catalog '%s'", catalogID));
         }
 
-        final ZincCloneBundleRequest cloneBundleRequest = new ZincCloneBundleRequest(sourceURL, bundleID, distribution, mFlavorName, mRoot);
+        final ZincCloneBundleRequest cloneBundleRequest = new ZincCloneBundleRequest(
+                sourceURL,
+                bundleID,
+                distribution,
+                mFlavorName,
+                mRoot);
 
         mQueue.add(cloneBundleRequest);
         mBundles.put(bundleID, cloneBundleRequest);
