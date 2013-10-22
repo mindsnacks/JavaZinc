@@ -19,6 +19,7 @@ import org.mockito.stubbing.Answer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.*;
@@ -211,10 +212,10 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         mAddedData.add(data);
     }
 
-    private void waitForDataToBeProcessed() {
+    private void waitForDataToBeProcessed() throws ExecutionException, InterruptedException {
         for (final TestData data : mAddedData) {
             try {
-                queue.get(data);
+                queue.get(data).get();
             } catch (PriorityJobQueue.JobNotFoundException e) {
                 // Ignore. Data might have already been retrieved.
             }
@@ -232,7 +233,6 @@ public class PriorityJobQueueTest extends ZincBaseTest {
             }
         });
 
-        assertEquals(mAddedData.size(), priorities.size());
         assertTrue(Ordering.natural().reverse().isOrdered(priorities));
     }
 }
