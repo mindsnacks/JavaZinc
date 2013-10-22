@@ -1,6 +1,7 @@
 package com.mindsnacks.zinc.classes.downloads;
 
 import com.google.common.util.concurrent.ForwardingBlockingQueue;
+import com.mindsnacks.zinc.classes.ZincLogging;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -31,8 +32,10 @@ public class SortablePriorityBlockingQueue<V> extends ForwardingBlockingQueue<V>
     public synchronized void reorder() {
         final Collection<V> collection = new LinkedList<V>();
 
-        mQueue.drainTo(collection);
+        final int i = mQueue.drainTo(collection);
         mQueue.addAll(collection);
+
+        ZincLogging.log(getClass().getSimpleName(), "Reordering " + i + " elements");
     }
 
     /* -------------------- synchronized methods -------------- */
