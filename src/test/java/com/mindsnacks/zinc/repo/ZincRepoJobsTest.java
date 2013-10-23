@@ -116,6 +116,7 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
 
         // run
         initializeRepo();
+        mRepo.start();
 
         // verify
         verifyCloneBundle(bundleID, distribution);
@@ -133,6 +134,7 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
 
         // run
         initializeRepo();
+        mRepo.start();
 
         // run
         final Future<ZincBundle> result = mRepo.getBundle(bundleID);
