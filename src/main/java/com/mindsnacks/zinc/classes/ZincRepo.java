@@ -35,11 +35,11 @@ public class ZincRepo {
         mFlavorName = flavorName;
         mRoot = new File(root);
         mIndexWriter = repoIndexWriter;
+
+        cloneTrackedBundles();
     }
 
     public void start() {
-        cloneTrackedBundles();
-
         mQueue.start();
     }
 
