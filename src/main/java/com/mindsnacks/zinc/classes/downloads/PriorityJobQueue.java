@@ -113,8 +113,14 @@ public class PriorityJobQueue<Input, Output> {
     }
 
     public void add(final Input element) {
-        mAddedElements.add(element);
-        mQueue.offer(element);
+        mLock.lock();
+
+        try {
+            mAddedElements.add(element);
+            mQueue.offer(element);
+        } finally {
+            mLock.unlock();
+        }
     }
 
     public Future<Output> get(final Input element) throws JobNotFoundException {
