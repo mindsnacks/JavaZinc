@@ -127,7 +127,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     @Test
     public void jobIsDoneReturnsTrueWhenFinished() throws Exception {
-        final Data data = processAndAddRandomData();
+        final TestData data = processAndAddRandomData();
 
         // run
         queue.start();
@@ -178,9 +178,9 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     @Test
     public void dataIsProcessedInOrderOfPriorityAfterChangingPriorities() throws Exception {
-        final TestData lowPriority = processAndAddData(TestData.randomTestData(DownloadPriority.UNKNOWN)),
-                       highestPriority = processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_IMMEDIATELY));
+        final TestData lowPriority = processAndAddData(TestData.randomTestData(DownloadPriority.UNKNOWN));
 
+        processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_IMMEDIATELY));
         processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_IMMEDIATELY));
         processAndAddData(TestData.randomTestData(DownloadPriority.NEEDED_SOON));
         processAndAddData(TestData.randomTestData(DownloadPriority.UNKNOWN));
