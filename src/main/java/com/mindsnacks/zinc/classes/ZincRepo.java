@@ -14,7 +14,7 @@ import java.util.concurrent.Future;
  * User: NachoSoto
  * Date: 9/3/13
  */
-public class ZincRepo {
+public class ZincRepo implements Repo {
     private final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> mQueue;
     private final ZincRepoIndexWriter mIndexWriter;
     private final String mFlavorName;
@@ -27,7 +27,10 @@ public class ZincRepo {
      * @todo remove cached promises that failed?
      * Instances are paused after initialization. You must call `start` after tracking the bundles.
      */
-    public ZincRepo(final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue, final URI root, final ZincRepoIndexWriter repoIndexWriter, final String flavorName) {
+    public ZincRepo(final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue,
+                    final URI root,
+                    final ZincRepoIndexWriter repoIndexWriter,
+                    final String flavorName) {
         mQueue = queue;
         mFlavorName = flavorName;
         mRoot = new File(root);
@@ -36,20 +39,24 @@ public class ZincRepo {
         cloneTrackedBundles();
     }
 
+    @Override
     public void start() {
         mQueue.start();
     }
 
+    @Override
     public void pause() throws InterruptedException {
         mQueue.stop();
     }
 
+    @Override
     public void addSourceURL(final SourceURL sourceURL) {
         if (mIndexWriter.getIndex().addSourceURL(sourceURL)) {
             mIndexWriter.saveIndex();
         }
     }
 
+    @Override
     public void startTrackingBundle(final BundleID bundleID, final String distribution) {
         if (mIndexWriter.getIndex().trackBundle(bundleID, distribution)) {
             mIndexWriter.saveIndex();
@@ -59,15 +66,21 @@ public class ZincRepo {
     }
 
     /**
-     * @warning calling this method will block if the clone task
+     * Warning: calling this method will block if the clone task
      * has not been scheduled yet and the repo is paused.
      */
+    @Override
     public Future<ZincBundle> getBundle(final BundleID bundleID) {
         try {
             return mQueue.get(mBundles.get(bundleID));
         } catch (PriorityJobQueue.JobNotFoundException e) {
             throw new ZincRuntimeException(String.format("Bundle '%s' was not being tracked", bundleID), e);
         }
+    }
+
+    @Override
+    public void recalculatePriorities() {
+        mQueue.recalculatePriorities();
     }
 
     private void cloneTrackedBundles() {
@@ -88,7 +101,12 @@ public class ZincRepo {
             throw new ZincRuntimeException(String.format("No sources for catalog '%s'", catalogID));
         }
 
-        final ZincCloneBundleRequest cloneBundleRequest = new ZincCloneBundleRequest(sourceURL, bundleID, distribution, mFlavorName, mRoot);
+        final ZincCloneBundleRequest cloneBundleRequest = new ZincCloneBundleRequest(
+                sourceURL,
+                bundleID,
+                distribution,
+                mFlavorName,
+                mRoot);
 
         mQueue.add(cloneBundleRequest);
         mBundles.put(bundleID, cloneBundleRequest);

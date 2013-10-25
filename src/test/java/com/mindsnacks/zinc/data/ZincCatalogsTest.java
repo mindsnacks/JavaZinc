@@ -56,7 +56,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
     private TimerTask mScheduledTask;
     private boolean runTaskImmediately = false;
 
-    private final String mCatalogID = "com.mindsnacks.games";
+    private static final String mCatalogID = "com.mindsnacks.games";
     private final SourceURL mSourceURL;
 
     private ZincCatalogs catalogs;
@@ -273,7 +273,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
         runTaskImmediately = true;
     }
 
-    private void setFuture(final ListenableFuture<ZincCatalog> future) {
+    private void setFuture(final ListenableFuture future) {
         doReturn(future).when(mExecutorService).submit(Matchers.<Callable>any());
     }
 

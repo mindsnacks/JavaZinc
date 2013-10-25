@@ -5,5 +5,5 @@ package com.mindsnacks.zinc.classes.downloads;
  * Date: 9/27/13
  */
 public interface PriorityCalculator <V> {
-    public DownloadPriority getPriorityForObject(final V object);
+    DownloadPriority getPriorityForObject(final V object);
 }

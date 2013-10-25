@@ -72,6 +72,13 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
     }
 
     @Test
+    public void prioritiesChanged() throws Exception {
+        mRepo.recalculatePriorities();
+
+        verify(mQueue).recalculatePriorities();
+    }
+
+    @Test
     public void trackingBundleAddsItToTheIndex() throws Exception {
         final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
         final String distribution = "master";

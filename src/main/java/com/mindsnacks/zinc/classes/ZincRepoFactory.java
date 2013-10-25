@@ -24,10 +24,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class ZincRepoFactory {
     private static final int CATALOG_DOWNLOAD_THREAD_POOL_SIZE = 3;
 
-    public ZincRepo createRepo(final File root,
-                               final String flavorName,
-                               final int bundleCloneConcurrency,
-                               final PriorityCalculator<BundleID> priorityCalculator) {
+    public Repo createRepo(final File root,
+                           final String flavorName,
+                           final int bundleCloneConcurrency,
+                           final PriorityCalculator<BundleID> priorityCalculator) {
         final Gson gson = createGson();
         final ZincJobFactory jobFactory = createJobFactory(gson);
         final ZincRepoIndexWriter indexWriter = createRepoIndexWriter(root, gson);
@@ -49,8 +49,7 @@ public final class ZincRepoFactory {
             final ZincRepoIndex repoIndex,
             final ThreadFactory threadFactory) {
         final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(CATALOG_DOWNLOAD_THREAD_POOL_SIZE, threadFactory);
-        final ZincCatalogs catalogs = new ZincCatalogs(
-                root,
+        final ZincCatalogs catalogs = new ZincCatalogs(root,
                 new FileHelper(gson),
                 new HashSet<SourceURL>(repoIndex.getSources()),
                 jobFactory,

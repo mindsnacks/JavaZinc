@@ -8,6 +8,7 @@ import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,18 +25,20 @@ public class PriorityJobQueue<Input, Output> {
     private final int mConcurrency;
     private final ThreadFactory mThreadFactory;
     private final DataProcessor<Input, Output> mDataProcessor;
+    private final PriorityCalculator<Input> mPriorityCalculator;
 
     private ExecutorService mScheduler;
     private ListeningExecutorService mExecutorService;
     private ListeningExecutorService mFuturesExecutorService;
 
-    private final PriorityBlockingQueue<Input> mQueue;
+    private final SortablePriorityBlockingQueue<Input> mQueue;
     private final Map<Input, ListenableFuture<Output>> mFutures = new HashMap<Input, ListenableFuture<Output>>();
     private final Set<Input> mAddedElements = new HashSet<Input>();
 
     private final Lock mLock = new ReentrantLock();
     private final Condition mEnqueued = mLock.newCondition();
     private final Semaphore mEnqueuedDataSemaphore;
+    private final AtomicBoolean mShouldReorder = new AtomicBoolean(false);
 
     public PriorityJobQueue(final int concurrency,
                             final ThreadFactory threadFactory,
@@ -46,20 +49,8 @@ public class PriorityJobQueue<Input, Output> {
         mDataProcessor = dataProcessor;
         mEnqueuedDataSemaphore = new Semaphore(concurrency);
 
-        mQueue = new PriorityBlockingQueue<Input>(INITIAL_QUEUE_CAPACITY, createPriorityComparator(priorityCalculator));
-    }
-
-    private Comparator<Input> createPriorityComparator(final PriorityCalculator<Input> priorityCalculator) {
-        final Comparator<DownloadPriority> comparator = DownloadPriority.createComparator();
-
-        return new Comparator<Input>() {
-            @Override
-            public int compare(final Input o1, final Input o2) {
-                return comparator.compare(
-                        priorityCalculator.getPriorityForObject(o1),
-                        priorityCalculator.getPriorityForObject(o2));
-            }
-        };
+        mPriorityCalculator = priorityCalculator;
+        mQueue = new SortablePriorityBlockingQueue<Input>(new PriorityBlockingQueue<Input>(INITIAL_QUEUE_CAPACITY, createPriorityComparator(mPriorityCalculator)));
     }
 
     public boolean isRunning() {
@@ -88,26 +79,15 @@ public class PriorityJobQueue<Input, Output> {
         mScheduler.submit(createSchedulerTask());
     }
 
-    private Runnable createSchedulerTask() {
-        return new Runnable() {
-            public void run() {
-                try {
-                    Input data;
-                    while ((data = mQueue.take()) != null) {
-                        mEnqueuedDataSemaphore.acquire();
+    private Comparator<Input> createPriorityComparator(final PriorityCalculator<Input> priorityCalculator) {
+        final Comparator<DownloadPriority> comparator = DownloadPriority.createComparator();
 
-                        mLock.lock();
-
-                        try {
-                            mFutures.put(data, submit(data));
-                            mEnqueued.signal();
-                        } finally {
-                            mLock.unlock();
-                        }
-                    }
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
+        return new Comparator<Input>() {
+            @Override
+            public int compare(final Input o1, final Input o2) {
+                return comparator.compare(
+                        priorityCalculator.getPriorityForObject(o1),
+                        priorityCalculator.getPriorityForObject(o2));
             }
         };
     }
@@ -132,22 +112,66 @@ public class PriorityJobQueue<Input, Output> {
         return stopped;
     }
 
-    private void checkServiceIsRunning(final boolean shouldBeRunning, final String errorMessage) {
-        if (isRunning() != shouldBeRunning) {
-            throw new ZincRuntimeException(errorMessage);
+    public void add(final Input element) {
+        mLock.lock();
+
+        try {
+            mAddedElements.add(element);
+            mQueue.offer(element);
+        } finally {
+            mLock.unlock();
         }
     }
 
-    public void add(final Input element) {
-        mAddedElements.add(element);
-        mQueue.put(element);
-    }
-
     public Future<Output> get(final Input element) throws JobNotFoundException {
+        checkServiceIsRunning(true, "Service should be running");
+
         if (mAddedElements.contains(element)) {
             return waitForFuture(element);
         } else {
             throw new JobNotFoundException(element);
+        }
+    }
+
+    public static interface DataProcessor<Input, Output> {
+        Callable<Output> process(Input data);
+    }
+
+    public void recalculatePriorities() {
+        mShouldReorder.lazySet(true);
+    }
+
+    private Runnable createSchedulerTask() {
+        return new Runnable() {
+            public void run() {
+                try {
+                    Input data;
+                    while ((data = mQueue.take()) != null) {
+                        mEnqueuedDataSemaphore.acquire();
+
+                        mLock.lock();
+
+                        try {
+                            mFutures.put(data, submit(data));
+                            mEnqueued.signal();
+
+                            if (mShouldReorder.getAndSet(false)) {
+                                mQueue.reorder();
+                            }
+                        } finally {
+                            mLock.unlock();
+                        }
+                    }
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        };
+    }
+
+    private void checkServiceIsRunning(final boolean shouldBeRunning, final String errorMessage) {
+        if (isRunning() != shouldBeRunning) {
+            throw new ZincRuntimeException(errorMessage);
         }
     }
 
@@ -174,10 +198,6 @@ public class PriorityJobQueue<Input, Output> {
                 return result;
             }
         }));
-    }
-
-    public static interface DataProcessor<Input, Output> {
-        Callable<Output> process(Input data);
     }
 
     public static class JobNotFoundException extends ZincRuntimeException {
