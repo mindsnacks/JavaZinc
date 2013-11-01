@@ -22,6 +22,10 @@ public class PathHelper {
     }
 
     public static String getLocalCatalogFilePath(final String catalogID) {
-        return String.format("%s/%s.%s", CATALOGS_FOLDER, catalogID, CATALOGS_FORMAT);
+        return String.format("%s%s.%s", getCatalogsFolder(), catalogID, CATALOGS_FORMAT);
+    }
+
+    public static String getCatalogsFolder() {
+        return String.format("%s/", CATALOGS_FOLDER);
     }
 }
