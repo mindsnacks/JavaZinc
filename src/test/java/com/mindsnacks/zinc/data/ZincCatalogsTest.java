@@ -122,12 +122,6 @@ public class ZincCatalogsTest extends ZincBaseTest {
         assertEquals(mResultCatalog, catalog.get());
     }
 
-    @Test(expected = ZincRuntimeException.class)
-    public void canOnlyScheduleUpdatesOnce() throws Exception {
-        scheduleUpdate();
-        scheduleUpdate();
-    }
-
     @Test
     public void JSONIsReadFromDisk() throws Exception {
         setLocalCatalogFileContent();
@@ -205,6 +199,14 @@ public class ZincCatalogsTest extends ZincBaseTest {
         scheduleUpdate();
 
         verify(mTimer).schedule(any(TimerTask.class), anyLong(), anyLong());
+    }
+
+    @Test
+    public void canOnlyScheduleUpdatesOnce() throws Exception {
+        scheduleUpdate();
+        scheduleUpdate();
+
+        verify(mTimer, times(1)).schedule(any(TimerTask.class), anyLong(), anyLong());
     }
 
     @Test

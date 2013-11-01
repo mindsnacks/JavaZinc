@@ -80,27 +80,23 @@ public class ZincCatalogs implements ZincCatalogsCache {
      */
     @Override
     public synchronized boolean clearCachedCatalogs() {
-        assertUpdatesWereNotScheduled();
+        if (mUpdateScheduled) {
+            throw new ZincRuntimeException("Updates were already scheduled");
+        }
 
         return mFileHelper.emptyDirectory(getCatalogsFolder());
     }
 
     @Override
     public void scheduleUpdate() {
-        assertUpdatesWereNotScheduled();
+        if (!mUpdateScheduled) {
+            mUpdateScheduled = true;
 
-        mUpdateScheduled = true;
-
-        mUpdateTimer.schedule(new TimerTask() {
-            @Override public void run() {
-                updateCatalogsForTrackedSourceURLs();
-            }
-        }, INITIAL_UPDATE_DELAY, UPDATE_FREQUENCY);
-    }
-
-    private void assertUpdatesWereNotScheduled() {
-        if (mUpdateScheduled) {
-            throw new ZincRuntimeException("Updates were already scheduled");
+            mUpdateTimer.schedule(new TimerTask() {
+                @Override public void run() {
+                    updateCatalogsForTrackedSourceURLs();
+                }
+            }, INITIAL_UPDATE_DELAY, UPDATE_FREQUENCY);
         }
     }
 
