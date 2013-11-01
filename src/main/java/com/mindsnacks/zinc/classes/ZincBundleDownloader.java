@@ -1,7 +1,7 @@
 package com.mindsnacks.zinc.classes;
 
 import com.mindsnacks.zinc.classes.data.ZincBundle;
-import com.mindsnacks.zinc.classes.data.ZincCatalogs;
+import com.mindsnacks.zinc.classes.data.ZincCatalogsCache;
 import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
 import com.mindsnacks.zinc.classes.downloads.PriorityJobQueue;
 
@@ -13,9 +13,9 @@ import java.util.concurrent.Callable;
  */
 public class ZincBundleDownloader implements PriorityJobQueue.DataProcessor<ZincCloneBundleRequest, ZincBundle> {
     private final ZincJobFactory mJobFactory;
-    private final ZincCatalogs mCatalogs;
+    private final ZincCatalogsCache mCatalogs;
 
-    public ZincBundleDownloader(final ZincJobFactory jobFactory, final ZincCatalogs catalogs) {
+    public ZincBundleDownloader(final ZincJobFactory jobFactory, final ZincCatalogsCache catalogs) {
         mJobFactory = jobFactory;
         mCatalogs = catalogs;
     }

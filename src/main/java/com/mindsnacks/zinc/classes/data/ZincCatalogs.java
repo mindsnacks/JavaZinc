@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  *
  * This class deals with persisting and scheduling downloading catalogs.
  */
-public class ZincCatalogs {
+public class ZincCatalogs implements ZincCatalogsCache {
     private static final long INITIAL_UPDATE_DELAY = TimeUnit.MINUTES.toMillis(5);
     private static final long UPDATE_FREQUENCY = TimeUnit.MINUTES.toMillis(5);
 
