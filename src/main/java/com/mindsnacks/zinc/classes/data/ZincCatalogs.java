@@ -17,9 +17,6 @@ import java.util.concurrent.TimeUnit;
  * @author Nacho Soto
  *
  * This class deals with persisting and scheduling downloading catalogs.
- *
- * TODO: cache futures, and only invalidate them when the scheduler updates all catalogs.
- * TODO: schedule updates.
  */
 public class ZincCatalogs {
     private static final long INITIAL_UPDATE_DELAY = TimeUnit.MINUTES.toMillis(5);
