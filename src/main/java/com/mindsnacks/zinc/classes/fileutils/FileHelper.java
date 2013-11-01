@@ -76,6 +76,21 @@ public class FileHelper {
         return file.delete();
     }
 
+    /**
+     * Removes all the files from a directory. Not recursively.
+     * @param folder
+     * @return true if all the files were correctly removed.
+     */
+    public boolean emptyDirectory(final File folder) {
+        boolean result = true;
+
+        for (final File file : folder.listFiles()) {
+            result &= removeFile(file);
+        }
+
+        return result;
+    }
+
     public <V> V readJSON(final File file, final Class<V> vClass) throws FileNotFoundException {
         return mGson.fromJson(readerForFile(file), vClass);
     }
