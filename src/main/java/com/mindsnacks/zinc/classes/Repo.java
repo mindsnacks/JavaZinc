@@ -19,4 +19,9 @@ public interface Repo {
     Future<ZincBundle> getBundle(BundleID bundleID);
 
     void recalculatePriorities();
+
+    /**
+     * Must be called before calling start.
+     */
+    void clearCachedCatalogs();
 }

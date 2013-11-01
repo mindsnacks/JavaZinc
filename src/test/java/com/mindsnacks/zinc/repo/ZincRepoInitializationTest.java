@@ -16,6 +16,7 @@ import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 
 /**
  * User: NachoSoto
@@ -76,6 +77,13 @@ public class ZincRepoInitializationTest extends ZincRepoBaseTest {
         // verify
         final ZincRepoIndex.TrackingInfo trackingInfo = readRepoIndex().getTrackingInfo(bundleID);
         Assert.assertEquals(distribution, trackingInfo.getDistribution());
+    }
+
+    @Test
+    public void clearCachedCatalogs() throws Exception {
+        mRepo.clearCachedCatalogs();
+
+        verify(mCatalogsCache).clearCachedCatalogs();
     }
 
     private void writeSourceURLsToIndexFile(final List<SourceURL> newSourceURL) throws IOException {
