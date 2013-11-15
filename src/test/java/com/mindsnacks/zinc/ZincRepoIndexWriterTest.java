@@ -9,8 +9,6 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotNull;
 
 /**
@@ -36,11 +34,8 @@ public class ZincRepoIndexWriterTest extends ZincBaseTest {
 
     @Test
     public void indexWriterReplacesFIleAndReturnsAnIndexWhenGSONReturnsNullWhenParsingIndexJSON() throws Exception {
-        File indexFile = mZincRepoIndexWriter.getIndexFile();
-
-        assertFalse(indexFile.exists());
-        indexFile.createNewFile();
-        assertTrue(indexFile.exists());
+        File emptyIndexFile = mZincRepoIndexWriter.getIndexFile();
+        emptyIndexFile.createNewFile();
 
         assertNotNull(mZincRepoIndexWriter.getIndex());
     }
