@@ -43,6 +43,10 @@ public class ZincRepoIndexWriter {
         return mRepoIndex;
     }
 
+    public File getIndexFile() {
+        return mIndexFile;
+    }
+
     private ZincRepoIndex initializeIndex() {
         try {
             return mGson.fromJson(new FileReader(mIndexFile), ZincRepoIndex.class);
