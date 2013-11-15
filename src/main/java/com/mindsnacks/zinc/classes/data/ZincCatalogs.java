@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.*;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.ZincLogging;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
+import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,11 +18,8 @@ import java.util.concurrent.TimeUnit;
  * @author Nacho Soto
  *
  * This class deals with persisting and scheduling downloading catalogs.
- *
- * TODO: cache futures, and only invalidate them when the scheduler updates all catalogs.
- * TODO: schedule updates.
  */
-public class ZincCatalogs {
+public class ZincCatalogs implements ZincCatalogsCache {
     private static final long INITIAL_UPDATE_DELAY = TimeUnit.MINUTES.toMillis(5);
     private static final long UPDATE_FREQUENCY = TimeUnit.MINUTES.toMillis(5);
 
@@ -36,6 +34,7 @@ public class ZincCatalogs {
     private final Timer mUpdateTimer;
 
     private final Map<SourceURL, ListenableFuture<ZincCatalog>> mFutures = new HashMap<SourceURL, ListenableFuture<ZincCatalog>>();
+    private boolean mUpdateScheduled = false;
 
     public ZincCatalogs(final File root,
                         final FileHelper fileHelper,
@@ -53,10 +52,9 @@ public class ZincCatalogs {
         mDownloadExecutorService = MoreExecutors.listeningDecorator(downloadExecutorService);
         mPersistenceExecutorService = persistenceExecutorService;
         mUpdateTimer = timer;
-        
-        scheduleUpdate();
     }
 
+    @Override
     public synchronized Future<ZincCatalog> getCatalog(final SourceURL sourceURL) {
         mTrackedSourceURLs.add(sourceURL);
 
@@ -75,6 +73,31 @@ public class ZincCatalogs {
         }
 
         return mFutures.get(sourceURL);
+    }
+
+    /**
+     * Must be called before scheduling updates.
+     */
+    @Override
+    public synchronized boolean clearCachedCatalogs() {
+        if (mUpdateScheduled) {
+            throw new ZincRuntimeException("Updates were already scheduled");
+        }
+
+        return mFileHelper.emptyDirectory(getCatalogsFolder());
+    }
+
+    @Override
+    public void scheduleUpdate() {
+        if (!mUpdateScheduled) {
+            mUpdateScheduled = true;
+
+            mUpdateTimer.schedule(new TimerTask() {
+                @Override public void run() {
+                    updateCatalogsForTrackedSourceURLs();
+                }
+            }, INITIAL_UPDATE_DELAY, UPDATE_FREQUENCY);
+        }
     }
 
     private synchronized SettableFuture<ZincCatalog> getPersistedCatalog(final SourceURL sourceURL, final File catalogFile) throws FileNotFoundException {
@@ -129,14 +152,6 @@ public class ZincCatalogs {
         mFutures.remove(sourceURL);
     }
 
-    private void scheduleUpdate() {
-        mUpdateTimer.schedule(new TimerTask() {
-            @Override public void run() {
-                updateCatalogsForTrackedSourceURLs();
-            }
-        }, INITIAL_UPDATE_DELAY, UPDATE_FREQUENCY);
-    }
-
     private synchronized void updateCatalogsForTrackedSourceURLs() {
         logMessage("All", "Updating catalogs for tracked source URLs");
 
@@ -147,6 +162,10 @@ public class ZincCatalogs {
                 cacheFuture(sourceURL, future);
             }
         }
+    }
+
+    private File getCatalogsFolder() {
+        return new File(mRoot, PathHelper.getCatalogsFolder());
     }
 
     private File getCatalogFile(final SourceURL sourceURL) {

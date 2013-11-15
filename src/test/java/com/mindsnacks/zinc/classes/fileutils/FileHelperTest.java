@@ -44,7 +44,7 @@ public class FileHelperTest extends ZincBaseTest {
         mOriginalFile = new File(mBundle, mFilename);
         mDestinationFile = new File(mBundle, mDestinationFilename);
 
-        createGzipFile(mContents, new File(mBundle, mFilename));
+        createGzipFile(mContents, mOriginalFile);
     }
 
     @Test
@@ -73,6 +73,24 @@ public class FileHelperTest extends ZincBaseTest {
         assertTrue(mOriginalFile.exists());
         mHelper.removeFile(mOriginalFile);
         assertFalse(mOriginalFile.exists());
+    }
+
+    @Test
+    public void emptyDirectory() throws Exception {
+        final String filename1 = "file1.txt", filename2 = "file2.txt";
+
+        final File file1 = TestUtils.createFile(rootFolder, filename1, "file1"),
+                   file2 = TestUtils.createFile(rootFolder, filename2, "file2");
+
+        assertTrue(file1.exists());
+        assertTrue(file2.exists());
+
+        // run
+        mHelper.emptyDirectory(mBundle);
+
+        assertTrue(mBundle.exists());
+        assertFalse(file1.exists());
+        assertFalse(file2.exists());
     }
 
     @Test

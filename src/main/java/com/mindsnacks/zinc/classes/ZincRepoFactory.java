@@ -33,31 +33,30 @@ public final class ZincRepoFactory {
         final ZincRepoIndexWriter indexWriter = createRepoIndexWriter(root, gson);
 
         final ThreadFactory threadFactory = new DaemonThreadFactory();
+        final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(CATALOG_DOWNLOAD_THREAD_POOL_SIZE, threadFactory);
+
+        final ZincCatalogsCache catalogs = createCatalogCache(jobFactory, root, gson, indexWriter.getIndex(), executorService);
 
         final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue = createQueue(
-                bundleCloneConcurrency, 
-                createBundleDownloader(jobFactory, root, gson, indexWriter.getIndex(), threadFactory),
+                bundleCloneConcurrency,
+                new ZincBundleDownloader(jobFactory, catalogs),
                 createPriorityCalculator(priorityCalculator));
 
-        return new ZincRepo(queue, root.toURI(), indexWriter, flavorName);
+        return new ZincRepo(queue, root.toURI(), indexWriter, catalogs, flavorName);
     }
 
-    private PriorityJobQueue.DataProcessor<ZincCloneBundleRequest, ZincBundle> createBundleDownloader(
-            final ZincJobFactory jobFactory,
-            final File root,
-            final Gson gson,
-            final ZincRepoIndex repoIndex,
-            final ThreadFactory threadFactory) {
-        final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(CATALOG_DOWNLOAD_THREAD_POOL_SIZE, threadFactory);
-        final ZincCatalogs catalogs = new ZincCatalogs(root,
-                new FileHelper(gson),
-                new HashSet<SourceURL>(repoIndex.getSources()),
-                jobFactory,
-                executorService,
-                executorService,
-                new Timer(ZincCatalogs.class.getSimpleName(), true));
-
-        return new ZincBundleDownloader(jobFactory, catalogs);
+    private ZincCatalogsCache createCatalogCache(final ZincJobFactory jobFactory,
+                                            final File root,
+                                            final Gson gson,
+                                            final ZincRepoIndex repoIndex,
+                                            final ScheduledExecutorService executorService) {
+        return new ZincCatalogs(root,
+                    new FileHelper(gson),
+                    new HashSet<SourceURL>(repoIndex.getSources()),
+                    jobFactory,
+                    executorService,
+                    executorService,
+                    new Timer(ZincCatalogs.class.getSimpleName(), true));
     }
 
     private Gson createGson() {

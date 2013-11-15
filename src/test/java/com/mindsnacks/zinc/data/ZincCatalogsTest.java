@@ -83,8 +83,32 @@ public class ZincCatalogsTest extends ZincBaseTest {
                 mTimer);
     }
 
+    private void scheduleUpdate() {
+        catalogs.scheduleUpdate();
+    }
+
+
+    private void initializeAndScheduleUpdate() {
+        initialize();
+        scheduleUpdate();
+    }
+
+
     private Future<ZincCatalog> run() {
         return catalogs.getCatalog(mSourceURL);
+    }
+
+    @Test
+    public void clearCachedCatalogs() throws Exception {
+        catalogs.clearCachedCatalogs();
+
+        verify(mFileHelper).emptyDirectory(any(File.class));
+    }
+
+    @Test(expected = ZincRuntimeException.class)
+    public void clearCachedCatalogsMustBeCalledBeforeSchedulingUpdates() throws Exception {
+        scheduleUpdate();
+        catalogs.clearCachedCatalogs();
     }
 
     @Test
@@ -155,8 +179,8 @@ public class ZincCatalogsTest extends ZincBaseTest {
     public void futuresAreCached() throws Exception {
         setLocalCatalogFileContent();
 
-        final Future<ZincCatalog> future1 = run();
-        final Future<ZincCatalog> future2 = run();
+        final Future<ZincCatalog> future1 = run(),
+                                  future2 = run();
 
         assertEquals(future1, future2);
 
@@ -171,15 +195,25 @@ public class ZincCatalogsTest extends ZincBaseTest {
     }
 
     @Test
-    public void updateIsScheduled() throws Exception {
+    public void testScheduleUpdate() throws Exception {
+        scheduleUpdate();
+
         verify(mTimer).schedule(any(TimerTask.class), anyLong(), anyLong());
+    }
+
+    @Test
+    public void canOnlyScheduleUpdatesOnce() throws Exception {
+        scheduleUpdate();
+        scheduleUpdate();
+
+        verify(mTimer, times(1)).schedule(any(TimerTask.class), anyLong(), anyLong());
     }
 
     @Test
     public void updatingCatalogsDownloadsNewOnes() throws Exception {
         setUpUpdateTask();
 
-        initialize();
+        initializeAndScheduleUpdate();
 
         verifyCatalogIsDownloaded();
     }
@@ -188,7 +222,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
     public void updatingCatalogsIgnoresCachedCatalogs() throws Exception {
         setUpUpdateTask();
 
-        initialize();
+        initializeAndScheduleUpdate();
 
         verify(mFileHelper, times(0)).readJSON(any(File.class), any(Class.class));
     }
@@ -197,14 +231,14 @@ public class ZincCatalogsTest extends ZincBaseTest {
     public void updatingCatalogsReplacesFutures() throws Exception {
         final ListenableFuture future = setUpUpdateTask();
 
-        initialize();
+        initializeAndScheduleUpdate();
 
         assertEquals(future, catalogs.getCatalog(mSourceURL));
     }
 
     @Test
     public void failedCatalogDownloadReplacesFutureWithOriginalOne() throws Exception {
-        initialize();
+        initializeAndScheduleUpdate();
 
         // cache the future with the persisted copy
         setLocalCatalogFileContent();
@@ -225,7 +259,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
         setDownloadTaskFails();
         setLocalCatalogFileDoesNotExist();
 
-        initialize();
+        initializeAndScheduleUpdate();
 
         final Future<ZincCatalog> catalogFuture = catalogs.getCatalog(mSourceURL);
 

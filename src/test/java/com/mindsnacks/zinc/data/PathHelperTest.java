@@ -62,4 +62,9 @@ public class PathHelperTest extends ZincBaseTest {
         assertTrue(result.contains(catalogID));
         assertTrue(result.endsWith(".json"));
     }
+
+    @Test
+    public void catalogsFolder() throws Exception {
+        assertTrue(PathHelper.getCatalogsFolder().endsWith("/"));
+    }
 }

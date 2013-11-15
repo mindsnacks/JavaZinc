@@ -17,6 +17,7 @@ import java.util.concurrent.Future;
 public class ZincRepo implements Repo {
     private final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> mQueue;
     private final ZincRepoIndexWriter mIndexWriter;
+    private final ZincCatalogsCache mCatalogsCache;
     private final String mFlavorName;
 
     private final File mRoot;
@@ -30,8 +31,10 @@ public class ZincRepo implements Repo {
     public ZincRepo(final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue,
                     final URI root,
                     final ZincRepoIndexWriter repoIndexWriter,
+                    final ZincCatalogsCache catalogsCache,
                     final String flavorName) {
         mQueue = queue;
+        mCatalogsCache = catalogsCache;
         mFlavorName = flavorName;
         mRoot = new File(root);
         mIndexWriter = repoIndexWriter;
@@ -42,6 +45,7 @@ public class ZincRepo implements Repo {
     @Override
     public void start() {
         mQueue.start();
+        mCatalogsCache.scheduleUpdate();
     }
 
     @Override
@@ -81,6 +85,11 @@ public class ZincRepo implements Repo {
     @Override
     public void recalculatePriorities() {
         mQueue.recalculatePriorities();
+    }
+
+    @Override
+    public void clearCachedCatalogs() {
+        mCatalogsCache.clearCachedCatalogs();
     }
 
     private void cloneTrackedBundles() {
