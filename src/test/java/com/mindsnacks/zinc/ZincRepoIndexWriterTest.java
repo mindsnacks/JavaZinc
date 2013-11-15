@@ -2,6 +2,7 @@ package com.mindsnacks.zinc;
 
 import com.mindsnacks.zinc.classes.ZincRepoIndexWriter;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -23,19 +24,18 @@ public class ZincRepoIndexWriterTest extends ZincBaseTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private void setupZincRepoIndexWriter(File file) {
-        mZincRepoIndexWriter = new ZincRepoIndexWriter(file, createGson());
+    @Before
+    public void setupZincRepoIndexWriter() throws Exception {
+        mZincRepoIndexWriter = new ZincRepoIndexWriter(temporaryFolder.newFolder(), createGson());
     }
 
     @Test
     public void indexWriterCreatesFileAndReturnsAnIndexWhenFileDoesNotExist() throws Exception {
-        setupZincRepoIndexWriter(temporaryFolder.newFolder());
         assertNotNull(mZincRepoIndexWriter.getIndex());
     }
 
     @Test
     public void indexWriterReplacesFIleAndReturnsAnIndexWhenGSONReturnsNullWhenParsingIndexJSON() throws Exception {
-        setupZincRepoIndexWriter(temporaryFolder.newFolder());
         File indexFile = mZincRepoIndexWriter.getIndexFile();
 
         assertFalse(indexFile.exists());
