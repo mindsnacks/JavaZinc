@@ -49,16 +49,27 @@ public class ZincRepoIndexWriter {
 
     private ZincRepoIndex initializeIndex() {
         try {
-            return mGson.fromJson(new FileReader(mIndexFile), ZincRepoIndex.class);
-        } catch (FileNotFoundException fnfe) {
-            try {
-                mIndexFile.getParentFile().mkdirs();
-                mIndexFile.createNewFile();
+            ZincRepoIndex indexFromJSON = mGson.fromJson(new FileReader(mIndexFile), ZincRepoIndex.class);
+            boolean indexFromJSONIsAnEmptyFileOrCorrupted = indexFromJSON == null;
 
-                return new ZincRepoIndex();
-            } catch (IOException ioe) {
-                throw new ZincRuntimeException("Error creating index file", ioe);
+            if (indexFromJSONIsAnEmptyFileOrCorrupted) {
+                return createNewIndexFile();
+            } else {
+                return indexFromJSON;
             }
+        } catch (FileNotFoundException fnfe) {
+            return createNewIndexFile();
+        }
+    }
+
+    private ZincRepoIndex createNewIndexFile() {
+        try {
+            mIndexFile.getParentFile().mkdirs();
+            mIndexFile.createNewFile();
+
+            return new ZincRepoIndex();
+        } catch (IOException ioe) {
+            throw new ZincRuntimeException("Error creating index file", ioe);
         }
     }
 
