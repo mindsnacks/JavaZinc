@@ -6,6 +6,8 @@ import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.*;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * User: NachoSoto
  * Date: 9/3/13
@@ -45,16 +47,26 @@ public class ZincRepoIndexWriter {
 
     private ZincRepoIndex initializeIndex() {
         try {
-            return mGson.fromJson(new FileReader(mIndexFile), ZincRepoIndex.class);
+            return checkNotNull(readRepoIndexFile());
         } catch (FileNotFoundException fnfe) {
-            try {
-                mIndexFile.getParentFile().mkdirs();
-                mIndexFile.createNewFile();
+            return createNewIndexFile();
+        } catch (NullPointerException npe) {
+            return createNewIndexFile();
+        }
+    }
 
-                return new ZincRepoIndex();
-            } catch (IOException ioe) {
-                throw new ZincRuntimeException("Error creating index file", ioe);
-            }
+    private ZincRepoIndex readRepoIndexFile() throws FileNotFoundException {
+        return mGson.fromJson(new FileReader(mIndexFile), ZincRepoIndex.class);
+    }
+
+    private ZincRepoIndex createNewIndexFile() {
+        try {
+            mIndexFile.getParentFile().mkdirs();
+            mIndexFile.createNewFile();
+
+            return new ZincRepoIndex();
+        } catch (IOException ioe) {
+            throw new ZincRuntimeException("Error creating index file", ioe);
         }
     }
 
