@@ -1,5 +1,6 @@
 package com.mindsnacks.zinc.classes;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.mindsnacks.zinc.classes.data.ZincRepoIndex;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
@@ -45,17 +46,16 @@ public class ZincRepoIndexWriter {
 
     private ZincRepoIndex initializeIndex() {
         try {
-            ZincRepoIndex indexFromJSON = mGson.fromJson(new FileReader(mIndexFile), ZincRepoIndex.class);
-            boolean indexFromJSONIsAnEmptyFileOrCorrupted = indexFromJSON == null;
-
-            if (indexFromJSONIsAnEmptyFileOrCorrupted) {
-                return createNewIndexFile();
-            } else {
-                return indexFromJSON;
-            }
+            return readRepoIndexFile();
         } catch (FileNotFoundException fnfe) {
             return createNewIndexFile();
+        } catch (NullPointerException npe) {
+            return createNewIndexFile();
         }
+    }
+
+    private ZincRepoIndex readRepoIndexFile() throws FileNotFoundException, NullPointerException {
+        return Preconditions.checkNotNull(mGson.fromJson(new FileReader(mIndexFile), ZincRepoIndex.class));
     }
 
     private ZincRepoIndex createNewIndexFile() {
