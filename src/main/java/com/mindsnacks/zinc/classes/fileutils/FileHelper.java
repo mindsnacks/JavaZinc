@@ -84,8 +84,10 @@ public class FileHelper {
     public boolean emptyDirectory(final File folder) {
         boolean result = true;
 
-        for (final File file : folder.listFiles()) {
-            result &= removeFile(file);
+        if (folder.exists()) {
+            for (final File file : folder.listFiles()) {
+                result &= removeFile(file);
+            }
         }
 
         return result;
