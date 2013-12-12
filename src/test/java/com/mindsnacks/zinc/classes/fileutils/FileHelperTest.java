@@ -94,6 +94,14 @@ public class FileHelperTest extends ZincBaseTest {
     }
 
     @Test
+    public void emptyDirectoryWithNonExistentDirectory() throws Exception {
+        // run
+        assertTrue(mHelper.emptyDirectory(new File(mBundle, "inexistent folder")));
+
+        assertTrue(mBundle.exists());
+    }
+
+    @Test
     public void moveFile() throws Exception {
         assertFalse(mDestinationFile.exists());
 
