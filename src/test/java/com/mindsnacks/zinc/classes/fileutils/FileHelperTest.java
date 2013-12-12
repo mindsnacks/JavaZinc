@@ -86,7 +86,7 @@ public class FileHelperTest extends ZincBaseTest {
         assertTrue(file2.exists());
 
         // run
-        mHelper.emptyDirectory(mBundle);
+        assertTrue(mHelper.emptyDirectory(mBundle));
 
         assertTrue(mBundle.exists());
         assertFalse(file1.exists());
