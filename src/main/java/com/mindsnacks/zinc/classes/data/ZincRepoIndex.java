@@ -12,7 +12,6 @@ import java.util.Set;
 /**
  * User: NachoSoto
  * Date: 9/3/13
- * @todo: deal with bundle ID, bundle name and catalog name
  */
 public class ZincRepoIndex {
     @SerializedName("sources")
