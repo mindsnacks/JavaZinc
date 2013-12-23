@@ -118,10 +118,21 @@ public class FileHelperTest extends ZincBaseTest {
     }
 
     @Test
-    public void moveFile() throws Exception {
+    public void moveFileWithNames() throws Exception {
         assertFalse(mDestinationFile.exists());
 
         mHelper.moveFile(mBundle, mFilename, mBundle, mDestinationFilename);
+
+        assertTrue(mDestinationFile.exists());
+    }
+
+    @Test
+    public void moveFile() throws Exception {
+        assertFalse(mDestinationFile.exists());
+
+        mHelper.moveFile(
+            new File(mBundle, mFilename),
+            new File(mBundle, mDestinationFilename));
 
         assertTrue(mDestinationFile.exists());
     }

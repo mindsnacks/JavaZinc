@@ -58,10 +58,13 @@ public class FileHelper {
 
     public boolean moveFile(final File originFolder, final String originFilename,
                             final File destinationFolder, final String destinationFilename) {
-        final File input = new File(originFolder, originFilename),
-                   output = new File(destinationFolder, destinationFilename);
+        return moveFile(new File(originFolder, originFilename),
+                        new File(destinationFolder, destinationFilename));
+    }
 
-        return input.renameTo(output);
+    public boolean moveFile(final File originFile,
+                            final File destinationFile) {
+        return originFile.renameTo(destinationFile);
     }
 
     public void copyFile(final File originFolder, final String originFilename,
