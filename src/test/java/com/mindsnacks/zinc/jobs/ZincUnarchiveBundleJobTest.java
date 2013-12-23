@@ -105,7 +105,10 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         verify(mFileHelper, times(0)).unzipFile(eq(mBundle), anyString(), any(ZincBundle.class), eq(filename2));
         verify(mFileHelper, times(0)).copyFile(eq(mBundle), anyString(), any(ZincBundle.class), eq(filename1));
 
+        final String expectedPath = PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName);
+
         assertTrue(result.getAbsolutePath().startsWith(mRepoFolder.getAbsolutePath()));
+        assertTrue(result.getAbsolutePath().contains(expectedPath));
     }
 
     @Test
