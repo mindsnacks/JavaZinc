@@ -21,6 +21,7 @@ public class PriorityJobQueue<Input, Output> {
     private static final int INITIAL_QUEUE_CAPACITY = 20;
     private static final int SCHEDULER_TERMINATION_TIMEOUT = 30;
     private static final int EXECUTOR_SERVICE_TERMINATION_TIMEOUT = 300;
+    private static final int FUTURE_WAITING_SECONDS_INTERVAL = 2;
 
     private final int mConcurrency;
     private final ThreadFactory mThreadFactory;
@@ -162,7 +163,7 @@ public class PriorityJobQueue<Input, Output> {
                             mLock.unlock();
                         }
                     }
-                } catch (InterruptedException ex) {
+                } catch (final InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 }
             }
@@ -189,7 +190,7 @@ public class PriorityJobQueue<Input, Output> {
 
                 try {
                     while ((result = mFutures.get(element)) == null) {
-                        mEnqueued.awaitUninterruptibly();
+                        mEnqueued.await(FUTURE_WAITING_SECONDS_INTERVAL, TimeUnit.SECONDS);
                     }
                 } finally {
                     mLock.unlock();
