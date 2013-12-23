@@ -115,18 +115,6 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         verify(mFileHelper).removeDirectory(eq(mBundle));
     }
 
-    @Test
-    public void doesntUnarchiveAnythingIfFolderIsAlreadyThere() throws Exception {
-        final String folderName = PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName);
-
-        final File folder = new File(mRepoFolder, folderName);
-        assert folder.mkdirs();
-
-        run();
-
-        verify(mJobFactory, times(0)).downloadManifest(any(SourceURL.class), anyString(), anyInt());
-    }
-
     private ZincBundle run() throws Exception {
         return mJob.call();
     }
