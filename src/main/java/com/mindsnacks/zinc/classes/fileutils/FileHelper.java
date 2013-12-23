@@ -21,7 +21,8 @@ public class FileHelper {
         mGson = gson;
     }
 
-    public void unzipFile(final File originFolder, final String originFilename, final File destinationFolder, final String destinationFilename) throws IOException {
+    public void unzipFile(final File originFolder, final String originFilename,
+                          final File destinationFolder, final String destinationFilename) throws IOException {
         final File input = new File(originFolder, originFilename),
                    output = new File(destinationFolder, destinationFilename);
 
@@ -55,14 +56,16 @@ public class FileHelper {
         return new BufferedReader(new FileReader(file));
     }
 
-    public boolean moveFile(final File originFolder, final String originFilename, final File destinationFolder, final String destinationFilename) {
+    public boolean moveFile(final File originFolder, final String originFilename,
+                            final File destinationFolder, final String destinationFilename) {
         final File input = new File(originFolder, originFilename),
                    output = new File(destinationFolder, destinationFilename);
 
         return input.renameTo(output);
     }
 
-    public void copyFile(final File originFolder, final String originFilename, final File destinationFolder, final String destinationFilename) throws IOException {
+    public void copyFile(final File originFolder, final String originFilename,
+                         final File destinationFolder, final String destinationFilename) throws IOException {
         final File input = new File(originFolder, originFilename),
                    output = new File(destinationFolder, destinationFilename);
 
@@ -89,7 +92,7 @@ public class FileHelper {
 
     /**
      * Removes all the files from a directory. Not recursively.
-     * @param folder
+     * @param folder directory to empty
      * @return true if all the files were correctly removed.
      */
     public boolean emptyDirectory(final File folder) {
