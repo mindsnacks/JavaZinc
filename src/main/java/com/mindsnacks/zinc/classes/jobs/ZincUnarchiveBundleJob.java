@@ -45,7 +45,7 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
             unarchiveBundle(mDownloadedBundle, result, manifest);
 
             logMessage("cleaning up archive");
-            mFileHelper.removeFile(mDownloadedBundle);
+            mFileHelper.removeDirectory(mDownloadedBundle);
         } else {
             logMessage("skipping unarchiving - bundle already found");
         }

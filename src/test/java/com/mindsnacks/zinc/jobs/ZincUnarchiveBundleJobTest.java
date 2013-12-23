@@ -112,7 +112,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
     public void removesDownloadedFolder() throws Exception {
         run();
 
-        verify(mFileHelper).removeFile(eq(mBundle));
+        verify(mFileHelper).removeDirectory(eq(mBundle));
     }
 
     @Test

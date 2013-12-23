@@ -61,10 +61,8 @@ public class ZincDownloadArchiveJob extends AbstractZincDownloadFileJob {
     }
 
     private void createFolder(final File outputFile) {
-        if (!outputFile.exists()) {
-            if (!outputFile.mkdirs()) {
-                throw new DownloadFileError("Error creating folder: " + outputFile.getAbsolutePath());
-            }
+        if (!outputFile.exists() && !outputFile.mkdirs()) {
+            throw new DownloadFileError("Error creating folder: " + outputFile.getAbsolutePath());
         }
     }
 }
