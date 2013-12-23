@@ -60,8 +60,7 @@ public final class ZincRepoFactory {
     }
 
     private Gson createGson() {
-        // TODO: disable pretty printing
-        final GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting().serializeNulls().setVersion(1.0);
+        final GsonBuilder gsonBuilder = new GsonBuilder().serializeNulls().setVersion(1.0);
         gsonBuilder.registerTypeAdapter(SourceURL.class, new SourceURL.Serializer());
         gsonBuilder.registerTypeAdapter(SourceURL.class, new SourceURL.Deserializer());
 
