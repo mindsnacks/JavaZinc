@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
 import java.io.File;
@@ -67,6 +68,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         when(mSourceURL.getCatalogID()).thenReturn(mCatalogID);
 
         when(mJobFactory.downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion))).thenReturn(mManifestJob);
+        when(mFileHelper.moveFile(any(File.class), any(File.class))).thenReturn(true);
 
         mJob = new ZincUnarchiveBundleJob(mBundle, mBundleCloneRequest, mJobFactory, mFileHelper);
     }
@@ -105,10 +107,8 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         verify(mFileHelper, times(0)).unzipFile(eq(mBundle), anyString(), any(ZincBundle.class), eq(filename2));
         verify(mFileHelper, times(0)).copyFile(eq(mBundle), anyString(), any(ZincBundle.class), eq(filename1));
 
-        final String expectedPath = PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName);
-
         assertTrue(result.getAbsolutePath().startsWith(mRepoFolder.getAbsolutePath()));
-        assertTrue(result.getAbsolutePath().contains(expectedPath));
+        assertTrue(result.getAbsolutePath().contains(expectedResultFolder()));
     }
 
     @Test
@@ -116,6 +116,19 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         run();
 
         verify(mFileHelper).removeDirectory(eq(mBundle));
+    }
+
+    @Test
+    public void movesResultBundle() throws Exception {
+        run();
+
+        ArgumentCaptor<File> temporaryFolder = ArgumentCaptor.forClass(File.class),
+                             resultFolder = ArgumentCaptor.forClass(File.class);
+
+        verify(mFileHelper).moveFile(temporaryFolder.capture(), resultFolder.capture());
+
+        assertTrue(resultFolder.getValue().getAbsolutePath().contains(expectedResultFolder()));
+        assertTrue(temporaryFolder.getValue().getAbsolutePath().contains(expectedTemporaryFolder()));
     }
 
     private ZincBundle run() throws Exception {
@@ -133,5 +146,13 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         when(info.isGzipped()).thenReturn(isGzipped);
 
         files.put(filename, info);
+    }
+
+    private String expectedResultFolder() {
+        return PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName);
+    }
+
+    private String expectedTemporaryFolder() {
+        return PathHelper.getLocalTemporaryBundleFolder(mBundleID, mVersion, mFlavorName);
     }
 }

@@ -3,13 +3,14 @@ package com.mindsnacks.zinc.classes.jobs;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
+import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
 /**
- * @author NachoSoto
+ * @author NachoSoto.
  *
  * This job creates the result bundle by extracting the contents of the archive,
  * with the information in the ZincManifest.
@@ -32,29 +33,32 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
 
     @Override
     public ZincBundle run() throws Exception {
-        final int version = mDownloadedBundle.getVersion();
         final BundleID bundleID = mRequest.getBundleID();
+        final int version = mDownloadedBundle.getVersion();
 
-        final File localBundleFolder = new File(
-                mRequest.getRepoFolder(),
-                PathHelper.getLocalBundleFolder(bundleID, version, mRequest.getFlavorName())
+        final File temporaryFolder = getTemporaryBundleFolder(bundleID),
+                   resultFolder = getBundleFolder(bundleID);
+
+        unarchiveBundle(mDownloadedBundle, temporaryFolder, getManifest(version, bundleID));
+
+        cleanUpDownloadedFolder();
+        moveToBundlesFolder(temporaryFolder, resultFolder);
+
+        return new ZincBundle(resultFolder, bundleID, version);
+    }
+
+    private File getTemporaryBundleFolder(final BundleID bundleID) {
+        return new File(
+            mRequest.getRepoFolder(),
+            PathHelper.getLocalTemporaryBundleFolder(bundleID, mDownloadedBundle.getVersion(), mRequest.getFlavorName())
         );
+    }
 
-        final ZincBundle result = new ZincBundle(localBundleFolder, bundleID, version);
-
-        if (!localBundleFolder.exists()) {
-            final ZincManifest manifest = getManifest(version, bundleID);
-
-            logMessage("unarchiving");
-            unarchiveBundle(mDownloadedBundle, result, manifest);
-        } else {
-            logMessage("skipping unarchiving - bundle already found");
-        }
-
-        logMessage("cleaning up archive");
-        mFileHelper.removeDirectory(mDownloadedBundle);
-
-        return result;
+    private File getBundleFolder(final BundleID bundleID) {
+        return new File(
+            mRequest.getRepoFolder(),
+            PathHelper.getLocalBundleFolder(bundleID, mDownloadedBundle.getVersion(), mRequest.getFlavorName())
+        );
     }
 
     private ZincManifest getManifest(final int version,
@@ -66,9 +70,11 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
         ).call();
     }
 
-    private void unarchiveBundle(final ZincBundle downloadedBundle,
-                                 final ZincBundle result,
+    private void unarchiveBundle(final File downloadedBundle,
+                                 final File temporaryFolder,
                                  final ZincManifest manifest) throws IOException {
+        logMessage("unarchiving");
+
         final Map<String, ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mRequest.getFlavorName());
 
         for (final Map.Entry<String, ZincManifest.FileInfo> entry : files.entrySet()) {
@@ -78,10 +84,24 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
             final String destinationFilename = entry.getKey();
 
             if (fileInfo.isGzipped()) {
-                mFileHelper.unzipFile(downloadedBundle, originFilename, result, destinationFilename);
+                mFileHelper.unzipFile(downloadedBundle, originFilename, temporaryFolder, destinationFilename);
             } else {
-                mFileHelper.copyFile(downloadedBundle, originFilename, result, destinationFilename);
+                mFileHelper.copyFile(downloadedBundle, originFilename, temporaryFolder, destinationFilename);
             }
+        }
+    }
+
+    private void cleanUpDownloadedFolder() {
+        logMessage("cleaning up archive");
+
+        mFileHelper.removeDirectory(mDownloadedBundle);
+    }
+
+    private void moveToBundlesFolder(final File temporaryFolder, final File bundleFolder) {
+        logMessage("moving bundle");
+
+        if (!bundleFolder.mkdirs() || !mFileHelper.moveFile(temporaryFolder, bundleFolder)) {
+            throw new ZincRuntimeException(String.format("Error moving bundle from '%s' to '%s'", temporaryFolder, bundleFolder));
         }
     }
 
