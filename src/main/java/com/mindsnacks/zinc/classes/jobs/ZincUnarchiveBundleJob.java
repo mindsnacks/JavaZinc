@@ -56,10 +56,10 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
     private ZincManifest getManifest(final int version,
                                      final BundleID bundleID) throws Exception {
         return mJobFactory.downloadManifest(
-                        mRequest.getSourceURL(),
-                        bundleID.getBundleName(),
-                        version
-                ).call();
+                mRequest.getSourceURL(),
+                bundleID.getBundleName(),
+                version
+        ).call();
     }
 
     private void unarchiveBundle(final ZincBundle downloadedBundle,

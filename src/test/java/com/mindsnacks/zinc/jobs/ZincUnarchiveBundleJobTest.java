@@ -105,9 +105,14 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         verify(mFileHelper, times(0)).unzipFile(eq(mBundle), anyString(), any(ZincBundle.class), eq(filename2));
         verify(mFileHelper, times(0)).copyFile(eq(mBundle), anyString(), any(ZincBundle.class), eq(filename1));
 
-        verify(mFileHelper).removeFile(eq(mBundle));
-
         assertTrue(result.getAbsolutePath().startsWith(mRepoFolder.getAbsolutePath()));
+    }
+
+    @Test
+    public void removesDownloadedFolder() throws Exception {
+        run();
+
+        verify(mFileHelper).removeFile(eq(mBundle));
     }
 
     @Test
@@ -115,7 +120,7 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         final String folderName = PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName);
 
         final File folder = new File(mRepoFolder, folderName);
-        folder.mkdirs();
+        assert folder.mkdirs();
 
         run();
 
