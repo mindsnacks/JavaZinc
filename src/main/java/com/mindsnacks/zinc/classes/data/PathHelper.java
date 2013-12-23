@@ -1,8 +1,9 @@
 package com.mindsnacks.zinc.classes.data;
 
 /**
- * User: NachoSoto
+ * @author NachoSoto
  * Date: 10/7/13
+ * @todo convert to instance methods.
  */
 public class PathHelper {
     private static final String DOWNLOADS_FOLDER = "downloads";
