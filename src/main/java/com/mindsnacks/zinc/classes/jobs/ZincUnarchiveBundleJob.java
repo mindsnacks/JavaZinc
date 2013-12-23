@@ -43,12 +43,12 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
 
             logMessage("unarchiving");
             unarchiveBundle(mDownloadedBundle, result, manifest);
-
-            logMessage("cleaning up archive");
-            mFileHelper.removeDirectory(mDownloadedBundle);
         } else {
             logMessage("skipping unarchiving - bundle already found");
         }
+
+        logMessage("cleaning up archive");
+        mFileHelper.removeDirectory(mDownloadedBundle);
 
         return result;
     }
