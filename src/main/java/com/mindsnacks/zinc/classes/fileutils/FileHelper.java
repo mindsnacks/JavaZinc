@@ -72,8 +72,19 @@ public class FileHelper {
         }
     }
 
+    /**
+     * Deletes the file or directory denoted by this abstract pathname.
+     * If this pathname denotes a directory, then the directory must be empty in order to be deleted.
+     */
     public boolean removeFile(final File file) {
         return file.delete();
+    }
+
+    /**
+     * Empties and removes a directory.
+     */
+    public boolean removeDirectory(final File directory) {
+        return emptyDirectory(directory) && removeFile(directory);
     }
 
     /**
