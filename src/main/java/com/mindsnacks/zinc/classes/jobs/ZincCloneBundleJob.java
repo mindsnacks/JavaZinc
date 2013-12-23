@@ -36,6 +36,8 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
             final ZincBundle downloadedBundle = mJobFactory.downloadBundle(mRequest, mCatalogFuture).call();
             return mJobFactory.unarchiveBundle(downloadedBundle, mRequest).call();
         } else {
+            logMessage("bundle already available");
+
             return new ZincBundle(localBundleFolder, bundleID, version);
         }
     }
