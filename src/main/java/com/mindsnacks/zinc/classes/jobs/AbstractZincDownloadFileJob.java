@@ -19,6 +19,7 @@ public abstract class AbstractZincDownloadFileJob extends AbstractZincDownloadJo
                                        final String child,
                                        final boolean override) {
         super(requestExecutor, url, File.class);
+
         mFile = new File(root, child);
         mOverride = override;
     }
@@ -44,5 +45,5 @@ public abstract class AbstractZincDownloadFileJob extends AbstractZincDownloadJo
         return mOverride || !mFile.exists();
     }
 
-    abstract protected void writeFile(final InputStream inputStream, final File file) throws IOException;
+    abstract protected void writeFile(final InputStream inputStream, final File outputFile) throws IOException;
 }

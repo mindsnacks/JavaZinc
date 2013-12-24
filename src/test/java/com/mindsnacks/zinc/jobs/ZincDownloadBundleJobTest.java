@@ -45,6 +45,10 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
     @Mock private File mRepoFolder;
     @Mock private File mResult;
 
+    // we always want to override in case a corrupt bundle is in place
+    // if this job is being run it means the result bundle wasn't there anyway.
+    private static boolean mShouldOverrideDownloadedBundle = true;
+
     private Callable<File> mResultJob;
 
     public ZincDownloadBundleJobTest() throws MalformedURLException {
@@ -61,7 +65,7 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
 
         mResultJob = TestFactory.createCallable(mResult);
 
-        when(mJobFactory.downloadArchive(any(URL.class), any(File.class), anyString(), eq(false))).thenReturn(mResultJob);
+        when(mJobFactory.downloadArchive(any(URL.class), any(File.class), anyString(), eq(mShouldOverrideDownloadedBundle))).thenReturn(mResultJob);
         when(mResult.getPath()).thenReturn(mResultPath);
 
         mJob = initializeJob(mSourceURL);
@@ -121,6 +125,6 @@ public class ZincDownloadBundleJobTest extends ZincBaseTest {
     }
 
     private void verifyDownloadArchiveJobCreation() {
-        verify(mJobFactory).downloadArchive(eq(mArchiveURL), eq(mRepoFolder), anyString(), eq(false));
+        verify(mJobFactory).downloadArchive(eq(mArchiveURL), eq(mRepoFolder), anyString(), eq(mShouldOverrideDownloadedBundle));
     }
 }

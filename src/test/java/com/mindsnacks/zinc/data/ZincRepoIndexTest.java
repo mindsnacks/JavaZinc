@@ -16,7 +16,6 @@ import static junit.framework.Assert.assertEquals;
 /**
  * User: NachoSoto
  * Date: 9/4/13
- * @todo: serialization tests
  */
 public class ZincRepoIndexTest extends ZincBaseTest {
     private ZincRepoIndex index;

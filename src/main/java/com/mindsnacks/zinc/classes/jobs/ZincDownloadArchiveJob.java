@@ -23,38 +23,46 @@ public class ZincDownloadArchiveJob extends AbstractZincDownloadFileJob {
     }
 
     @Override
-    protected void writeFile(final InputStream inputStream, final File file) throws IOException {
-        logMessage("untaring " + file.getAbsolutePath());
+    protected void writeFile(final InputStream inputStream, final File outputFile) throws IOException {
+        logMessage("untaring " + outputFile.getAbsolutePath());
 
-        if (!file.exists()) {
-            if (!file.mkdirs()) {
-                throw new DownloadFileError("Error creating folder: " + file.getAbsolutePath());
-            }
-        }
+        createFolder(outputFile);
 
         final TarInputStream tis = new TarInputStream(new BufferedInputStream(inputStream));
 
         try {
             TarEntry entry;
             while ((entry = tis.getNextEntry()) != null) {
-                int count;
-                final byte data[] = new byte[BUFFER_SIZE];
-
-                final FileOutputStream fos = new FileOutputStream(file.getPath() + "/" + entry.getName());
-                final BufferedOutputStream dest = new BufferedOutputStream(fos);
-
-                try {
-                    while ((count = tis.read(data)) != -1) {
-                        dest.write(data, 0, count);
-                    }
-                } finally {
-                    dest.close();
-                }
+                untarEntry(outputFile, tis, entry);
             }
         } finally {
-            logMessage("Finished untaring " + file.getAbsolutePath());
-
             tis.close();
+
+            logMessage("Finished untaring " + outputFile.getAbsolutePath());
+        }
+    }
+
+    private void untarEntry(final File outputFile,
+                            final TarInputStream inputStream,
+                            final TarEntry entry) throws IOException {
+        int count;
+        final byte data[] = new byte[BUFFER_SIZE];
+
+        final FileOutputStream fos = new FileOutputStream(new File(outputFile, entry.getName()));
+        final BufferedOutputStream dest = new BufferedOutputStream(fos);
+
+        try {
+            while ((count = inputStream.read(data)) != -1) {
+                dest.write(data, 0, count);
+            }
+        } finally {
+            dest.close();
+        }
+    }
+
+    private void createFolder(final File outputFile) {
+        if (!outputFile.exists() && !outputFile.mkdirs()) {
+            throw new DownloadFileError("Error creating folder: " + outputFile.getAbsolutePath());
         }
     }
 }

@@ -36,6 +36,11 @@ public class FileHelperTest extends ZincBaseTest {
     private File mOriginalFile;
     private File mDestinationFile;
 
+    private final String filename1 = "file1.txt",
+                         filename2 = "file2.txt";
+
+    private File file1, file2;
+
     @Before
     public void setUp() throws Exception {
         mGson = createGson();
@@ -43,6 +48,9 @@ public class FileHelperTest extends ZincBaseTest {
         mBundle = new ZincBundle(rootFolder.getRoot(), new BundleID("com.mindsnacks.catalog", "mBundle name"), 2);
         mOriginalFile = new File(mBundle, mFilename);
         mDestinationFile = new File(mBundle, mDestinationFilename);
+
+        file1 = TestUtils.createFile(rootFolder, filename1, "file1");
+        file2 = TestUtils.createFile(rootFolder, filename2, "file2");
 
         createGzipFile(mContents, mOriginalFile);
     }
@@ -77,11 +85,6 @@ public class FileHelperTest extends ZincBaseTest {
 
     @Test
     public void emptyDirectory() throws Exception {
-        final String filename1 = "file1.txt", filename2 = "file2.txt";
-
-        final File file1 = TestUtils.createFile(rootFolder, filename1, "file1"),
-                   file2 = TestUtils.createFile(rootFolder, filename2, "file2");
-
         assertTrue(file1.exists());
         assertTrue(file2.exists());
 
@@ -89,6 +92,19 @@ public class FileHelperTest extends ZincBaseTest {
         assertTrue(mHelper.emptyDirectory(mBundle));
 
         assertTrue(mBundle.exists());
+        assertFalse(file1.exists());
+        assertFalse(file2.exists());
+    }
+
+    @Test
+    public void removeDirectory() throws Exception {
+        assertTrue(file1.exists());
+        assertTrue(file2.exists());
+
+        // run
+        assertTrue(mHelper.removeDirectory(mBundle));
+
+        assertFalse(mBundle.exists());
         assertFalse(file1.exists());
         assertFalse(file2.exists());
     }
@@ -102,10 +118,21 @@ public class FileHelperTest extends ZincBaseTest {
     }
 
     @Test
-    public void moveFile() throws Exception {
+    public void moveFileWithNames() throws Exception {
         assertFalse(mDestinationFile.exists());
 
         mHelper.moveFile(mBundle, mFilename, mBundle, mDestinationFilename);
+
+        assertTrue(mDestinationFile.exists());
+    }
+
+    @Test
+    public void moveFile() throws Exception {
+        assertFalse(mDestinationFile.exists());
+
+        mHelper.moveFile(
+            new File(mBundle, mFilename),
+            new File(mBundle, mDestinationFilename));
 
         assertTrue(mDestinationFile.exists());
     }

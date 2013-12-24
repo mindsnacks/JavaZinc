@@ -45,6 +45,19 @@ public class PathHelperTest extends ZincBaseTest {
     }
 
     @Test
+    public void localTemporaryBundleFolder() throws Exception {
+        final BundleID bundleID = new BundleID(catalogID, "swell");
+        final int version = randomInt(1, 1000);
+        final String flavorName = "retina";
+
+        final String result = PathHelper.getLocalTemporaryBundleFolder(bundleID, version, flavorName);
+
+        assertTrue(result.contains(Integer.toString(version)));
+        assertTrue(result.contains(bundleID.toString()));
+        assertTrue(result.contains(flavorName));
+    }
+
+    @Test
     public void localBundleFolderIsDifferentThanDownload() throws Exception {
         final BundleID bundleID = new BundleID(catalogID, "swell");
         final int version = randomInt(1, 1000);

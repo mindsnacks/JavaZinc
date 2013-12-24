@@ -21,7 +21,8 @@ public class FileHelper {
         mGson = gson;
     }
 
-    public void unzipFile(final File originFolder, final String originFilename, final File destinationFolder, final String destinationFilename) throws IOException {
+    public void unzipFile(final File originFolder, final String originFilename,
+                          final File destinationFolder, final String destinationFilename) throws IOException {
         final File input = new File(originFolder, originFilename),
                    output = new File(destinationFolder, destinationFilename);
 
@@ -55,14 +56,19 @@ public class FileHelper {
         return new BufferedReader(new FileReader(file));
     }
 
-    public boolean moveFile(final File originFolder, final String originFilename, final File destinationFolder, final String destinationFilename) {
-        final File input = new File(originFolder, originFilename),
-                   output = new File(destinationFolder, destinationFilename);
-
-        return input.renameTo(output);
+    public boolean moveFile(final File originFolder, final String originFilename,
+                            final File destinationFolder, final String destinationFilename) {
+        return moveFile(new File(originFolder, originFilename),
+                        new File(destinationFolder, destinationFilename));
     }
 
-    public void copyFile(final File originFolder, final String originFilename, final File destinationFolder, final String destinationFilename) throws IOException {
+    public boolean moveFile(final File originFile,
+                            final File destinationFile) {
+        return originFile.renameTo(destinationFile);
+    }
+
+    public void copyFile(final File originFolder, final String originFilename,
+                         final File destinationFolder, final String destinationFilename) throws IOException {
         final File input = new File(originFolder, originFilename),
                    output = new File(destinationFolder, destinationFilename);
 
@@ -72,13 +78,24 @@ public class FileHelper {
         }
     }
 
+    /**
+     * Deletes the file or directory denoted by this abstract pathname.
+     * If this pathname denotes a directory, then the directory must be empty in order to be deleted.
+     */
     public boolean removeFile(final File file) {
         return file.delete();
     }
 
     /**
+     * Empties and removes a directory.
+     */
+    public boolean removeDirectory(final File directory) {
+        return emptyDirectory(directory) && removeFile(directory);
+    }
+
+    /**
      * Removes all the files from a directory. Not recursively.
-     * @param folder
+     * @param folder directory to empty
      * @return true if all the files were correctly removed.
      */
     public boolean emptyDirectory(final File folder) {
