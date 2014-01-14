@@ -124,7 +124,7 @@ public class PriorityJobQueue<Input, Output> {
         }
     }
 
-    public Future<Output> get(final Input element) throws JobNotFoundException {
+    public ListenableFuture<Output> get(final Input element) throws JobNotFoundException {
         checkServiceIsRunning(true, "Service should be running");
 
         if (mAddedElements.contains(element)) {
@@ -180,7 +180,7 @@ public class PriorityJobQueue<Input, Output> {
         return mExecutorService.submit(mDataProcessor.process(element));
     }
 
-    private Future<Output> waitForFuture(final Input element) {
+    private ListenableFuture<Output> waitForFuture(final Input element) {
         return Futures.dereference(mFuturesExecutorService.submit(new Callable<ListenableFuture<Output>>() {
             @Override
             public ListenableFuture<Output> call() throws Exception {

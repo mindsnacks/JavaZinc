@@ -1,5 +1,6 @@
 package com.mindsnacks.zinc.repo;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.mindsnacks.zinc.classes.ZincRepoIndexWriter;
 import com.mindsnacks.zinc.classes.data.*;
 import org.junit.Before;
@@ -133,7 +134,7 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
     public void getBundleWithIDReturnsExistingPromise() throws Exception {
         final BundleID bundleID = new BundleID(mCatalogID, "swell");
         final String distribution = "develop";
-        final Future<ZincBundle> expectedResult = mock(Future.class);
+        final ListenableFuture<ZincBundle> expectedResult = mock(ListenableFuture.class);
 
         setUpIndexWithTrackedBundleID(bundleID, distribution);
         mockCloneBundle(bundleID, expectedResult);
@@ -156,7 +157,7 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
     }
 
     @SuppressWarnings("unchecked")
-    private void mockCloneBundle(final BundleID bundleID, final Future<ZincBundle> expectedResult) {
+    private void mockCloneBundle(final BundleID bundleID, final ListenableFuture<ZincBundle> expectedResult) {
         when(mQueue.get(argThat(new ArgumentMatcher<ZincCloneBundleRequest>() {
             @Override
             public boolean matches(final Object o) {

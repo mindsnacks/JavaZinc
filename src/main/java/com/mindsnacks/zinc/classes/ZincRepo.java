@@ -1,5 +1,6 @@
 package com.mindsnacks.zinc.classes;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.downloads.PriorityJobQueue;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
@@ -74,7 +75,7 @@ public class ZincRepo implements Repo {
      * has not been scheduled yet and the repo is paused.
      */
     @Override
-    public Future<ZincBundle> getBundle(final BundleID bundleID) {
+    public ListenableFuture<ZincBundle> getBundle(final BundleID bundleID) {
         try {
             return mQueue.get(mBundles.get(bundleID));
         } catch (PriorityJobQueue.JobNotFoundException e) {
