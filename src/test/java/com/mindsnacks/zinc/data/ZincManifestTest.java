@@ -65,6 +65,16 @@ public class ZincManifestTest extends ZincBaseTest {
     }
 
     @Test
+    public void containsFilesWithNoFiles() throws Exception {
+        assertFalse(createManifest(0).containsFiles(mFlavors.get(0)));
+    }
+
+    @Test
+    public void containsFilesWithOneFile() throws Exception {
+        assertTrue(createManifest(1).containsFiles(mFlavors.get(0)));
+    }
+
+    @Test
     public void getHashWithExtensionGzippedFile() throws Exception {
         final Map<String, Map<String, Integer>> formats = new HashMap<String, Map<String, Integer>>();
         formats.put(ZincManifest.FileInfo.GZIPPED_FORMAT, null);

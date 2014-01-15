@@ -76,6 +76,10 @@ public class ZincManifest {
         return (getFilesWithFlavor(flavor).size() > 1);
     }
 
+    public boolean containsFiles(final String flavor) {
+        return (!getFilesWithFlavor(flavor).isEmpty());
+    }
+
     public static class FileInfo {
         public static final String GZIPPED_FORMAT = "gz";
 
