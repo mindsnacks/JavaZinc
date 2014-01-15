@@ -32,11 +32,13 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     @Mock private BundleID mBundleID;
     @Mock private Callable<ZincBundle> mDownloadBundleJob;
     @Mock private Callable<ZincBundle> mResultBundleJob;
+    @Mock private Callable<ZincManifest> mZincManifestJob;
     @Mock private ZincBundle mResultBundle;
     @Mock private ZincBundle mDownloadedBundle;
     @Mock private ZincJobFactory mJobFactory;
     @Mock private Future<ZincCatalog> mZincCatalogFuture;
     @Mock private ZincCatalog mZincCatalog;
+    @Mock private ZincManifest mZincManifest;
 
     private final String mDistribution = "master";
     private final String mFlavorName = "retina";
@@ -56,10 +58,12 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         job = new ZincCloneBundleJob(mRequest, mJobFactory, mZincCatalogFuture);
 
         when(mJobFactory.downloadBundle(eq(mRequest), eq(mZincCatalogFuture))).thenReturn(mDownloadBundleJob);
-        when(mJobFactory.unarchiveBundle(any(ZincBundle.class), eq(mRequest))).thenReturn(mResultBundleJob);
+        when(mJobFactory.downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion))).thenReturn(mZincManifestJob);
+        when(mJobFactory.unarchiveBundle(any(ZincBundle.class), eq(mRequest), eq(mZincManifest))).thenReturn(mResultBundleJob);
 
         TestFactory.setCallableResult(mDownloadBundleJob, mDownloadedBundle);
         TestFactory.setCallableResult(mResultBundleJob, mResultBundle);
+        TestFactory.setCallableResult(mZincManifestJob, mZincManifest);
         TestFactory.setFutureResult(mZincCatalogFuture, mZincCatalog);
 
         when(mBundleID.getBundleName()).thenReturn(mBundleName);
@@ -74,10 +78,17 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     }
 
     @Test
+    public void manifestIsDownloaded() throws Exception {
+        run();
+
+        verify(mJobFactory).downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion));
+    }
+
+    @Test
     public void bundleIsUnarchived() throws Exception {
         run();
 
-        verify(mJobFactory).unarchiveBundle(eq(mDownloadedBundle), eq(mRequest));
+        verify(mJobFactory).unarchiveBundle(eq(mDownloadedBundle), eq(mRequest), eq(mZincManifest));
     }
 
     @Test
@@ -91,7 +102,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
         run();
 
-        verify(mJobFactory, times(0)).unarchiveBundle(any(ZincBundle.class), any(ZincCloneBundleRequest.class));
+        verify(mJobFactory, times(0)).unarchiveBundle(any(ZincBundle.class), any(ZincCloneBundleRequest.class), any(ZincManifest.class));
         verify(mJobFactory, times(0)).downloadBundle(any(ZincCloneBundleRequest.class), Matchers.<Future<ZincCatalog>>any());
     }
 

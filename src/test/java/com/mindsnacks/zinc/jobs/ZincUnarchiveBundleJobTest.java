@@ -1,6 +1,5 @@
 package com.mindsnacks.zinc.jobs;
 
-import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import com.mindsnacks.zinc.classes.jobs.ZincUnarchiveBundleJob;
@@ -17,7 +16,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import static com.mindsnacks.zinc.utils.TestFactory.randomInt;
 import static com.mindsnacks.zinc.utils.TestFactory.randomString;
@@ -47,8 +45,6 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
     @Mock private ZincBundle mBundle;
     @Mock private ZincManifest mManifest;
-    private Callable<ZincManifest> mManifestJob;
-    @Mock private ZincJobFactory mJobFactory;
     @Mock private SourceURL mSourceURL;
     @Mock private FileHelper mFileHelper;
 
@@ -59,7 +55,6 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         mRepoFolder = rootFolder.getRoot();
 
         mBundleCloneRequest = new ZincCloneBundleRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
-        mManifestJob = TestFactory.createCallable(mManifest);
 
         when(mBundle.getBundleID()).thenReturn(mBundleID);
         when(mBundle.getVersion()).thenReturn(mVersion);
@@ -67,17 +62,9 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         when(mSourceURL.getUrl()).thenReturn(mSourceHost);
         when(mSourceURL.getCatalogID()).thenReturn(mCatalogID);
 
-        when(mJobFactory.downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion))).thenReturn(mManifestJob);
         when(mFileHelper.moveFile(any(File.class), any(File.class))).thenReturn(true);
 
-        mJob = new ZincUnarchiveBundleJob(mBundle, mBundleCloneRequest, mJobFactory, mFileHelper);
-    }
-
-    @Test
-    public void downloadsTheManifest() throws Exception {
-        run();
-
-        verify(mJobFactory).downloadManifest(mSourceURL, mBundleName, mVersion);
+        mJob = new ZincUnarchiveBundleJob(mBundle, mBundleCloneRequest, mManifest, mFileHelper);
     }
 
     @Test

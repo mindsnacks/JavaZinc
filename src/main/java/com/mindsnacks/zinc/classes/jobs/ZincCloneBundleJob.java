@@ -32,14 +32,23 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
 
         final File localBundleFolder = getLocalBundleFolder(bundleID, version);
 
-        if (!localBundleFolder.exists()) {
+        if (!localBundleFolder.exists()) { // TODO: extract this logic as a first step to implement bundle verification
+            final ZincManifest manifest = getManifest(version, bundleID);
+
             final ZincBundle downloadedBundle = mJobFactory.downloadBundle(mRequest, mCatalogFuture).call();
-            return mJobFactory.unarchiveBundle(downloadedBundle, mRequest).call();
+            return mJobFactory.unarchiveBundle(downloadedBundle, mRequest, manifest).call();
         } else {
             logMessage("bundle already available");
 
             return new ZincBundle(localBundleFolder, bundleID, version);
         }
+    }
+
+    private ZincManifest getManifest(final int version, final BundleID bundleID) throws Exception {
+        return mJobFactory.downloadManifest(
+                mRequest.getSourceURL(),
+                bundleID.getBundleName(),
+                version).call();
     }
 
     private File getLocalBundleFolder(final BundleID bundleID, final int version) {

@@ -18,5 +18,6 @@ public interface ZincJobFactory {
     Callable<ZincBundle> cloneBundle(ZincCloneBundleRequest request, Future<ZincCatalog> catalogFuture);
     Callable<ZincBundle> downloadBundle(ZincCloneBundleRequest request, Future<ZincCatalog> catalogFuture);
     Callable<ZincBundle> unarchiveBundle(ZincBundle downloadedBundle,
-                                       ZincCloneBundleRequest request);
+                                         ZincCloneBundleRequest request,
+                                         ZincManifest manifest);
 }
