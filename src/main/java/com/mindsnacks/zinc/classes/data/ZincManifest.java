@@ -69,6 +69,13 @@ public class ZincManifest {
         return result;
     }
 
+    public boolean archiveExists(final String flavor) {
+        /**
+         * Archives are only created for bundles with at least 2 files
+         */
+        return (getFilesWithFlavor(flavor).size() > 1);
+    }
+
     public static class FileInfo {
         public static final String GZIPPED_FORMAT = "gz";
 

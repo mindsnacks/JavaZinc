@@ -2,17 +2,15 @@ package com.mindsnacks.zinc.data;
 
 import com.google.gson.Gson;
 import com.mindsnacks.zinc.classes.data.ZincManifest;
+import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.mindsnacks.zinc.utils.TestFactory.randomString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * User: NachoSoto
@@ -21,6 +19,11 @@ import static org.junit.Assert.assertTrue;
 public class ZincManifestTest extends ZincBaseTest {
     private Gson gson;
 
+    private final List<String> mFlavors = Arrays.asList("flavor");
+    private final String mIdentifier = "com.mindsnacks.catalog";
+    private final String mBundleName = "bundle";
+    private final int mVersion = 3;
+
     @Before
     public void setUp() throws Exception {
         gson = createGson();
@@ -28,25 +31,37 @@ public class ZincManifestTest extends ZincBaseTest {
 
     @Test
     public void deserialization() throws Exception {
-        final String identifier = "com.mindsnacks.catalog";
-        final String bundleName = "bundle name";
+        final ZincManifest manifest = createSampleManifest();
 
-        final ZincManifest manifest = createSampleManifest(identifier, bundleName);
-
-        assertEquals(identifier, manifest.getIdentifier());
-        assertEquals(bundleName, manifest.getBundleName());
+        assertEquals(mIdentifier, manifest.getIdentifier());
+        assertEquals(mBundleName, manifest.getBundleName());
         assertEquals(4, manifest.getFlavors().size());
     }
 
     @Test
     public void getFilesWithFlavor() throws Exception {
-        final ZincManifest manifest = createSampleManifest("identifier", "bundle");
+        final ZincManifest manifest = createSampleManifest();
 
         final Map<String, ZincManifest.FileInfo> result = manifest.getFilesWithFlavor("iphone");
         final ZincManifest.FileInfo info = result.get("level11.mp4");
 
         assertEquals(1, result.size());
         assertEquals("a7c55929d6f674b839e6ea0276830ee213472952", info.getHash());
+    }
+
+    @Test
+    public void archiveDoesNotExistWithNoFiles() throws Exception {
+        assertFalse(createManifest(0).archiveExists(mFlavors.get(0)));
+    }
+
+    @Test
+    public void archiveDoesNotExistWithOneFile() throws Exception {
+        assertFalse(createManifest(1).archiveExists(mFlavors.get(0)));
+    }
+
+    @Test
+    public void archiveExistsWithTwoFiles() throws Exception {
+        assertTrue(createManifest(2).archiveExists(mFlavors.get(0)));
     }
 
     @Test
@@ -75,7 +90,7 @@ public class ZincManifestTest extends ZincBaseTest {
         assertEquals(hash, new ZincManifest.FileInfo(null, hash, formats).getHashWithExtension());
     }
 
-    private ZincManifest createSampleManifest(final String identifier, final String bundleName) {
+    private ZincManifest createSampleManifest() {
         final String json = "{\n" +
                 "  \"flavors\": [\n" +
                 "    \"ipad-retina\",\n" +
@@ -129,11 +144,27 @@ public class ZincManifestTest extends ZincBaseTest {
                 "      }\n" +
                 "    }\n" +
                 "  },\n" +
-                "  \"catalog\": \"" + identifier + "\",\n" +
-                "  \"version\": 3,\n" +
-                "  \"bundle\": \"" + bundleName + "\"\n" +
+                "  \"catalog\": \"" + mIdentifier + "\",\n" +
+                "  \"version\": " + mVersion + ",\n" +
+                "  \"bundle\": \"" + mBundleName + "\"\n" +
                 "}";
 
         return gson.fromJson(json, ZincManifest.class);
+    }
+
+    private ZincManifest createManifest(final int count) {
+        return new ZincManifest(mFlavors, mIdentifier, mVersion, mBundleName, createFilesMap(count));
+    }
+
+    private HashMap<String, ZincManifest.FileInfo> createFilesMap(final int numFiles) {
+        final HashMap<String, ZincManifest.FileInfo> result = new HashMap<String, ZincManifest.FileInfo>();
+
+        for (int i = 0; i < numFiles; ++i) {
+            result.put(
+                    TestFactory.randomString(),
+                    new ZincManifest.FileInfo(new HashSet<String>(mFlavors), TestFactory.randomString(), null));
+        }
+
+        return result;
     }
 }
