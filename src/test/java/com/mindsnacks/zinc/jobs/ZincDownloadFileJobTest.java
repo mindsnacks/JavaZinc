@@ -106,6 +106,6 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
     }
 
     private void createFolder() throws IOException {
-        new File(rootFolder.getRoot(), mFilename).createNewFile();
+        assert new File(rootFolder.getRoot(), mFilename).createNewFile();
     }
 }

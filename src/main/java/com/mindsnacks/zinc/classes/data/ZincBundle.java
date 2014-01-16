@@ -24,6 +24,26 @@ public class ZincBundle extends File {
         mVersion = version;
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        final ZincBundle that = (ZincBundle)o;
+
+        return (mVersion == that.mVersion &&
+                mBundleID.equals(that.mBundleID));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + mBundleID.hashCode();
+        result = 31 * result + mVersion;
+        return result;
+    }
+
     public BundleID getBundleID() {
         return mBundleID;
     }

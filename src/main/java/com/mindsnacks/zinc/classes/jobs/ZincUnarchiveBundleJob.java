@@ -1,6 +1,5 @@
 package com.mindsnacks.zinc.classes.jobs;
 
-import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
@@ -18,16 +17,16 @@ import java.util.Map;
 public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
     private final ZincBundle mDownloadedBundle;
     private final ZincCloneBundleRequest mRequest;
-    private final ZincJobFactory mJobFactory;
+    private final ZincManifest mManifest;
     private final FileHelper mFileHelper;
 
     public ZincUnarchiveBundleJob(final ZincBundle downloadedBundle,
                                   final ZincCloneBundleRequest request,
-                                  final ZincJobFactory jobFactory,
+                                  final ZincManifest zincManifest,
                                   final FileHelper fileHelper) {
         mDownloadedBundle = downloadedBundle;
         mRequest = request;
-        mJobFactory = jobFactory;
+        mManifest = zincManifest;
         mFileHelper = fileHelper;
     }
 
@@ -39,7 +38,7 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
         final File temporaryFolder = getTemporaryBundleFolder(bundleID),
                    resultFolder = getBundleFolder(bundleID);
 
-        unarchiveBundle(mDownloadedBundle, temporaryFolder, getManifest(version, bundleID));
+        unarchiveBundle(mDownloadedBundle, temporaryFolder, mManifest);
 
         cleanUpDownloadedFolder();
         moveToBundlesFolder(temporaryFolder, resultFolder);
@@ -59,15 +58,6 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
             mRequest.getRepoFolder(),
             PathHelper.getLocalBundleFolder(bundleID, mDownloadedBundle.getVersion(), mRequest.getFlavorName())
         );
-    }
-
-    private ZincManifest getManifest(final int version,
-                                     final BundleID bundleID) throws Exception {
-        return mJobFactory.downloadManifest(
-                mRequest.getSourceURL(),
-                bundleID.getBundleName(),
-                version
-        ).call();
     }
 
     private void unarchiveBundle(final File downloadedBundle,

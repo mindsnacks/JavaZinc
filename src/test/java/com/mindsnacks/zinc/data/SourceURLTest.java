@@ -2,15 +2,19 @@ package com.mindsnacks.zinc.data;
 
 import com.google.gson.Gson;
 import com.mindsnacks.zinc.classes.data.SourceURL;
+import com.mindsnacks.zinc.classes.data.ZincManifest;
 import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Test;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import static com.mindsnacks.zinc.utils.TestFactory.randomInt;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * User: NachoSoto
@@ -19,8 +23,17 @@ import static org.junit.Assert.assertTrue;
 public class SourceURLTest extends ZincBaseTest {
     private final URL zincURL = TestFactory.createURL("http://zinc.repo.com/some-folder/");
     private final String catalogID = "com.mindsnacks.games";
+    private final String bundleName = "swell";
+    private final int version = randomInt(1, 1000);
+    private final String flavorName = "retina";
+
+    private final SourceURL sourceURL;
 
     private final Gson mGson = createGson();
+
+    public SourceURLTest() throws MalformedURLException {
+        sourceURL = new SourceURL(zincURL, catalogID);
+    }
 
     @Test
     public void initializeWithHostAndCatalogName() throws Exception {
@@ -55,7 +68,7 @@ public class SourceURLTest extends ZincBaseTest {
 
     @Test
     public void catalogFileURL() throws Exception {
-        final URL result = new SourceURL(zincURL, catalogID).getCatalogFileURL();
+        final URL result = sourceURL.getCatalogFileURL();
 
         assertTrue(result.toString().contains(catalogID));
         assertTrue(result.getFile().endsWith(".json"));
@@ -63,10 +76,7 @@ public class SourceURLTest extends ZincBaseTest {
 
     @Test
     public void manifestFileURL() throws Exception {
-        final String bundleName = "swell";
-        final int version = randomInt(2, 10);
-
-        final URL result = new SourceURL(zincURL, catalogID).getManifestFileURL(bundleName, version);
+        final URL result = sourceURL.getManifestFileURL(bundleName, version);
 
         assertTrue(result.toString().contains(catalogID));
         assertTrue(result.toString().contains(Integer.toString(version)));
@@ -76,11 +86,7 @@ public class SourceURLTest extends ZincBaseTest {
 
     @Test
     public void archiveURL() throws Exception {
-        final String bundleName = "swell";
-        final int version = randomInt(1, 1000);
-        final String flavorName = "retina";
-
-        final URL result = new SourceURL(zincURL, catalogID).getArchiveURL(bundleName, version, flavorName);
+        final URL result = sourceURL.getArchiveURL(bundleName, version, flavorName);
 
         assertTrue(result.getFile().endsWith(".tar"));
         assertTrue(result.toString().contains(Integer.toString(version)));
@@ -89,21 +95,25 @@ public class SourceURLTest extends ZincBaseTest {
     }
 
     @Test
+    public void objectURL() throws Exception {
+        final String filePath = TestFactory.randomString();
+
+        ZincManifest.FileInfo fileInfo = mock(ZincManifest.FileInfo.class);
+        when(fileInfo.getFilePath()).thenReturn(filePath);
+
+        final URL result = sourceURL.getObjectURL(fileInfo);
+
+        assertTrue(result.getFile().endsWith(filePath));
+    }
+
+    @Test
     public void testTrailingSlashes() throws Exception {
-        final String catalogID = "com.mindsnacks.misc";
-
-        final SourceURL result = new SourceURL(new URL("http://zinc.mindsnacks.com/" + catalogID + "/"));
-
-        assertEquals(catalogID, result.getCatalogID());
+        assertEquals(catalogID, new SourceURL(new URL("http://zinc.mindsnacks.com/" + catalogID + "/")).getCatalogID());
     }
 
     @Test
     public void serialization() throws Exception {
-        final SourceURL sourceURL = new SourceURL(zincURL, catalogID);
-
-        final String json = mGson.toJson(sourceURL).replace("\"", "");
-
-        assertEquals(sourceURL.getUrl().toString(), json);
+        assertEquals(sourceURL.getUrl().toString(), mGson.toJson(sourceURL).replace("\"", ""));
     }
 
     @Test

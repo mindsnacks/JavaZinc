@@ -14,10 +14,12 @@ import org.mockito.Mock;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -32,18 +34,26 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     @Mock private BundleID mBundleID;
     @Mock private Callable<ZincBundle> mDownloadBundleJob;
     @Mock private Callable<ZincBundle> mResultBundleJob;
+    @Mock private Callable<ZincManifest> mZincManifestJob;
+    @Mock private Callable<File> mDownloadFileJob;
     @Mock private ZincBundle mResultBundle;
     @Mock private ZincBundle mDownloadedBundle;
     @Mock private ZincJobFactory mJobFactory;
     @Mock private Future<ZincCatalog> mZincCatalogFuture;
     @Mock private ZincCatalog mZincCatalog;
+    @Mock private ZincManifest mZincManifest;
+    @Mock private ZincManifest.FileInfo mFileWithFlavor;
+    private URL mObjectURL;
 
     private final String mDistribution = "master";
     private final String mFlavorName = "retina";
-    private int mVersion = 10;
+    private final String mSingleFilename = "some-file";
 
+    private int mVersion = 10;
     private final String mBundleName = "bundle";
+
     private File mRepoFolder;
+    private File mDownloadedFile;
 
     private ZincCloneBundleRequest mRequest;
     private ZincCloneBundleJob job;
@@ -51,19 +61,31 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     @Before
     public void setUp() throws Exception {
         mRepoFolder = rootFolder.getRoot();
+        mDownloadedFile = new File(rootFolder.getRoot(), "downloaded file");
+        mObjectURL = new URL("https://www.nsa.gov");
 
         mRequest = new ZincCloneBundleRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
         job = new ZincCloneBundleJob(mRequest, mJobFactory, mZincCatalogFuture);
 
         when(mJobFactory.downloadBundle(eq(mRequest), eq(mZincCatalogFuture))).thenReturn(mDownloadBundleJob);
-        when(mJobFactory.unarchiveBundle(any(ZincBundle.class), eq(mRequest))).thenReturn(mResultBundleJob);
+        when(mJobFactory.downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion))).thenReturn(mZincManifestJob);
+        when(mJobFactory.unarchiveBundle(any(ZincBundle.class), eq(mRequest), eq(mZincManifest))).thenReturn(mResultBundleJob);
+        when(mJobFactory.downloadFile(eq(mObjectURL), any(File.class), eq(mSingleFilename), anyBoolean())).thenReturn(mDownloadFileJob);
 
         TestFactory.setCallableResult(mDownloadBundleJob, mDownloadedBundle);
+        TestFactory.setCallableResult(mDownloadFileJob, mDownloadedFile);
         TestFactory.setCallableResult(mResultBundleJob, mResultBundle);
+        TestFactory.setCallableResult(mZincManifestJob, mZincManifest);
         TestFactory.setFutureResult(mZincCatalogFuture, mZincCatalog);
 
         when(mBundleID.getBundleName()).thenReturn(mBundleName);
         when(mZincCatalog.getVersionForBundleName(mBundleName, mDistribution)).thenReturn(mVersion);
+        when(mZincManifest.getFileWithFlavor(mFlavorName)).thenReturn(mFileWithFlavor);
+        when(mZincManifest.getFilenameWithFlavor(mFlavorName)).thenReturn(mSingleFilename);
+        when(mSourceURL.getObjectURL(mFileWithFlavor)).thenReturn(mObjectURL);
+
+        setManifestContainsFiles(true);
+        setManifestArchiveExists(true);
     }
 
     @Test
@@ -74,10 +96,17 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     }
 
     @Test
+    public void manifestIsDownloaded() throws Exception {
+        run();
+
+        verify(mJobFactory).downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion));
+    }
+
+    @Test
     public void bundleIsUnarchived() throws Exception {
         run();
 
-        verify(mJobFactory).unarchiveBundle(eq(mDownloadedBundle), eq(mRequest));
+        verify(mJobFactory).unarchiveBundle(eq(mDownloadedBundle), eq(mRequest), eq(mZincManifest));
     }
 
     @Test
@@ -87,36 +116,117 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
     @Test
     public void bundleIsNotDownloadedifItAlreadyExists() throws Exception {
-        createDirectory();
+        createExpectedResultDirectory();
 
         run();
 
-        verify(mJobFactory, times(0)).unarchiveBundle(any(ZincBundle.class), any(ZincCloneBundleRequest.class));
-        verify(mJobFactory, times(0)).downloadBundle(any(ZincCloneBundleRequest.class), Matchers.<Future<ZincCatalog>>any());
+        verifyBundleIsNotUnarchived();
+        verifyArchiveIsNotDownloaded();
     }
 
     @Test
     public void bundleIsReturnedIfItAlreadyExists() throws Exception {
-        final File directory = createDirectory();
+        verifyResult(createExpectedResultDirectory(), run());
+    }
+
+    @Test
+    public void bundleIsCorrectIfManifestContainsNoFiles() throws Exception {
+        setManifestContainsFiles(false);
+
+        verifyResult(
+                new ZincBundle(expectedResultDirectory(),
+                        mBundleID,
+                        mVersion),
+                run());
+    }
+
+    @Test
+    public void bundleFolderIsEmptyIfManifestContainsNoFiles() throws Exception {
+        setManifestContainsFiles(false);
 
         final ZincBundle result = run();
 
+        assertTrue(result.exists());
+        assertEquals(0, result.listFiles().length);
+    }
+
+    @Test
+    public void nothingIsDownloadedIfManifestContainsNoFiles() throws Exception {
+        setManifestContainsFiles(false);
+
+        run();
+
+        verifyArchiveIsNotDownloaded();
+    }
+
+    @Test
+    public void archiveIsNotDownloadedIfItDoesntExist() throws Exception {
+        setManifestArchiveExists(false);
+
+        run();
+
+        verifyArchiveIsNotDownloaded();
+    }
+
+    @Test
+    public void fileIsDownloadedIfThereIsNoArchive() throws Exception {
+        final File expectedResultDirectory = expectedResultDirectory();
+
+        setManifestArchiveExists(false);
+
+        run();
+
+        verify(mJobFactory).downloadFile(eq(mObjectURL), eq(expectedResultDirectory), eq(mSingleFilename), eq(false));
+    }
+
+    @Test
+    public void bundleIsCorrectIfOnlyOneFileIsDownloaded() throws Exception {
+        setManifestArchiveExists(false);
+
+        verifyResult(mDownloadedFile.getParentFile(), run());
+    }
+
+    private File createExpectedResultDirectory() throws IOException {
+        final File file = expectedResultDirectory();
+
+        assert file.getParentFile().exists() || file.mkdirs();
+        assert file.exists() || file.createNewFile();
+
+        assert file.exists();
+
+        return file;
+    }
+
+    private File expectedResultDirectory() {
+        return new File(
+                mRepoFolder,
+                PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName));
+    }
+
+    private void setManifestContainsFiles(final boolean containsFiles) {
+        when(mZincManifest.containsFiles(mFlavorName)).thenReturn(containsFiles);
+    }
+
+    private void setManifestArchiveExists(final boolean exists) {
+        when(mZincManifest.archiveExists(mFlavorName)).thenReturn(exists);
+    }
+
+    private void verifyBundleIsNotUnarchived() {
+        verify(mJobFactory, times(0)).unarchiveBundle(any(ZincBundle.class), any(ZincCloneBundleRequest.class), any(ZincManifest.class));
+    }
+
+    private void verifyArchiveIsNotDownloaded() {
+        verify(mJobFactory, times(0)).downloadBundle(any(ZincCloneBundleRequest.class), anyCatalogFuture());
+    }
+
+    private void verifyResult(final File directory, final ZincBundle result) {
         assertEquals(directory.getAbsolutePath(), result.getAbsolutePath());
         assertEquals(mBundleID, result.getBundleID());
         assertEquals(mVersion, result.getVersion());
     }
 
-    private File createDirectory() throws IOException {
-        final File file = new File(
-                mRepoFolder,
-                PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName));
-
-        file.mkdirs();
-        file.createNewFile();
-
-        assert file.exists();
-
-        return file;
+    private static Future<ZincCatalog> anyCatalogFuture() {
+        return Matchers.any();
     }
 
     private ZincBundle run() throws Exception {

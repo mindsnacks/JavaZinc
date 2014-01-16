@@ -1,8 +1,13 @@
 package com.mindsnacks.zinc.classes.data;
 
 import com.google.gson.annotations.SerializedName;
+import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
-import java.util.*;
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: NachoSoto
@@ -23,6 +28,8 @@ public class ZincManifest {
 
     @SerializedName("files")
     private final Map<String, FileInfo> mFiles;
+
+    transient private Map<String, Map<String, FileInfo>> mFilesForFlavor;
 
     public ZincManifest(final List<String> flavors,
                         final String identifier,
@@ -51,22 +58,69 @@ public class ZincManifest {
         return mBundleName;
     }
 
+    private Map<String, Map<String, FileInfo>> getFilesMap() {
+        if (mFilesForFlavor == null) {
+            mFilesForFlavor = new HashMap<String, Map<String, FileInfo>>();
+        }
+
+        return mFilesForFlavor;
+    }
+
     /**
      * @return Map (filename => FileInfo)
      */
     public Map<String, FileInfo> getFilesWithFlavor(final String flavor) {
-        final Map<String, FileInfo> result = new HashMap<String, FileInfo>();
+        final Map<String, Map<String, FileInfo>> filesMap = getFilesMap();
 
-        for (final Map.Entry<String, FileInfo> entry : mFiles.entrySet()) {
-            final String filename = entry.getKey();
-            final FileInfo fileInfo = entry.getValue();
+        if (filesMap.get(flavor) == null) {
+            final Map<String, FileInfo> result = new HashMap<String, FileInfo>();
 
-            if (fileInfo.getFlavors().contains(flavor)) {
-                result.put(filename, fileInfo);
+            for (final Map.Entry<String, FileInfo> entry : mFiles.entrySet()) {
+                final String filename = entry.getKey();
+                final FileInfo fileInfo = entry.getValue();
+
+                if (fileInfo.getFlavors().contains(flavor)) {
+                    result.put(filename, fileInfo);
+                }
             }
+
+            filesMap.put(flavor, result);
         }
 
-        return result;
+        return filesMap.get(flavor);
+    }
+
+    public boolean archiveExists(final String flavor) {
+        /**
+         * Archives are only created for bundles with at least 2 files
+         */
+        return (getFilesWithFlavor(flavor).size() > 1);
+    }
+
+    public boolean containsFiles(final String flavor) {
+        return (!getFilesWithFlavor(flavor).isEmpty());
+    }
+
+    /**
+     * This method can only be used if !archiveExists() && containsFiles
+     * to obtain the single file in a bundle.
+     */
+    public FileInfo getFileWithFlavor(final String flavor) {
+        return getFilesWithFlavor(flavor).get(getFilenameWithFlavor(flavor));
+    }
+
+    /**
+     * This method can only be used if !archiveExists() && containsFiles
+     * to obtain the single filename in a bundle.
+     */
+    public String getFilenameWithFlavor(final String flavor) {
+        final Map<String, FileInfo> files = getFilesWithFlavor(flavor);
+
+        if (archiveExists(flavor) || !containsFiles(flavor)) {
+            throw new ZincRuntimeException(String.format("This manifest has %d files for flavor '%s'", files.size(), flavor));
+        }
+
+        return files.keySet().iterator().next();
     }
 
     public static class FileInfo {
@@ -99,6 +153,14 @@ public class ZincManifest {
 
         public String getHash() {
             return mHash;
+        }
+
+        /**
+         * @return relative path for file in the repo.
+         */
+        public String getFilePath() {
+            // sha[0:2]/sha[2:4]/sha.extension
+            return mHash.substring(0, 2) + File.separator + mHash.substring(2, 4) + File.separator + getHashWithExtension();
         }
 
         public String getHashWithExtension() {
