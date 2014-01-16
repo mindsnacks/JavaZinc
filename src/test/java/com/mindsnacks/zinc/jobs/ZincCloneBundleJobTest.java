@@ -148,8 +148,8 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
                 mRepoFolder,
                 PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName));
 
-        file.mkdirs();
-        file.createNewFile();
+        assert file.getParentFile().exists() || file.mkdirs();
+        assert file.exists() || file.createNewFile();
 
         assert file.exists();
 
