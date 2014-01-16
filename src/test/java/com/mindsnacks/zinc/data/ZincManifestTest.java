@@ -2,6 +2,7 @@ package com.mindsnacks.zinc.data;
 
 import com.google.gson.Gson;
 import com.mindsnacks.zinc.classes.data.ZincManifest;
+import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
@@ -20,6 +21,8 @@ public class ZincManifestTest extends ZincBaseTest {
     private Gson gson;
 
     private final List<String> mFlavors = Arrays.asList("flavor");
+    private final String mFlavor = mFlavors.get(0);
+
     private final String mIdentifier = "com.mindsnacks.catalog";
     private final String mBundleName = "bundle";
     private final int mVersion = 3;
@@ -56,27 +59,46 @@ public class ZincManifestTest extends ZincBaseTest {
 
     @Test
     public void archiveDoesNotExistWithNoFiles() throws Exception {
-        assertFalse(createManifest(0).archiveExists(mFlavors.get(0)));
+        assertFalse(createManifest(0).archiveExists(mFlavor));
     }
 
     @Test
     public void archiveDoesNotExistWithOneFile() throws Exception {
-        assertFalse(createManifest(1).archiveExists(mFlavors.get(0)));
+        assertFalse(createManifest(1).archiveExists(mFlavor));
     }
 
     @Test
     public void archiveExistsWithTwoFiles() throws Exception {
-        assertTrue(createManifest(2).archiveExists(mFlavors.get(0)));
+        assertTrue(createManifest(2).archiveExists(mFlavor));
     }
 
     @Test
     public void containsFilesWithNoFiles() throws Exception {
-        assertFalse(createManifest(0).containsFiles(mFlavors.get(0)));
+        assertFalse(createManifest(0).containsFiles(mFlavor));
     }
 
     @Test
     public void containsFilesWithOneFile() throws Exception {
-        assertTrue(createManifest(1).containsFiles(mFlavors.get(0)));
+        assertTrue(createManifest(1).containsFiles(mFlavor));
+    }
+
+    @Test(expected = ZincRuntimeException.class)
+    public void getFileWithFlavorWithNoFiles() throws Exception {
+        createManifest(0).getFileWithFlavor(mFlavor);
+    }
+
+    @Test(expected = ZincRuntimeException.class)
+    public void getFileWithFlavorWithMoreThanOneFile() throws Exception {
+        createManifest(2).getFileWithFlavor(mFlavor);
+    }
+
+    @Test
+    public void getFileWithFlavorWithOneFiles() throws Exception {
+        final ZincManifest manifest = createManifest(1);
+        final Map<String, ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mFlavor);
+
+        assertEquals(1, files.size());
+        assertEquals(files.get(files.keySet().toArray()[0]), manifest.getFileWithFlavor(mFlavor));
     }
 
     @Test
