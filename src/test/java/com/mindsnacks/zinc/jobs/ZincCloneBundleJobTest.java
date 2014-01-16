@@ -18,6 +18,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -68,6 +69,8 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
         when(mBundleID.getBundleName()).thenReturn(mBundleName);
         when(mZincCatalog.getVersionForBundleName(mBundleName, mDistribution)).thenReturn(mVersion);
+
+        setManifestContainsFiles(true);
     }
 
     @Test
@@ -103,18 +106,41 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         run();
 
         verify(mJobFactory, times(0)).unarchiveBundle(any(ZincBundle.class), any(ZincCloneBundleRequest.class), any(ZincManifest.class));
-        verify(mJobFactory, times(0)).downloadBundle(any(ZincCloneBundleRequest.class), Matchers.<Future<ZincCatalog>>any());
+        verify(mJobFactory, times(0)).downloadBundle(any(ZincCloneBundleRequest.class), anyCatalogFuture());
     }
 
     @Test
     public void bundleIsReturnedIfItAlreadyExists() throws Exception {
-        final File directory = createDirectory();
+        verifyResult(createDirectory(), run());
+    }
+
+    @Test
+    public void bundleIsCorrectIfManifestContainsNoFiles() throws Exception {
+        setManifestContainsFiles(false);
+
+        verifyResult(
+                new ZincBundle(new File(mRepoFolder,
+                        PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName)),
+                        mBundleID,
+                        mVersion),
+                run());
+    }
+    @Test
+    public void bundleFolderIsEmptyIfManifestContainsNoFiles() throws Exception {
+        setManifestContainsFiles(false);
 
         final ZincBundle result = run();
 
-        assertEquals(directory.getAbsolutePath(), result.getAbsolutePath());
-        assertEquals(mBundleID, result.getBundleID());
-        assertEquals(mVersion, result.getVersion());
+        assertTrue(result.exists());
+        assertEquals(0, result.listFiles().length);
+    }
+
+    @Test
+    public void nothingIsDownloadedIfManifestContainsNoFiles() throws Exception {
+        setManifestContainsFiles(false);
+
+        run();
+        verify(mJobFactory, times(0)).downloadBundle(any(ZincCloneBundleRequest.class), anyCatalogFuture());
     }
 
     private File createDirectory() throws IOException {
@@ -128,6 +154,20 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         assert file.exists();
 
         return file;
+    }
+
+    private void setManifestContainsFiles(final boolean containsFiles) {
+        when(mZincManifest.containsFiles(mFlavorName)).thenReturn(containsFiles);
+    }
+
+    private void verifyResult(final File directory, final ZincBundle result) {
+        assertEquals(directory.getAbsolutePath(), result.getAbsolutePath());
+        assertEquals(mBundleID, result.getBundleID());
+        assertEquals(mVersion, result.getVersion());
+    }
+
+    private static Future<ZincCatalog> anyCatalogFuture() {
+        return Matchers.<Future<ZincCatalog>>any();
     }
 
     private ZincBundle run() throws Exception {
