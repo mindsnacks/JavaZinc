@@ -102,17 +102,25 @@ public class ZincManifest {
     }
 
     /**
-     * This method can be used if !archiveExists() && containsFiles
-     * to obtain the single file in a bundle
+     * This method can only be used if !archiveExists() && containsFiles
+     * to obtain the single file in a bundle.
      */
     public FileInfo getFileWithFlavor(final String flavor) {
+        return getFilesWithFlavor(flavor).get(getFilenameWithFlavor(flavor));
+    }
+
+    /**
+     * This method can only be used if !archiveExists() && containsFiles
+     * to obtain the single filename in a bundle.
+     */
+    public String getFilenameWithFlavor(final String flavor) {
         final Map<String, FileInfo> files = getFilesWithFlavor(flavor);
 
         if (archiveExists(flavor) || !containsFiles(flavor)) {
             throw new ZincRuntimeException(String.format("This manifest has %d files for flavor '%s'", files.size(), flavor));
         }
 
-        return files.values().iterator().next();
+        return files.keySet().iterator().next();
     }
 
     public static class FileInfo {

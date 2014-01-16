@@ -101,6 +101,25 @@ public class ZincManifestTest extends ZincBaseTest {
         assertEquals(files.get(files.keySet().toArray()[0]), manifest.getFileWithFlavor(mFlavor));
     }
 
+    @Test(expected = ZincRuntimeException.class)
+    public void getFilenameWithFlavorWithNoFiles() throws Exception {
+        createManifest(0).getFilenameWithFlavor(mFlavor);
+    }
+
+    @Test(expected = ZincRuntimeException.class)
+    public void getFilenameWithFlavorWithMoreThanOneFile() throws Exception {
+        createManifest(2).getFilenameWithFlavor(mFlavor);
+    }
+
+    @Test
+    public void getFilenameWithFlavorWithOneFiles() throws Exception {
+        final ZincManifest manifest = createManifest(1);
+        final Map<String, ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mFlavor);
+
+        assertEquals(1, files.size());
+        assertEquals(files.keySet().toArray()[0], manifest.getFilenameWithFlavor(mFlavor));
+    }
+
     @Test
     public void getHashWithExtensionGzippedFile() throws Exception {
         final Map<String, Map<String, Integer>> formats = new HashMap<String, Map<String, Integer>>();
