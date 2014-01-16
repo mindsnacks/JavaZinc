@@ -51,9 +51,7 @@ public class ZincManifestTest extends ZincBaseTest {
 
     @Test
     public void filePath() throws Exception {
-        final ZincManifest.FileInfo info = getFileInfo();
-
-        assertEquals("a7/c5/a7c55929d6f674b839e6ea0276830ee213472952", info.getFilePath());
+        assertEquals("a7/c5/a7c55929d6f674b839e6ea0276830ee213472952", getFileInfo().getFilePath());
     }
 
     @Test
