@@ -2,7 +2,11 @@ package com.mindsnacks.zinc.classes.data;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.*;
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: NachoSoto
@@ -110,6 +114,14 @@ public class ZincManifest {
 
         public String getHash() {
             return mHash;
+        }
+
+        /**
+         * @return relative path for file in the repo.
+         */
+        public String getFilePath() {
+            // sha[0:2]/sha[2:4]/sha
+            return mHash.substring(0, 2) + File.separator + mHash.substring(2, 4) + File.separator + mHash;
         }
 
         public String getHashWithExtension() {

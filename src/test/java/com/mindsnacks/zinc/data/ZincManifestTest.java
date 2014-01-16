@@ -50,6 +50,13 @@ public class ZincManifestTest extends ZincBaseTest {
     }
 
     @Test
+    public void filePath() throws Exception {
+        final ZincManifest.FileInfo info = getFileInfo();
+
+        assertEquals("a7/c5/a7c55929d6f674b839e6ea0276830ee213472952", info.getFilePath());
+    }
+
+    @Test
     public void archiveDoesNotExistWithNoFiles() throws Exception {
         assertFalse(createManifest(0).archiveExists(mFlavors.get(0)));
     }
@@ -160,6 +167,10 @@ public class ZincManifestTest extends ZincBaseTest {
                 "}";
 
         return gson.fromJson(json, ZincManifest.class);
+    }
+
+    private ZincManifest.FileInfo getFileInfo() {
+        return createSampleManifest().getFilesWithFlavor("iphone").get("level11.mp4");
     }
 
     private ZincManifest createManifest(final int count) {
