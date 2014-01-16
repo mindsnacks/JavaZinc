@@ -183,7 +183,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     public void bundleIsCorrectIfOnlyOneFileIsDownloaded() throws Exception {
         setManifestArchiveExists(false);
 
-        verifyResult(mDownloadedFile, run());
+        verifyResult(mDownloadedFile.getParentFile(), run());
     }
 
     private File createExpectedResultDirectory() throws IOException {
