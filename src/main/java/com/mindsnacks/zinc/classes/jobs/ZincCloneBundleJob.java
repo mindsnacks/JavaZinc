@@ -36,10 +36,14 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
 
         if (!localBundleFolder.exists()) { // TODO: extract this logic as a first step to implement bundle verification
             final ZincManifest manifest = getManifest();
+            final String flavorName = mRequest.getFlavorName();
 
-            if (manifest.containsFiles(mRequest.getFlavorName())) {
-                final ZincBundle downloadedBundle = mJobFactory.downloadBundle(mRequest, mCatalogFuture).call();
-                return mJobFactory.unarchiveBundle(downloadedBundle, mRequest, manifest).call();
+            if (manifest.containsFiles(flavorName)) {
+                if (manifest.archiveExists(flavorName)) {
+                    return downloadAndUnarchiveBundle(manifest);
+                } else {
+                    return createZincBundle(downloadOnlyFileInBundle(localBundleFolder, manifest, flavorName));
+                }
             } else {
                 logMessage("empty bundle");
 
@@ -50,6 +54,26 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
 
             return createZincBundle(localBundleFolder);
         }
+    }
+
+    private ZincBundle downloadAndUnarchiveBundle(final ZincManifest manifest) throws Exception {
+        return mJobFactory.unarchiveBundle(
+                mJobFactory.downloadBundle(mRequest, mCatalogFuture).call(),
+                mRequest,
+                manifest).call();
+    }
+
+    private File downloadOnlyFileInBundle(final File localBundleFolder,
+                                          final ZincManifest manifest,
+                                          final String flavorName) throws Exception {
+        final ZincManifest.FileInfo file = manifest.getFileWithFlavor(flavorName);
+        final String filename = manifest.getFilenameWithFlavor(flavorName);
+
+        return mJobFactory.downloadFile(
+                mRequest.getSourceURL().getObjectURL(file),
+                localBundleFolder.getParentFile(),
+                filename,
+                false).call();
     }
 
     private ZincBundle createZincBundle(final File folder) {
