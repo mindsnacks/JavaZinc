@@ -2,6 +2,7 @@ package com.mindsnacks.zinc.data;
 
 import com.google.gson.Gson;
 import com.mindsnacks.zinc.classes.data.SourceURL;
+import com.mindsnacks.zinc.classes.data.ZincManifest;
 import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Test;
@@ -12,6 +13,8 @@ import java.net.URL;
 import static com.mindsnacks.zinc.utils.TestFactory.randomInt;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * User: NachoSoto
@@ -89,6 +92,18 @@ public class SourceURLTest extends ZincBaseTest {
         assertTrue(result.toString().contains(Integer.toString(version)));
         assertTrue(result.toString().contains(bundleName));
         assertTrue(result.toString().contains(flavorName));
+    }
+
+    @Test
+    public void objectURL() throws Exception {
+        final String filePath = TestFactory.randomString();
+
+        ZincManifest.FileInfo fileInfo = mock(ZincManifest.FileInfo.class);
+        when(fileInfo.getFilePath()).thenReturn(filePath);
+
+        final URL result = sourceURL.getObjectURL(fileInfo);
+
+        assertTrue(result.getFile().endsWith(filePath));
     }
 
     @Test
