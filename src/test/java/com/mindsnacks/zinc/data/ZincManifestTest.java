@@ -51,7 +51,7 @@ public class ZincManifestTest extends ZincBaseTest {
 
     @Test
     public void filePath() throws Exception {
-        assertEquals("a7/c5/a7c55929d6f674b839e6ea0276830ee213472952", getFileInfo().getFilePath());
+        assertEquals("04/d4/04d4d73af5b4bb4042251f92df785639defd1ff5.gz", getFileInfo("level11.gz").getFilePath());
     }
 
     @Test
@@ -125,6 +125,17 @@ public class ZincManifestTest extends ZincBaseTest {
                 "        }\n" +
                 "      }\n" +
                 "    },\n" +
+                "    \"level11.gz\": {\n" +
+                "      \"flavors\": [\n" +
+                "        \"android\"\n" +
+                "      ],\n" +
+                "      \"sha\": \"04d4d73af5b4bb4042251f92df785639defd1ff5\",\n" +
+                "      \"formats\": {\n" +
+                "        \"gz\": {\n" +
+                "          \"size\": 386755\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
                 "    \"level11.mp4\": {\n" +
                 "      \"flavors\": [\n" +
                 "        \"iphone\"\n" +
@@ -167,8 +178,8 @@ public class ZincManifestTest extends ZincBaseTest {
         return gson.fromJson(json, ZincManifest.class);
     }
 
-    private ZincManifest.FileInfo getFileInfo() {
-        return createSampleManifest().getFilesWithFlavor("iphone").get("level11.mp4");
+    private ZincManifest.FileInfo getFileInfo(final String filename) {
+        return createSampleManifest().getFilesWithFlavor("android").get(filename);
     }
 
     private ZincManifest createManifest(final int count) {

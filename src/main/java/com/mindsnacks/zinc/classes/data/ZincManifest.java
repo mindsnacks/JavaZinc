@@ -120,8 +120,8 @@ public class ZincManifest {
          * @return relative path for file in the repo.
          */
         public String getFilePath() {
-            // sha[0:2]/sha[2:4]/sha
-            return mHash.substring(0, 2) + File.separator + mHash.substring(2, 4) + File.separator + mHash;
+            // sha[0:2]/sha[2:4]/sha.extension
+            return mHash.substring(0, 2) + File.separator + mHash.substring(2, 4) + File.separator + getHashWithExtension();
         }
 
         public String getHashWithExtension() {
