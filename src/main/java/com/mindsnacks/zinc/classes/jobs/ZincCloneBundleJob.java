@@ -16,6 +16,8 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
     private final ZincCloneBundleRequest mRequest;
     private final ZincJobFactory mJobFactory;
     private final Future<ZincCatalog> mCatalogFuture;
+    private BundleID mBundleID;
+    private int mVersion;
 
     public ZincCloneBundleJob(final ZincCloneBundleRequest request,
                               final ZincJobFactory jobFactory,
@@ -27,31 +29,31 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
 
     @Override
     protected ZincBundle run() throws Exception {
-        final BundleID bundleID = mRequest.getBundleID();
+        mBundleID = mRequest.getBundleID();
+        mVersion = getBundleVersion(mBundleID);
 
-        final int version = getBundleVersion(bundleID);
-
-        final File localBundleFolder = getLocalBundleFolder(bundleID, version);
+        final File localBundleFolder = getLocalBundleFolder();
 
         if (!localBundleFolder.exists()) { // TODO: extract this logic as a first step to implement bundle verification
-            final ZincManifest manifest = getManifest(version, bundleID);
+            final ZincManifest manifest = getManifest();
 
             if (manifest.containsFiles(mRequest.getFlavorName())) {
                 final ZincBundle downloadedBundle = mJobFactory.downloadBundle(mRequest, mCatalogFuture).call();
                 return mJobFactory.unarchiveBundle(downloadedBundle, mRequest, manifest).call();
             } else {
-                return createEmptyBundle(bundleID, version);
+                logMessage("empty bundle");
+
+                return createZincBundle(localBundleFolder);
             }
         } else {
             logMessage("bundle already available");
 
-            return new ZincBundle(localBundleFolder, bundleID, version);
+            return createZincBundle(localBundleFolder);
         }
     }
 
-    private ZincBundle createEmptyBundle(final BundleID bundleID, final int version) {
-        final File folder = new File(mRequest.getRepoFolder(), PathHelper.getLocalBundleFolder(bundleID, version, mRequest.getFlavorName()));
-        final ZincBundle result = new ZincBundle(folder, bundleID, version);
+    private ZincBundle createZincBundle(final File folder) {
+        final ZincBundle result = new ZincBundle(folder, mBundleID, mVersion);
 
         if (!result.exists() && !result.mkdirs()) {
             throw new ZincRuntimeException(String.format("Error creating folder for '%s'", result));
@@ -60,17 +62,17 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
         return result;
     }
 
-    private ZincManifest getManifest(final int version, final BundleID bundleID) throws Exception {
+    private ZincManifest getManifest() throws Exception {
         return mJobFactory.downloadManifest(
                 mRequest.getSourceURL(),
-                bundleID.getBundleName(),
-                version).call();
+                mBundleID.getBundleName(),
+                mVersion).call();
     }
 
-    private File getLocalBundleFolder(final BundleID bundleID, final int version) {
+    private File getLocalBundleFolder() {
         return new File(
             mRequest.getRepoFolder(),
-            PathHelper.getLocalBundleFolder(bundleID, version, mRequest.getFlavorName())
+            PathHelper.getLocalBundleFolder(mBundleID, mVersion, mRequest.getFlavorName())
         );
     }
 
