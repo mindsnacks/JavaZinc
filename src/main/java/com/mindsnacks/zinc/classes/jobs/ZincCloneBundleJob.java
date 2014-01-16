@@ -35,6 +35,8 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
         final File localBundleFolder = getLocalBundleFolder();
 
         if (!localBundleFolder.exists()) { // TODO: extract this logic as a first step to implement bundle verification
+            createFolder(localBundleFolder);
+
             final ZincManifest manifest = getManifest();
             final String flavorName = mRequest.getFlavorName();
 
@@ -53,6 +55,12 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
             logMessage("bundle already available");
 
             return createZincBundle(localBundleFolder);
+        }
+    }
+
+    private void createFolder(final File folder) {
+        if (!folder.exists() && !folder.mkdirs()) {
+            throw new ZincRuntimeException(String.format("Error creating folder '%s'", folder));
         }
     }
 
@@ -77,13 +85,7 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
     }
 
     private ZincBundle createZincBundle(final File folder) {
-        final ZincBundle result = new ZincBundle(folder, mBundleID, mVersion);
-
-        if (!result.exists() && !result.mkdirs()) {
-            throw new ZincRuntimeException(String.format("Error creating folder for '%s'", result));
-        }
-
-        return result;
+        return new ZincBundle(folder, mBundleID, mVersion);
     }
 
     private ZincManifest getManifest() throws Exception {
