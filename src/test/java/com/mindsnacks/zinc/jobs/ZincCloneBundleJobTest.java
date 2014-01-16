@@ -116,7 +116,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
     @Test
     public void bundleIsNotDownloadedifItAlreadyExists() throws Exception {
-        createDirectory();
+        createExpectedResultDirectory();
 
         run();
 
@@ -126,7 +126,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
     @Test
     public void bundleIsReturnedIfItAlreadyExists() throws Exception {
-        verifyResult(createDirectory(), run());
+        verifyResult(createExpectedResultDirectory(), run());
     }
 
     @Test
@@ -134,8 +134,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         setManifestContainsFiles(false);
 
         verifyResult(
-                new ZincBundle(new File(mRepoFolder,
-                        PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName)),
+                new ZincBundle(expectedResultDirectory(),
                         mBundleID,
                         mVersion),
                 run());
@@ -171,11 +170,13 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
     @Test
     public void fileIsDownloadedIfThereIsNoArchive() throws Exception {
+        final File expectedResultDirectory = expectedResultDirectory();
+
         setManifestArchiveExists(false);
 
         run();
 
-        verify(mJobFactory).downloadFile(eq(mObjectURL), any(File.class), eq(mSingleFilename), eq(false));
+        verify(mJobFactory).downloadFile(eq(mObjectURL), eq(expectedResultDirectory), eq(mSingleFilename), eq(false));
     }
 
     @Test
@@ -185,10 +186,8 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         verifyResult(mDownloadedFile, run());
     }
 
-    private File createDirectory() throws IOException {
-        final File file = new File(
-                mRepoFolder,
-                PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName));
+    private File createExpectedResultDirectory() throws IOException {
+        final File file = expectedResultDirectory();
 
         assert file.getParentFile().exists() || file.mkdirs();
         assert file.exists() || file.createNewFile();
@@ -196,6 +195,12 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         assert file.exists();
 
         return file;
+    }
+
+    private File expectedResultDirectory() {
+        return new File(
+                mRepoFolder,
+                PathHelper.getLocalBundleFolder(mBundleID, mVersion, mFlavorName));
     }
 
     private void setManifestContainsFiles(final boolean containsFiles) {

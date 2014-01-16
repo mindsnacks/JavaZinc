@@ -74,12 +74,12 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
     private File downloadOnlyFileInBundle(final File localBundleFolder,
                                           final ZincManifest manifest,
                                           final String flavorName) throws Exception {
-        final ZincManifest.FileInfo file = manifest.getFileWithFlavor(flavorName);
+        final ZincManifest.FileInfo fileInfo = manifest.getFileWithFlavor(flavorName);
         final String filename = manifest.getFilenameWithFlavor(flavorName);
 
         return mJobFactory.downloadFile(
-                mRequest.getSourceURL().getObjectURL(file),
-                localBundleFolder.getParentFile(),
+                mRequest.getSourceURL().getObjectURL(fileInfo),
+                localBundleFolder,
                 filename,
                 false).call();
     }
