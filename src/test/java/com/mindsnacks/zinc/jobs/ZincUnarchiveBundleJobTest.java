@@ -118,6 +118,15 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
         assertTrue(temporaryFolder.getValue().getAbsolutePath().contains(expectedTemporaryFolder()));
     }
 
+    @Test
+    public void movesResultBundleEvenIfFolderIsAlreadyThere() throws Exception {
+        createExceptedResultFolder();
+
+        run();
+
+        verify(mFileHelper).moveFile(any(File.class), any(File.class));
+    }
+
     private ZincBundle run() throws Exception {
         return mJob.call();
     }
@@ -141,5 +150,9 @@ public class ZincUnarchiveBundleJobTest extends ZincBaseTest {
 
     private String expectedTemporaryFolder() {
         return PathHelper.getLocalTemporaryBundleFolder(mBundleID, mVersion, mFlavorName);
+    }
+
+    private void createExceptedResultFolder() {
+        assert new File(mRepoFolder, expectedResultFolder()).mkdirs();
     }
 }
