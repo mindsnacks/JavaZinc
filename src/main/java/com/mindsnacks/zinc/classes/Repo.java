@@ -4,6 +4,7 @@ import com.mindsnacks.zinc.classes.data.BundleID;
 import com.mindsnacks.zinc.classes.data.SourceURL;
 import com.mindsnacks.zinc.classes.data.ZincBundle;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 /**
@@ -16,6 +17,8 @@ public interface Repo {
     void addSourceURL(SourceURL sourceURL);
 
     void startTrackingBundle(BundleID bundleID, String distribution);
+    void startTrackingBundles(List<BundleID> bundleIDs, String distribution);
+
     Future<ZincBundle> getBundle(BundleID bundleID);
 
     void recalculatePriorities();

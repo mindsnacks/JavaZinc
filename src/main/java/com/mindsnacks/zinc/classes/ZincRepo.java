@@ -7,9 +7,10 @@ import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 /**
  * User: NachoSoto
@@ -63,11 +64,22 @@ public class ZincRepo implements Repo {
 
     @Override
     public void startTrackingBundle(final BundleID bundleID, final String distribution) {
-        if (mIndexWriter.getIndex().trackBundle(bundleID, distribution)) {
-            mIndexWriter.saveIndex();
+        startTrackingBundles(Arrays.asList(bundleID), distribution);
+    }
+
+    @Override
+    public void startTrackingBundles(final List<BundleID> bundleIDs, final String distribution) {
+        final ZincRepoIndex index = mIndexWriter.getIndex();
+        boolean newTrackedBundles = false;
+
+        for (final BundleID bundleID : bundleIDs) {
+            newTrackedBundles |= index.trackBundle(bundleID, distribution);
+            cloneBundle(bundleID, distribution);
         }
 
-        cloneBundle(bundleID, distribution);
+        if (newTrackedBundles) {
+            mIndexWriter.saveIndex();
+        }
     }
 
     /**
