@@ -30,11 +30,12 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
 
     @Mock private ZincRepoIndexWriter mRepoIndexWriter;
 
-    private final String mCatalogID;
+    private final String mCatalogID = "com.mindsnacks.lessons";
     private final SourceURL mSourceURL;
+    private final BundleID mBundleID = new BundleID(mCatalogID, "swell");
+    private final String mDistribution = "master";
 
     public ZincRepoJobsTest() throws MalformedURLException {
-        mCatalogID = "com.mindsnacks.lessons";
         mSourceURL = new SourceURL(new URL("https://mindsnacks.com"), mCatalogID);
     }
 
@@ -42,6 +43,8 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
     @Before
     public void setUp() throws Exception {
         when(mRepoIndexWriter.getIndex()).thenReturn(mRepoIndex);
+        when(mRepoIndex.getSourceURLForCatalog(eq(mCatalogID))).thenReturn(mSourceURL);
+
         mockGetSources(new ArrayList<SourceURL>());
 
         super.setUp();
@@ -88,45 +91,35 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
 
     @Test
     public void trackingBundleAddsItToTheIndex() throws Exception {
-        final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
-        final String distribution = "master";
-
-        mockGetTrackingInfo(bundleID, distribution);
+        mockGetTrackingInfo(mBundleID, mDistribution);
 
         // run
-        mRepo.startTrackingBundle(bundleID, distribution);
+        mRepo.startTrackingBundle(mBundleID, mDistribution);
 
         // verify
-        verify(mRepoIndex).trackBundle(eq(bundleID), eq(distribution));
+        verify(mRepoIndex).trackBundle(eq(mBundleID), eq(mDistribution));
     }
 
     @Test
     public void trackingBundleClonesBundle() throws Exception {
-        final BundleID bundleID = new BundleID(mCatalogID, "swell");
-        final String distribution = "master";
-
-        mockSourceURLForCatalog();
-        mockGetTrackingInfo(bundleID, distribution);
+        mockGetTrackingInfo(mBundleID, mDistribution);
 
         // run
-        mRepo.startTrackingBundle(bundleID, distribution);
+        mRepo.startTrackingBundle(mBundleID, mDistribution);
 
         // verify
-        verifyCloneBundle(bundleID, distribution);
+        verifyCloneBundle(mBundleID, mDistribution);
     }
 
     @Test
     public void bundlesAreAreClonedForAlreadyTrackedBundles() throws Exception {
-        final BundleID bundleID = new BundleID(mCatalogID, "swell");
-        final String distribution = "master";
-
-        setUpIndexWithTrackedBundleID(bundleID, distribution);
+        setUpIndexWithTrackedBundleID(mBundleID, mDistribution);
 
         // run
         initializeRepo();
 
         // verify
-        verifyCloneBundle(bundleID, distribution);
+        verifyCloneBundle(mBundleID, mDistribution);
     }
 
     @Test
@@ -151,7 +144,6 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
 
     private void setUpIndexWithTrackedBundleID(final BundleID bundleID,
                                                final String distribution) throws ZincRepoIndex.CatalogNotFoundException, ZincRepoIndex.BundleNotBeingTrackedException {
-        mockSourceURLForCatalog();
         mockGetTrackingInfo(bundleID, distribution);
         when(mRepoIndex.getTrackedBundleIDs()).thenReturn(new HashSet<BundleID>(Arrays.asList(bundleID)));
     }
@@ -171,10 +163,6 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
 
     private void mockGetTrackingInfo(final BundleID bundleID, final String distribution) throws ZincRepoIndex.BundleNotBeingTrackedException {
         when(mRepoIndex.getTrackingInfo(eq(bundleID))).thenReturn(new ZincRepoIndex.TrackingInfo(distribution));
-    }
-
-    private void mockSourceURLForCatalog() throws ZincRepoIndex.CatalogNotFoundException {
-        when(mRepoIndex.getSourceURLForCatalog(eq(mCatalogID))).thenReturn(mSourceURL);
     }
 
     private void verifyCloneBundle(final BundleID bundleID, final String distribution) {
