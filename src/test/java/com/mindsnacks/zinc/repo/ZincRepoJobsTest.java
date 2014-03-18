@@ -26,15 +26,19 @@ import static org.mockito.Mockito.*;
  */
 public class ZincRepoJobsTest extends ZincRepoBaseTest {
     @Mock private Future<ZincCatalog> mCatalogFuture;
-    @Mock private ZincRepoIndex mRepoIndex;
 
+    @Mock private ZincRepoIndex mRepoIndex;
     @Mock private ZincRepoIndexWriter mRepoIndexWriter;
 
-    private final String mCatalogID;
     private final SourceURL mSourceURL;
 
+    private final String mCatalogID = "com.mindsnacks.lessons";
+    private final String mDistribution = "master";
+
+    private final BundleID mBundleID = new BundleID(mCatalogID, "swell");
+    private final BundleID mAnotherBundleID = new BundleID(mCatalogID, "another bundle");
+
     public ZincRepoJobsTest() throws MalformedURLException {
-        mCatalogID = "com.mindsnacks.lessons";
         mSourceURL = new SourceURL(new URL("https://mindsnacks.com"), mCatalogID);
     }
 
@@ -42,6 +46,9 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
     @Before
     public void setUp() throws Exception {
         when(mRepoIndexWriter.getIndex()).thenReturn(mRepoIndex);
+        when(mRepoIndex.getSourceURLForCatalog(eq(mCatalogID))).thenReturn(mSourceURL);
+        when(mRepoIndex.trackBundle(any(BundleID.class), anyString())).thenReturn(true);
+
         mockGetSources(new ArrayList<SourceURL>());
 
         super.setUp();
@@ -88,45 +95,84 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
 
     @Test
     public void trackingBundleAddsItToTheIndex() throws Exception {
-        final BundleID bundleID = new BundleID("com.mindsnacks.games.swell");
-        final String distribution = "master";
-
-        mockGetTrackingInfo(bundleID, distribution);
+        mockGetTrackingInfo(mBundleID, mDistribution);
 
         // run
-        mRepo.startTrackingBundle(bundleID, distribution);
+        mRepo.startTrackingBundle(mBundleID, mDistribution);
 
         // verify
-        verify(mRepoIndex).trackBundle(eq(bundleID), eq(distribution));
+        verify(mRepoIndex).trackBundle(eq(mBundleID), eq(mDistribution));
+    }
+
+    @Test
+    public void trackingBundleSavesTheIndex() throws Exception {
+        mockGetTrackingInfo(mBundleID, mDistribution);
+
+        // run
+        mRepo.startTrackingBundle(mBundleID, mDistribution);
+
+        // verify
+        verifySaveIndex();
     }
 
     @Test
     public void trackingBundleClonesBundle() throws Exception {
-        final BundleID bundleID = new BundleID(mCatalogID, "swell");
-        final String distribution = "master";
-
-        mockSourceURLForCatalog();
-        mockGetTrackingInfo(bundleID, distribution);
+        mockGetTrackingInfo(mBundleID, mDistribution);
 
         // run
-        mRepo.startTrackingBundle(bundleID, distribution);
+        mRepo.startTrackingBundle(mBundleID, mDistribution);
 
         // verify
-        verifyCloneBundle(bundleID, distribution);
+        verifyCloneBundle(mBundleID, mDistribution);
+    }
+
+    @Test
+    public void trackingMultipleBundlesAddsThemToTheIndex() throws Exception {
+        mockGetTrackingInfo(mBundleID, mDistribution);
+        mockGetTrackingInfo(mAnotherBundleID, mDistribution);
+
+        // run
+        mRepo.startTrackingBundles(Arrays.asList(mBundleID, mAnotherBundleID), mDistribution);
+
+        // verify
+        verify(mRepoIndex).trackBundle(eq(mBundleID), eq(mDistribution));
+        verify(mRepoIndex).trackBundle(eq(mAnotherBundleID), eq(mDistribution));
+    }
+
+    @Test
+    public void trackingMultipleBundlesClonesThem() throws Exception {
+        mockGetTrackingInfo(mBundleID, mDistribution);
+        mockGetTrackingInfo(mAnotherBundleID, mDistribution);
+
+        // run
+        mRepo.startTrackingBundles(Arrays.asList(mBundleID, mAnotherBundleID), mDistribution);
+
+        // verify
+        verifyCloneBundle(mBundleID, mDistribution);
+        verifyCloneBundle(mAnotherBundleID, mDistribution);
+    }
+
+    @Test
+    public void trackingMultipleSavesTheIndexOnlyOnce() throws Exception {
+        mockGetTrackingInfo(mBundleID, mDistribution);
+        mockGetTrackingInfo(mAnotherBundleID, mDistribution);
+
+        // run
+        mRepo.startTrackingBundles(Arrays.asList(mBundleID, mAnotherBundleID), mDistribution);
+
+        // verify
+        verifySaveIndex();
     }
 
     @Test
     public void bundlesAreAreClonedForAlreadyTrackedBundles() throws Exception {
-        final BundleID bundleID = new BundleID(mCatalogID, "swell");
-        final String distribution = "master";
-
-        setUpIndexWithTrackedBundleID(bundleID, distribution);
+        setUpIndexWithTrackedBundleID(mBundleID, mDistribution);
 
         // run
         initializeRepo();
 
         // verify
-        verifyCloneBundle(bundleID, distribution);
+        verifyCloneBundle(mBundleID, mDistribution);
     }
 
     @Test
@@ -151,7 +197,6 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
 
     private void setUpIndexWithTrackedBundleID(final BundleID bundleID,
                                                final String distribution) throws ZincRepoIndex.CatalogNotFoundException, ZincRepoIndex.BundleNotBeingTrackedException {
-        mockSourceURLForCatalog();
         mockGetTrackingInfo(bundleID, distribution);
         when(mRepoIndex.getTrackedBundleIDs()).thenReturn(new HashSet<BundleID>(Arrays.asList(bundleID)));
     }
@@ -169,12 +214,9 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
         }))).thenReturn(expectedResult);
     }
 
-    private void mockGetTrackingInfo(final BundleID bundleID, final String distribution) throws ZincRepoIndex.BundleNotBeingTrackedException {
+    private void mockGetTrackingInfo(final BundleID bundleID,
+                                     final String distribution) throws ZincRepoIndex.BundleNotBeingTrackedException {
         when(mRepoIndex.getTrackingInfo(eq(bundleID))).thenReturn(new ZincRepoIndex.TrackingInfo(distribution));
-    }
-
-    private void mockSourceURLForCatalog() throws ZincRepoIndex.CatalogNotFoundException {
-        when(mRepoIndex.getSourceURLForCatalog(eq(mCatalogID))).thenReturn(mSourceURL);
     }
 
     private void verifyCloneBundle(final BundleID bundleID, final String distribution) {
@@ -191,6 +233,10 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
                 );
             }
         }));
+    }
+
+    private void verifySaveIndex() {
+        verify(mIndexWriter, times(1)).saveIndex();
     }
 
     private void mockGetSources(List<SourceURL> sourceURLs) {
