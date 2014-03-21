@@ -1,16 +1,21 @@
 package com.mindsnacks.zinc.classes;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.mindsnacks.zinc.classes.data.*;
+import com.mindsnacks.zinc.classes.data.BundleID;
+import com.mindsnacks.zinc.classes.data.SourceURL;
+import com.mindsnacks.zinc.classes.data.ZincBundle;
+import com.mindsnacks.zinc.classes.data.ZincCatalogsCache;
+import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
+import com.mindsnacks.zinc.classes.data.ZincRepoIndex;
 import com.mindsnacks.zinc.classes.downloads.PriorityJobQueue;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
-
 import java.io.File;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: NachoSoto
@@ -103,6 +108,11 @@ public class ZincRepo implements Repo {
     @Override
     public void clearCachedCatalogs() {
         mCatalogsCache.clearCachedCatalogs();
+    }
+
+    @Override
+    public Set<BundleID> getTrackedBundleIDs() {
+      return mIndexWriter.getIndex().getTrackedBundleIDs();
     }
 
     private void cloneTrackedBundles() {
