@@ -105,6 +105,11 @@ public class ZincRepo implements Repo {
         mCatalogsCache.clearCachedCatalogs();
     }
 
+    @Override
+    public ZincRepoIndex getRepoIndex() {
+      return mIndexWriter.getIndex();
+    }
+
     private void cloneTrackedBundles() {
         final ZincRepoIndex index = mIndexWriter.getIndex();
 
