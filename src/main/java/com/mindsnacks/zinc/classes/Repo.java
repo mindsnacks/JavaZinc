@@ -3,9 +3,8 @@ package com.mindsnacks.zinc.classes;
 import com.mindsnacks.zinc.classes.data.BundleID;
 import com.mindsnacks.zinc.classes.data.SourceURL;
 import com.mindsnacks.zinc.classes.data.ZincBundle;
-
-import com.mindsnacks.zinc.classes.data.ZincRepoIndex;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 /**
@@ -22,7 +21,7 @@ public interface Repo {
 
     Future<ZincBundle> getBundle(BundleID bundleID);
 
-    ZincRepoIndex getRepoIndex();
+    Set<BundleID> getTrackedBundleIDs();
 
     void recalculatePriorities();
 
