@@ -91,10 +91,20 @@ public final class TestFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static <V> Callable<V> callableWithResult(V result) {
+    public static <V> Callable<V> callableWithResult(final V result) {
         final Callable<V> mock = mock(Callable.class);
         try {
             doReturn(result).when(mock).call();
+        } catch (Exception thisCantHappen) { assert false; }
+
+        return mock;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <V> Callable<V> callableWithError(final Throwable error) {
+        final Callable<V> mock = mock(Callable.class);
+        try {
+            doThrow(error).when(mock).call();
         } catch (Exception thisCantHappen) { assert false; }
 
         return mock;
