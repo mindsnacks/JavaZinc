@@ -101,6 +101,25 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         queue.add(TestData.randomTestData());
     }
 
+    @Test(expected = PriorityJobQueue.JobAlreadyAddedException.class)
+    public void dataCannotBeAddedTwice() throws Exception {
+        final TestData data = TestData.randomTestData();
+
+        queue.add(data);
+        queue.add(data);
+    }
+
+    @Test(expected = PriorityJobQueue.JobAlreadyAddedException.class)
+    public void dataCannotBeAddedTwiceEvenAfterFinishing() throws Exception {
+        final TestData data = processAndAddRandomData();
+
+        // run
+        queue.start();
+
+        waitForDataToBeProcessed();
+        queue.add(data);
+    }
+
     @Test(expected = ZincRuntimeException.class)
     public void dataCannotBeRetrievedIfStopped() throws Exception {
         final TestData data = TestData.randomTestData();
@@ -211,6 +230,10 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         return processAndAddData(TestData.randomTestData());
     }
 
+    private TestData processWithErrorAndAddRandomData() {
+        return processWithErrorAndAddData(TestData.randomTestData());
+    }
+
     private TestData processAndAddData(final TestData data) {
         processData(data);
         queue.add(data);
@@ -218,10 +241,23 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         return data;
     }
 
-    private void processData(final TestData data) {
-        final Callable<String> processor = TestFactory.callableWithResult(data.getResult());
-        when(mDataProcessor.process(data)).thenReturn(processor);
+    private TestData processWithErrorAndAddData(final TestData data) {
+        processDataWithError(data);
+        queue.add(data);
 
+        return data;
+    }
+
+    private void processData(final TestData data) {
+        _processData(data, TestFactory.callableWithResult(data.getResult()));
+    }
+
+    private void processDataWithError(final TestData data) {
+        _processData(data, TestFactory.<String>callableWithError(new ZincRuntimeException("Process error;")));
+    }
+
+    private void _processData(final TestData data, final Callable<String> processor) {
+        when(mDataProcessor.process(data)).thenReturn(processor);
         mAddedData.add(data);
     }
 
