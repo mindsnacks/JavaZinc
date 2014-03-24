@@ -167,6 +167,15 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         verifyDataWasProcessedOnce(data);
     }
 
+    @Test(expected = ExecutionException.class)
+    public void dataReturnsErrorIfFailed() throws Exception {
+        final TestData data = processWithErrorAndAddRandomData();
+
+        // run
+        queue.start();
+        queue.get(data).get();
+    }
+
     @Test
     public void jobIsDoneReturnsTrueWhenFinished() throws Exception {
         final TestData data = processAndAddRandomData();
@@ -276,7 +285,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
     }
 
     private void processDataWithError(final TestData data) {
-        _processData(data, TestFactory.<String>callableWithError(new ZincRuntimeException("Process error;")));
+        _processData(data, TestFactory.<String>callableWithError(new JobFailedException()));
     }
 
     private void _processData(final TestData data, final Callable<String> processor) {
@@ -310,5 +319,11 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
     private void verifyDataWasProcessedOnce(final TestData data) {
         verify(mDataProcessor, times(1)).process(data);
+    }
+
+    private class JobFailedException extends ZincRuntimeException {
+        public JobFailedException() {
+            super("job failed");
+        }
     }
 }
