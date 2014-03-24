@@ -139,9 +139,32 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         // run
         assertNotNull(result);
         assertEquals(data.getResult(), result.get());
+    }
+
+    @Test
+    public void dataIsProcessed() throws Exception {
+        final TestData data = processAndAddRandomData();
+
+        // run
+        queue.start();
+        queue.get(data).get();
 
         // verify
-        verify(mDataProcessor).process(data);
+        verifyDataWasProcessedOnce(data);
+    }
+
+    @Test
+    public void dataIsNotProcessedMultipleTimesIfRetrievedMultipleTimes() throws Exception {
+        final TestData data = processAndAddRandomData();
+
+        // run
+        queue.start();
+
+        queue.get(data).get();
+        queue.get(data).get();
+
+        // verify
+        verifyDataWasProcessedOnce(data);
     }
 
     @Test
@@ -174,7 +197,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         assertEquals(data.getResult(), result.get());
 
         // verify
-        verify(mDataProcessor).process(data);
+        verifyDataWasProcessedOnce(data);
         verify(mPriorityCalculator, atLeast(1)).getPriorityForObject(data);
     }
 
@@ -283,5 +306,9 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         });
 
         assertTrue(Ordering.natural().reverse().isOrdered(priorities));
+    }
+
+    private void verifyDataWasProcessedOnce(final TestData data) {
+        verify(mDataProcessor, times(1)).process(data);
     }
 }
