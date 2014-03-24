@@ -120,7 +120,7 @@ public class PriorityJobQueue<Input, Output> {
 
         try {
             mAddedElements.add(element);
-            mQueue.offer(element);
+            addElementToQueue(element);
         } finally {
             mLock.unlock();
         }
@@ -128,11 +128,36 @@ public class PriorityJobQueue<Input, Output> {
 
     public ListenableFuture<Output> get(final Input element) throws JobNotFoundException {
         checkServiceIsRunning(true, "Service should be running");
+        checkJobWasAlreadyAdded(element);
 
-        if (mAddedElements.contains(element)) {
-            return waitForFuture(element);
-        } else {
-            throw new JobNotFoundException(element);
+        ListenableFuture<Output> result = findExistingFuture(element);
+
+        if (didFutureFail(result)) {
+            removeCachedFuture(element);
+            addElementToQueue(element);
+            result = null;
+        }
+
+        return (result != null) ? result : waitForFuture(element);
+    }
+
+    private ListenableFuture<Output> findExistingFuture(final Input element) {
+        mLock.lock();
+
+        try {
+            return mFutures.get(element);
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    private void removeCachedFuture(final Input element) {
+        mLock.lock();
+
+        try {
+            mFutures.remove(element);
+        } finally {
+            mLock.unlock();
         }
     }
 
@@ -178,10 +203,38 @@ public class PriorityJobQueue<Input, Output> {
         }
     }
 
+    private void checkJobWasAlreadyAdded(final Input element) {
+        if (!jobWasAdded(element)) {
+            throw new JobNotFoundException(element);
+        }
+    }
+
     private void checkJobWasNotAlreadyAdded(final Input element) {
-        if (mAddedElements.contains(element)) {
+        if (jobWasAdded(element)) {
             throw new JobAlreadyAddedException(element);
         }
+    }
+
+    private boolean jobWasAdded(final Input element) {
+        return mAddedElements.contains(element);
+    }
+
+    private boolean didFutureFail(final Future<Output> future) {
+        boolean didFail = false;
+
+        if (future != null && future.isDone()) {
+            try {
+                future.get();
+            } catch (Exception e) {
+                didFail = true;
+            }
+        }
+
+        return didFail;
+    }
+
+    private void addElementToQueue(final Input element) {
+        mQueue.offer(element);
     }
 
     private ListenableFuture<Output> submit(final Input element) {

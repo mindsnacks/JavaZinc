@@ -177,6 +177,31 @@ public class PriorityJobQueueTest extends ZincBaseTest {
     }
 
     @Test
+    public void dataIsProcessedAgainIfItFailed() throws Exception {
+        final TestData data = processWithErrorAndAddRandomData();
+
+        // run
+        queue.start();
+
+        // wait for future to finish
+        try {
+            queue.get(data).get();
+        } catch (ExecutionException e) {}
+
+        // process again with a positive result this time
+        processData(data);
+
+        // run
+        final String result = queue.get(data).get();
+
+        // verify
+        verify(mDataProcessor, times(2)).process(data);
+
+        assertNotNull(result);
+        assertEquals(data.getResult(), result);
+    }
+
+    @Test
     public void jobIsDoneReturnsTrueWhenFinished() throws Exception {
         final TestData data = processAndAddRandomData();
 
