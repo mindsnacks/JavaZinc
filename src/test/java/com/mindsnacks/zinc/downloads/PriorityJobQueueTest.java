@@ -101,6 +101,25 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         queue.add(TestData.randomTestData());
     }
 
+    @Test(expected = PriorityJobQueue.JobAlreadyAddedException.class)
+    public void dataCannotBeAddedTwice() throws Exception {
+        final TestData data = TestData.randomTestData();
+
+        queue.add(data);
+        queue.add(data);
+    }
+
+    @Test(expected = PriorityJobQueue.JobAlreadyAddedException.class)
+    public void dataCannotBeAddedTwiceEvenAfterFinishing() throws Exception {
+        final TestData data = processAndAddRandomData();
+
+        // run
+        queue.start();
+
+        waitForDataToBeProcessed();
+        queue.add(data);
+    }
+
     @Test(expected = ZincRuntimeException.class)
     public void dataCannotBeRetrievedIfStopped() throws Exception {
         final TestData data = TestData.randomTestData();
@@ -120,9 +139,66 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         // run
         assertNotNull(result);
         assertEquals(data.getResult(), result.get());
+    }
+
+    @Test
+    public void dataIsProcessed() throws Exception {
+        final TestData data = processAndAddRandomData();
+
+        // run
+        queue.start();
+        queue.get(data).get();
 
         // verify
-        verify(mDataProcessor).process(data);
+        verifyDataWasProcessedOnce(data);
+    }
+
+    @Test
+    public void dataIsNotProcessedMultipleTimesIfRetrievedMultipleTimes() throws Exception {
+        final TestData data = processAndAddRandomData();
+
+        // run
+        queue.start();
+
+        queue.get(data).get();
+        queue.get(data).get();
+
+        // verify
+        verifyDataWasProcessedOnce(data);
+    }
+
+    @Test(expected = ExecutionException.class)
+    public void dataReturnsErrorIfFailed() throws Exception {
+        final TestData data = processWithErrorAndAddRandomData();
+
+        // run
+        queue.start();
+        queue.get(data).get();
+    }
+
+    @Test
+    public void dataIsProcessedAgainIfItFailed() throws Exception {
+        final TestData data = processWithErrorAndAddRandomData();
+
+        // run
+        queue.start();
+
+        // wait for future to finish
+        try {
+            queue.get(data).get();
+        } catch (ExecutionException e) {}
+
+        // process again with a positive result this time
+        processData(data);
+
+        // run
+        final String result = queue.get(data).get();
+
+        // verify
+        verify(mDataProcessor, times(2)).process(data);
+
+        assertNotNull(result);
+        assertEquals(data.getResult(), result);
     }
 
     @Test
@@ -155,7 +231,7 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         assertEquals(data.getResult(), result.get());
 
         // verify
-        verify(mDataProcessor).process(data);
+        verifyDataWasProcessedOnce(data);
         verify(mPriorityCalculator, atLeast(1)).getPriorityForObject(data);
     }
 
@@ -211,6 +287,10 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         return processAndAddData(TestData.randomTestData());
     }
 
+    private TestData processWithErrorAndAddRandomData() {
+        return processWithErrorAndAddData(TestData.randomTestData());
+    }
+
     private TestData processAndAddData(final TestData data) {
         processData(data);
         queue.add(data);
@@ -218,10 +298,23 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         return data;
     }
 
-    private void processData(final TestData data) {
-        final Callable<String> processor = TestFactory.callableWithResult(data.getResult());
-        when(mDataProcessor.process(data)).thenReturn(processor);
+    private TestData processWithErrorAndAddData(final TestData data) {
+        processDataWithError(data);
+        queue.add(data);
 
+        return data;
+    }
+
+    private void processData(final TestData data) {
+        _processData(data, TestFactory.callableWithResult(data.getResult()));
+    }
+
+    private void processDataWithError(final TestData data) {
+        _processData(data, TestFactory.<String>callableWithError(new JobFailedException()));
+    }
+
+    private void _processData(final TestData data, final Callable<String> processor) {
+        when(mDataProcessor.process(data)).thenReturn(processor);
         mAddedData.add(data);
     }
 
@@ -247,5 +340,15 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         });
 
         assertTrue(Ordering.natural().reverse().isOrdered(priorities));
+    }
+
+    private void verifyDataWasProcessedOnce(final TestData data) {
+        verify(mDataProcessor, times(1)).process(data);
+    }
+
+    private class JobFailedException extends ZincRuntimeException {
+        public JobFailedException() {
+            super("job failed");
+        }
     }
 }
