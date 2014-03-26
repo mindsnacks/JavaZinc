@@ -114,15 +114,15 @@ public class PriorityJobQueue<Input, Output> {
     }
 
     public void add(final Input element) {
-        checkJobWasNotAlreadyAdded(element);
+        if (!jobWasAdded(element)) {
+            mLock.lock();
 
-        mLock.lock();
-
-        try {
-            mAddedElements.add(element);
-            addElementToQueue(element);
-        } finally {
-            mLock.unlock();
+            try {
+                mAddedElements.add(element);
+                addElementToQueue(element);
+            } finally {
+                mLock.unlock();
+            }
         }
     }
 
@@ -209,12 +209,6 @@ public class PriorityJobQueue<Input, Output> {
         }
     }
 
-    private void checkJobWasNotAlreadyAdded(final Input element) {
-        if (jobWasAdded(element)) {
-            throw new JobAlreadyAddedException(element);
-        }
-    }
-
     private boolean jobWasAdded(final Input element) {
         return mAddedElements.contains(element);
     }
@@ -265,12 +259,6 @@ public class PriorityJobQueue<Input, Output> {
     public static class JobNotFoundException extends ZincRuntimeException {
         public JobNotFoundException(final Object object) {
             super((object == null) ? "Object is null" : "Object '" + object.toString() + "' had not been added");
-        }
-    }
-
-    public static class JobAlreadyAddedException extends ZincRuntimeException {
-        public JobAlreadyAddedException(final Object object) {
-            super((object == null) ? "Object is null" : "Object '" + object.toString() + "' had already been added");
         }
     }
 }
