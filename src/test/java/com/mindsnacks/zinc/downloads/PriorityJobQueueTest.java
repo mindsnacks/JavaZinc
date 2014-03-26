@@ -101,15 +101,19 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         queue.add(TestData.randomTestData());
     }
 
-    @Test(expected = PriorityJobQueue.JobAlreadyAddedException.class)
-    public void dataCannotBeAddedTwice() throws Exception {
-        final TestData data = TestData.randomTestData();
+    @Test
+    public void dataIsNotProcessedIfItWasAlreadyAdded() throws Exception {
+        final TestData data = processAndAddRandomData();
 
-        queue.add(data);
-        queue.add(data);
+        queue.start();
+
+        processAndAddData(data);
+
+        waitForDataToBeProcessed();
+        verifyDataWasProcessedOnce(data);
     }
 
-    @Test(expected = PriorityJobQueue.JobAlreadyAddedException.class)
+    @Test
     public void dataCannotBeAddedTwiceEvenAfterFinishing() throws Exception {
         final TestData data = processAndAddRandomData();
 
@@ -118,6 +122,9 @@ public class PriorityJobQueueTest extends ZincBaseTest {
 
         waitForDataToBeProcessed();
         queue.add(data);
+
+        waitForDataToBeProcessed();
+        verifyDataWasProcessedOnce(data);
     }
 
     @Test(expected = ZincRuntimeException.class)
