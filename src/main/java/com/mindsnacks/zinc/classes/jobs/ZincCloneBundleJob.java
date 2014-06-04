@@ -34,7 +34,7 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
 
         final File localBundleFolder = getLocalBundleFolder();
 
-        if (!localBundleFolder.exists()) { // TODO: extract this logic as a first step to implement bundle verification
+        if (shouldDownloadBundle(localBundleFolder)) {
             createFolder(localBundleFolder);
 
             final ZincManifest manifest = getManifest();
@@ -56,6 +56,11 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
 
             return createZincBundle(localBundleFolder);
         }
+    }
+
+    private boolean shouldDownloadBundle(final File localBundleFolder) {
+        // TODO: extract this logic as a first step to implement bundle verification
+        return (!localBundleFolder.exists() || localBundleFolder.listFiles().length == 0);
     }
 
     private void createFolder(final File folder) {

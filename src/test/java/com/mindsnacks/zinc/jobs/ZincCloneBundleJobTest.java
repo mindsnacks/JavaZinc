@@ -4,6 +4,7 @@ import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.jobs.ZincCloneBundleJob;
 import com.mindsnacks.zinc.utils.TestFactory;
+import com.mindsnacks.zinc.utils.TestUtils;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Rule;
@@ -115,8 +116,17 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     }
 
     @Test
-    public void bundleIsNotDownloadedifItAlreadyExists() throws Exception {
+    public void bundleIDownloadedIfItAlreadyExistsButItsEmpty() throws Exception {
         createExpectedResultDirectory();
+
+        run();
+
+        verify(mJobFactory).downloadBundle(eq(mRequest), eq(mZincCatalogFuture));
+    }
+
+    @Test
+    public void bundleIsNotDownloadedIfItAlreadyExists() throws Exception {
+        createExpectedResultDirectoryWithFiles();
 
         run();
 
@@ -126,7 +136,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
     @Test
     public void bundleIsReturnedIfItAlreadyExists() throws Exception {
-        verifyResult(createExpectedResultDirectory(), run());
+        verifyResult(createExpectedResultDirectoryWithFiles(), run());
     }
 
     @Test
@@ -195,6 +205,14 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         assert file.exists();
 
         return file;
+    }
+
+    private File createExpectedResultDirectoryWithFiles() throws IOException {
+        final File folder = createExpectedResultDirectory();
+
+        TestUtils.createRandomFileInFolder(folder);
+
+        return folder;
     }
 
     private File expectedResultDirectory() {
