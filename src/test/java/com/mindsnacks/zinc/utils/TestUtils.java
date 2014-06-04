@@ -48,4 +48,10 @@ public class TestUtils {
             writer.close();
         }
     }
+
+    public static void createRandomFileInFolder(final File folder) throws IOException {
+        TestUtils.writeToFile(
+                new File(folder, TestFactory.randomString()),
+                TestFactory.randomString());
+    }
 }
