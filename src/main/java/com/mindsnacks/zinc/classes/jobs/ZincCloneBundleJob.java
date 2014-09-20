@@ -2,9 +2,11 @@ package com.mindsnacks.zinc.classes.jobs;
 
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.*;
+import com.mindsnacks.zinc.classes.fileutils.HashUtil;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
@@ -33,12 +35,11 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
         mVersion = getBundleVersion(mBundleID);
 
         final File localBundleFolder = getLocalBundleFolder();
+        final ZincManifest manifest = getManifest();
+        final String flavorName = mRequest.getFlavorName();
 
-        if (shouldDownloadBundle(localBundleFolder)) {
+        if (shouldDownloadBundle(localBundleFolder, manifest, flavorName)) {
             createFolder(localBundleFolder);
-
-            final ZincManifest manifest = getManifest();
-            final String flavorName = mRequest.getFlavorName();
 
             if (manifest.containsFiles(flavorName)) {
                 if (manifest.archiveExists(flavorName)) {
@@ -58,9 +59,25 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
         }
     }
 
-    private boolean shouldDownloadBundle(final File localBundleFolder) {
-        // TODO: extract this logic as a first step to implement bundle verification
-        return (!localBundleFolder.exists() || localBundleFolder.listFiles().length == 0);
+    private boolean shouldDownloadBundle(final File localBundleFolder, ZincManifest manifest, String flavorName) {
+        if (!localBundleFolder.exists() || localBundleFolder.listFiles().length == 0) {
+            return true;
+        }
+
+        //validate bundle hashes
+        Map<String, ZincManifest.FileInfo> fileInfoMap = manifest.getFilesWithFlavor(flavorName);
+
+        for (Map.Entry<String, ZincManifest.FileInfo> fileInfoEntry : fileInfoMap.entrySet()) {
+            File bundlefile = new File(localBundleFolder, fileInfoEntry.getKey());
+            if (!bundlefile.exists()) {
+                return true;
+            }
+            String hash = HashUtil.sha1HashString(bundlefile);
+            if (!hash.equals(fileInfoEntry.getValue().getHash())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void createFolder(final File folder) {
