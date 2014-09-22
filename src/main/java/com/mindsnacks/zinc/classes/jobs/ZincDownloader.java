@@ -21,6 +21,8 @@ import java.util.concurrent.Future;
  * Date: 9/3/13
  */
 public class ZincDownloader implements ZincJobFactory {
+
+    private static final ZincBundleVerifier BUNDLE_VERIFIER = new ZincBundleVerifier();
     private final Gson mGson;
 
     public ZincDownloader(final Gson gson) {
@@ -57,7 +59,7 @@ public class ZincDownloader implements ZincJobFactory {
 
     @Override
     public Callable<ZincBundle> cloneBundle(final ZincCloneBundleRequest request, final Future<ZincCatalog> catalogFuture) {
-        return new ZincCloneBundleJob(request, this, catalogFuture);
+        return new ZincCloneBundleJob(request, this, catalogFuture, BUNDLE_VERIFIER);
     }
 
     @Override

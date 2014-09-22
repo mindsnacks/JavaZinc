@@ -2,48 +2,45 @@ package com.mindsnacks.zinc.classes.fileutils;
 
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
  * @author John Ericksen
  */
-public class HashUtil {
+public final class HashUtil {
 
     private static final String HASH_TYPE = "SHA1";
     private static final int BUFF_SIZE = 1024;
 
-    public static String sha1HashString(File file) {
-        return toHexString(sha1Hash(file));
+    private HashUtil() {
+        // private utility class constructor
     }
 
-    public static MessageDigest sha1Hash(File file) {
+    public static String sha1HashString(InputStream inputStream) {
+        return toHexString(sha1Hash(inputStream));
+    }
+
+    private static MessageDigest sha1Hash(InputStream inputStream) {
         try {
-            // calculate sha1 hash
             MessageDigest md = newDigest();
 
-            InputStream in = new FileInputStream(file);
             byte[] buff = new byte[BUFF_SIZE];
             int length;
-            while ((length = in.read(buff)) > 0) {
+            while ((length = inputStream.read(buff)) > 0) {
                 md.update(buff, 0, length);
             }
-            in.close();
+            inputStream.close();
 
             return md;
-
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ZincRuntimeException("Could not read file.", e);
         }
-
-        return null;
     }
 
-    public static MessageDigest newDigest() {
+    private static MessageDigest newDigest() {
         try {
             return MessageDigest.getInstance(HASH_TYPE);
         } catch (NoSuchAlgorithmException e) {
@@ -51,8 +48,7 @@ public class HashUtil {
         }
     }
 
-    public static String toHexString(MessageDigest digest) {
-        // convert to hex
+    private static String toHexString(MessageDigest digest) {
         StringBuilder builder = new StringBuilder();
 
         for (byte b : digest.digest()) {

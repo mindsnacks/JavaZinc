@@ -2,11 +2,9 @@ package com.mindsnacks.zinc.classes.jobs;
 
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.*;
-import com.mindsnacks.zinc.classes.fileutils.HashUtil;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
-import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
@@ -15,18 +13,22 @@ import java.util.concurrent.Future;
  * This class groups ZincDownloadBundleJob and ZincUnarchiveBundleJob.
  */
 public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
+
     private final ZincCloneBundleRequest mRequest;
     private final ZincJobFactory mJobFactory;
     private final Future<ZincCatalog> mCatalogFuture;
+    private final ZincBundleVerifier mBundleVerifier;
     private BundleID mBundleID;
     private int mVersion;
 
     public ZincCloneBundleJob(final ZincCloneBundleRequest request,
                               final ZincJobFactory jobFactory,
-                              final Future<ZincCatalog> catalogFuture) {
+                              final Future<ZincCatalog> catalogFuture,
+                              final ZincBundleVerifier bundleVerifier) {
         mRequest = request;
         mJobFactory = jobFactory;
         mCatalogFuture = catalogFuture;
+        mBundleVerifier = bundleVerifier;
     }
 
     @Override
@@ -38,7 +40,7 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
         final ZincManifest manifest = getManifest();
         final String flavorName = mRequest.getFlavorName();
 
-        if (shouldDownloadBundle(localBundleFolder, manifest, flavorName)) {
+        if (mBundleVerifier.shouldDownloadBundle(localBundleFolder, manifest, flavorName)) {
             createFolder(localBundleFolder);
 
             if (manifest.containsFiles(flavorName)) {
@@ -57,27 +59,6 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
 
             return createZincBundle(localBundleFolder);
         }
-    }
-
-    private boolean shouldDownloadBundle(final File localBundleFolder, ZincManifest manifest, String flavorName) {
-        if (!localBundleFolder.exists() || localBundleFolder.listFiles().length == 0) {
-            return true;
-        }
-
-        //validate bundle hashes
-        Map<String, ZincManifest.FileInfo> fileInfoMap = manifest.getFilesWithFlavor(flavorName);
-
-        for (Map.Entry<String, ZincManifest.FileInfo> fileInfoEntry : fileInfoMap.entrySet()) {
-            File bundlefile = new File(localBundleFolder, fileInfoEntry.getKey());
-            if (!bundlefile.exists()) {
-                return true;
-            }
-            String hash = HashUtil.sha1HashString(bundlefile);
-            if (!hash.equals(fileInfoEntry.getValue().getHash())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void createFolder(final File folder) {
