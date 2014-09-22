@@ -40,7 +40,7 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
         final ZincManifest manifest = getManifest();
         final String flavorName = mRequest.getFlavorName();
 
-        if (mBundleVerifier.shouldDownloadBundle(localBundleFolder, manifest, flavorName)) {
+        if (!mBundleVerifier.verify(localBundleFolder, manifest, flavorName)) {
             createFolder(localBundleFolder);
 
             if (manifest.containsFiles(flavorName)) {

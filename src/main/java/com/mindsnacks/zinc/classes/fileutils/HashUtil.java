@@ -10,20 +10,16 @@ import java.security.NoSuchAlgorithmException;
 /**
  * @author John Ericksen
  */
-public final class HashUtil {
+public class HashUtil {
 
     private static final String HASH_TYPE = "SHA1";
     private static final int BUFF_SIZE = 1024;
 
-    private HashUtil() {
-        // private utility class constructor
-    }
-
-    public static String sha1HashString(InputStream inputStream) {
+    public String sha1HashString(InputStream inputStream) {
         return toHexString(sha1Hash(inputStream));
     }
 
-    private static MessageDigest sha1Hash(InputStream inputStream) {
+    private MessageDigest sha1Hash(InputStream inputStream) {
         try {
             MessageDigest md = newDigest();
 
@@ -40,7 +36,7 @@ public final class HashUtil {
         }
     }
 
-    private static MessageDigest newDigest() {
+    private MessageDigest newDigest() {
         try {
             return MessageDigest.getInstance(HASH_TYPE);
         } catch (NoSuchAlgorithmException e) {
@@ -48,7 +44,7 @@ public final class HashUtil {
         }
     }
 
-    private static String toHexString(MessageDigest digest) {
+    private String toHexString(MessageDigest digest) {
         StringBuilder builder = new StringBuilder();
 
         for (byte b : digest.digest()) {

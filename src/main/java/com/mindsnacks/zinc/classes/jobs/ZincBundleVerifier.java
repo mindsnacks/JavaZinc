@@ -7,6 +7,7 @@ import com.mindsnacks.zinc.classes.fileutils.HashUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -14,38 +15,47 @@ import java.util.Map;
  */
 public class ZincBundleVerifier {
 
-    public boolean shouldDownloadBundle(final File localBundleFolder, final ZincManifest manifest, final String flavorName) {
+    private final HashUtil hashUtil;
+
+    public ZincBundleVerifier(HashUtil hashUtil) {
+        this.hashUtil = hashUtil;
+    }
+
+    public boolean verify(final File localBundleFolder, final ZincManifest manifest, final String flavorName) {
+        boolean filesExist = true;
         if (!localBundleFolder.exists()) {
-            return true;
+            filesExist = false;
         } else {
             File[] files = localBundleFolder.listFiles();
             if (files == null || files.length == 0) {
-                return true;
+                filesExist = false;
             }
         }
 
-        return validateBundleHashes(localBundleFolder, manifest, flavorName);
+        return filesExist && validateBundleHashes(localBundleFolder, manifest, flavorName);
     }
 
     private boolean validateBundleHashes(final File localBundleFolder, final ZincManifest manifest, final String flavorName) {
+        boolean valid = true;
         Map<String, ZincManifest.FileInfo> fileInfoMap = manifest.getFilesWithFlavor(flavorName);
 
-        for (Map.Entry<String, ZincManifest.FileInfo> fileInfoEntry : fileInfoMap.entrySet()) {
+        Iterator<Map.Entry<String, ZincManifest.FileInfo>> mapEntryIter = fileInfoMap.entrySet().iterator();
+        while (mapEntryIter.hasNext() && valid) {
+            Map.Entry<String, ZincManifest.FileInfo> fileInfoEntry = mapEntryIter.next();
             File bundlefile = new File(localBundleFolder, fileInfoEntry.getKey());
             if (!bundlefile.exists()) {
-                return true;
+                valid = false;
             }
             try {
-                String hash = HashUtil.sha1HashString(new FileInputStream(bundlefile));
+                String hash = hashUtil.sha1HashString(new FileInputStream(bundlefile));
                 if (!hash.equals(fileInfoEntry.getValue().getHash())) {
-                    return true;
+                    valid = false;
                 }
             } catch (FileNotFoundException e) {
-                ZincLogging.log("ZincBundleVerifier", "Could not find file.");
-                return true;
+                ZincLogging.log("ZincBundleVerifier", "Could not find file " + bundlefile);
+                valid = false;
             }
-
         }
-        return false;
+        return valid;
     }
 }

@@ -87,7 +87,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         when(mZincManifest.getFileWithFlavor(mFlavorName)).thenReturn(mFileWithFlavor);
         when(mZincManifest.getFilenameWithFlavor(mFlavorName)).thenReturn(mSingleFilename);
         when(mSourceURL.getObjectURL(mFileWithFlavor)).thenReturn(mObjectURL);
-        setupBundleVerifier(true);
+        isValidBundle(false);
 
 
         setManifestContainsFiles(true);
@@ -131,7 +131,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
     @Test
     public void bundleIsNotDownloadedIfItAlreadyExists() throws Exception {
-        setupBundleVerifier(false);
+        isValidBundle(true);
         createExpectedResultDirectoryWithFiles();
 
         run();
@@ -142,7 +142,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
     @Test
     public void bundleIsReturnedIfItAlreadyExists() throws Exception {
-        setupBundleVerifier(false);
+        isValidBundle(true);
         verifyResult(createExpectedResultDirectoryWithFiles(), run());
     }
 
@@ -244,8 +244,8 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         verify(mJobFactory, times(0)).downloadBundle(any(ZincCloneBundleRequest.class), anyCatalogFuture());
     }
 
-    private void setupBundleVerifier(boolean download) {
-        when(mBundleVerifier.shouldDownloadBundle(any(File.class), eq(mZincManifest), eq(mFlavorName))).thenReturn(download);
+    private void isValidBundle(boolean valid) {
+        when(mBundleVerifier.verify(any(File.class), eq(mZincManifest), eq(mFlavorName))).thenReturn(valid);
     }
 
     private void verifyResult(final File directory, final ZincBundle result) {
