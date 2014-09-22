@@ -13,18 +13,22 @@ import java.util.concurrent.Future;
  * This class groups ZincDownloadBundleJob and ZincUnarchiveBundleJob.
  */
 public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
+
     private final ZincCloneBundleRequest mRequest;
     private final ZincJobFactory mJobFactory;
     private final Future<ZincCatalog> mCatalogFuture;
+    private final ZincBundleVerifier mBundleVerifier;
     private BundleID mBundleID;
     private int mVersion;
 
     public ZincCloneBundleJob(final ZincCloneBundleRequest request,
                               final ZincJobFactory jobFactory,
-                              final Future<ZincCatalog> catalogFuture) {
+                              final Future<ZincCatalog> catalogFuture,
+                              final ZincBundleVerifier bundleVerifier) {
         mRequest = request;
         mJobFactory = jobFactory;
         mCatalogFuture = catalogFuture;
+        mBundleVerifier = bundleVerifier;
     }
 
     @Override
@@ -33,12 +37,11 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
         mVersion = getBundleVersion(mBundleID);
 
         final File localBundleFolder = getLocalBundleFolder();
+        final ZincManifest manifest = getManifest();
+        final String flavorName = mRequest.getFlavorName();
 
-        if (shouldDownloadBundle(localBundleFolder)) {
+        if (!mBundleVerifier.verify(localBundleFolder, manifest, flavorName)) {
             createFolder(localBundleFolder);
-
-            final ZincManifest manifest = getManifest();
-            final String flavorName = mRequest.getFlavorName();
 
             if (manifest.containsFiles(flavorName)) {
                 if (manifest.archiveExists(flavorName)) {
@@ -56,11 +59,6 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
 
             return createZincBundle(localBundleFolder);
         }
-    }
-
-    private boolean shouldDownloadBundle(final File localBundleFolder) {
-        // TODO: extract this logic as a first step to implement bundle verification
-        return (!localBundleFolder.exists() || localBundleFolder.listFiles().length == 0);
     }
 
     private void createFolder(final File folder) {

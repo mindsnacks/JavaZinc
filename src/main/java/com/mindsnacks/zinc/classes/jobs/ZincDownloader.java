@@ -6,6 +6,7 @@ import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.ZincLogging;
 import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
+import com.mindsnacks.zinc.classes.fileutils.HashUtil;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
@@ -21,6 +22,8 @@ import java.util.concurrent.Future;
  * Date: 9/3/13
  */
 public class ZincDownloader implements ZincJobFactory {
+
+    private final ZincBundleVerifier bundleVerifier = new ZincBundleVerifier(new HashUtil());
     private final Gson mGson;
 
     public ZincDownloader(final Gson gson) {
@@ -57,7 +60,7 @@ public class ZincDownloader implements ZincJobFactory {
 
     @Override
     public Callable<ZincBundle> cloneBundle(final ZincCloneBundleRequest request, final Future<ZincCatalog> catalogFuture) {
-        return new ZincCloneBundleJob(request, this, catalogFuture);
+        return new ZincCloneBundleJob(request, this, catalogFuture, bundleVerifier);
     }
 
     @Override
@@ -67,9 +70,9 @@ public class ZincDownloader implements ZincJobFactory {
 
     @Override
     public Callable<File> downloadFile(final URL url,
-                                             final File root,
-                                             final String child,
-                                             final boolean override) {
+                                       final File root,
+                                       final String child,
+                                       final boolean override) {
         return new ZincDownloadFileJob(createRequestExecutor(), url, root, child, override);
     }
 
