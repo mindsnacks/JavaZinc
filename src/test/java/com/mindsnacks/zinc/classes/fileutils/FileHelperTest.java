@@ -4,6 +4,7 @@ import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 import com.mindsnacks.zinc.classes.data.BundleID;
 import com.mindsnacks.zinc.classes.data.ZincBundle;
+import com.mindsnacks.zinc.exceptions.ZincException;
 import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.TestUtils;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
@@ -23,6 +24,7 @@ import static org.junit.Assert.*;
  * Date: 9/10/13
  */
 public class FileHelperTest extends ZincBaseTest {
+    private HashUtil mHashUtil;
     private Gson mGson;
     private FileHelper mHelper;
     private ZincBundle mBundle;
@@ -35,6 +37,8 @@ public class FileHelperTest extends ZincBaseTest {
 
     private File mOriginalFile;
     private File mDestinationFile;
+    private String mOriginalHash;
+    private String mGzippedHash;
 
     private final String filename1 = "file1.txt",
                          filename2 = "file2.txt";
@@ -44,7 +48,8 @@ public class FileHelperTest extends ZincBaseTest {
     @Before
     public void setUp() throws Exception {
         mGson = createGson();
-        mHelper = new FileHelper(mGson);
+        mHashUtil = new HashUtil();
+        mHelper = new FileHelper(mGson, mHashUtil);
         mBundle = new ZincBundle(rootFolder.getRoot(), new BundleID("com.mindsnacks.catalog", "mBundle name"), 2);
         mOriginalFile = new File(mBundle, mFilename);
         mDestinationFile = new File(mBundle, mDestinationFilename);
@@ -53,25 +58,34 @@ public class FileHelperTest extends ZincBaseTest {
         file2 = TestUtils.createFile(rootFolder, filename2, "file2");
 
         createGzipFile(mContents, mOriginalFile);
+        mOriginalHash = mHashUtil.sha1HashString(mContents);
+        mGzippedHash = mHashUtil.sha1HashString(new FileInputStream(mOriginalFile));
+    }
+
+    @Test
+    public void testStreamToFile() throws IOException, ZincException {
+        mHelper.streamToFile(new ByteArrayInputStream(mContents.getBytes()), mDestinationFile, mOriginalHash);
+
+        assertEquals(mContents, TestUtils.readFile(mDestinationFile));
     }
 
     @Test
     public void unzipFileCreatesFile() throws Exception {
-        mHelper.unzipFile(mBundle, mFilename, mBundle, mDestinationFilename);
+        mHelper.unzipFile(mBundle, mFilename, mBundle, mDestinationFilename, mOriginalHash);
 
         assertTrue(mDestinationFile.exists());
     }
 
     @Test
     public void testUnzipFile() throws Exception {
-        mHelper.unzipFile(mBundle, mFilename, mBundle, mDestinationFilename);
+        mHelper.unzipFile(mBundle, mFilename, mBundle, mDestinationFilename, mOriginalHash);
 
         assertEquals(mContents, TestUtils.readFile(mDestinationFile));
     }
 
     @Test
     public void unzipFileDoesntRemoveOriginalFile() throws Exception {
-        mHelper.unzipFile(mBundle, mFilename, mBundle, mDestinationFilename);
+        mHelper.unzipFile(mBundle, mFilename, mBundle, mDestinationFilename, mOriginalHash);
 
         assertTrue(mOriginalFile.exists());
     }
@@ -141,7 +155,7 @@ public class FileHelperTest extends ZincBaseTest {
     public void copyFile() throws Exception {
         assertFalse(mDestinationFile.exists());
 
-        mHelper.copyFile(mBundle, mFilename, mBundle, mDestinationFilename);
+        mHelper.copyFile(mBundle, mFilename, mBundle, mDestinationFilename, mGzippedHash);
 
         assertTrue(mDestinationFile.exists());
         assertTrue(mOriginalFile.exists());

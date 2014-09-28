@@ -86,7 +86,8 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
                 mRequest.getSourceURL().getObjectURL(fileInfo),
                 localBundleFolder,
                 filename,
-                false).call().getParentFile();
+                false,
+                fileInfo.getHash()).call().getParentFile();
     }
 
     private ZincBundle createZincBundle(final File folder) {

@@ -6,6 +6,7 @@ import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.ZincLogging;
 import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
+import com.mindsnacks.zinc.classes.fileutils.HashUtil;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
@@ -69,15 +70,16 @@ public class ZincDownloader implements ZincJobFactory {
     public Callable<File> downloadFile(final URL url,
                                              final File root,
                                              final String child,
-                                             final boolean override) {
-        return new ZincDownloadFileJob(createRequestExecutor(), url, root, child, override);
+                                             final boolean override,
+                                             final String expectedHash) {
+        return new ZincDownloadFileJob(createRequestExecutor(), url, root, child, override, expectedHash, new FileHelper(mGson, new HashUtil()));
     }
 
     @Override
     public Callable<ZincBundle> unarchiveBundle(final ZincBundle downloadedBundle,
                                                 final ZincCloneBundleRequest request,
                                                 final ZincManifest manifest) {
-        return new ZincUnarchiveBundleJob(downloadedBundle, request, manifest, new FileHelper(mGson));
+        return new ZincUnarchiveBundleJob(downloadedBundle, request, manifest, new FileHelper(mGson, new HashUtil()));
     }
 
     private ZincRequestExecutor createRequestExecutor() {

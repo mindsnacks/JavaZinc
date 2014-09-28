@@ -1,5 +1,7 @@
 package com.mindsnacks.zinc.classes.jobs;
 
+import com.mindsnacks.zinc.exceptions.ZincException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +33,7 @@ public abstract class AbstractZincDownloadFileJob extends AbstractZincDownloadJo
 
             try {
                 writeFile(inputStream, mFile);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new DownloadFileError("Error writing to file '" + mFile.getAbsolutePath() + "'", e);
             }
         } else {
@@ -45,5 +47,5 @@ public abstract class AbstractZincDownloadFileJob extends AbstractZincDownloadJo
         return mOverride || !mFile.exists();
     }
 
-    abstract protected void writeFile(final InputStream inputStream, final File outputFile) throws IOException;
+    abstract protected void writeFile(final InputStream inputStream, final File outputFile) throws IOException, ZincException;
 }

@@ -1,7 +1,9 @@
 package com.mindsnacks.zinc.classes.jobs;
 
+import com.mindsnacks.zinc.classes.fileutils.FileHelper;
+import com.mindsnacks.zinc.exceptions.ZincException;
+
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -11,30 +13,28 @@ import java.net.URL;
  * Date: 9/4/13
  */
 public class ZincDownloadFileJob extends AbstractZincDownloadFileJob {
-    private static final int BUFFER_SIZE = 1024;
+    private final String expectedHash;
+    private final FileHelper mFileUtil;
 
     public ZincDownloadFileJob(final ZincRequestExecutor requestExecutor,
                                final URL url,
                                final File root,
                                final String child,
-                               final boolean override) {
+                               final boolean override,
+                               final String expectedHash,
+                               final FileHelper fileUtil) {
         super(requestExecutor, url, root, child, override);
+        this.expectedHash = expectedHash;
+        this.mFileUtil = fileUtil;
     }
 
-    // TODO: use FileHelper
     @Override
-    protected void writeFile(final InputStream inputStream, final File file) throws IOException {
+    protected void writeFile(final InputStream inputStream, final File file) throws IOException, ZincException {
         logMessage("Saving file " + file.getAbsolutePath());
 
-        final FileOutputStream outputStream = new FileOutputStream(file);
+        //todo: copy to temporary file, then move into final destination
+        mFileUtil.streamToFile(inputStream, file, expectedHash);
 
-        int read = 0;
-        final byte[] bytes = new byte[BUFFER_SIZE];
-
-        while ((read = inputStream.read(bytes, 0, BUFFER_SIZE)) != -1) {
-            outputStream.write(bytes, 0, read);
-        }
-
-        outputStream.close();
+        //mFileUtil.moveFile(temporaryFile, file);
     }
 }
