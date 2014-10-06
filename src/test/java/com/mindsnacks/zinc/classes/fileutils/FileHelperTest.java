@@ -58,7 +58,7 @@ public class FileHelperTest extends ZincBaseTest {
         file2 = TestUtils.createFile(rootFolder, filename2, "file2");
 
         createGzipFile(mContents, mOriginalFile);
-        mOriginalHash = mHashUtil.sha1HashString(mContents);
+        mOriginalHash = TestUtils.sha1HashString(mContents);
         mGzippedHash = mHashUtil.sha1HashString(new FileInputStream(mOriginalFile));
     }
 
@@ -81,6 +81,11 @@ public class FileHelperTest extends ZincBaseTest {
         mHelper.unzipFile(mBundle, mFilename, mBundle, mDestinationFilename, mOriginalHash);
 
         assertEquals(mContents, TestUtils.readFile(mDestinationFile));
+    }
+
+    @Test(expected = ZincException.class)
+    public void testFailingUnzipFile() throws Exception {
+        mHelper.unzipFile(mBundle, mFilename, mBundle, mDestinationFilename, mOriginalHash + "NOT_THE_HASH");
     }
 
     @Test

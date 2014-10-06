@@ -1,6 +1,7 @@
 package com.mindsnacks.zinc.classes.fileutils;
 
 import com.mindsnacks.zinc.exceptions.ZincException;
+import com.mindsnacks.zinc.utils.TestUtils;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Rule;
@@ -26,7 +27,7 @@ public class ValidatingDigestOutputStreamTest extends ZincBaseTest {
     public void setup(){
         mHashUtil = new HashUtil();
         mContents = randomString();
-        mHash = mHashUtil.sha1HashString(mContents);
+        mHash = TestUtils.sha1HashString(mContents);
     }
 
     @Test

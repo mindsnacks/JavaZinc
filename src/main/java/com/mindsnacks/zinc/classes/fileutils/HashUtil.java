@@ -2,7 +2,6 @@ package com.mindsnacks.zinc.classes.fileutils;
 
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,10 +15,6 @@ public class HashUtil {
 
     private static final String HASH_TYPE = "SHA1";
     private static final int BUFF_SIZE = 1024;
-
-    public String sha1HashString(String input){
-        return sha1HashString(new ByteArrayInputStream(input.getBytes()));
-    }
 
     public String sha1HashString(InputStream inputStream) {
         return toHexString(sha1Hash(inputStream));
@@ -60,7 +55,7 @@ public class HashUtil {
         return builder.toString();
     }
 
-    public ValidatingDigestOutputStream wrapOutputStreamWithDigest(OutputStream outputStream){
+    public ValidatingDigestOutputStream wrapOutputStreamWithDigest(OutputStream outputStream) {
         return new ValidatingDigestOutputStream(outputStream, newDigest());
     }
 }

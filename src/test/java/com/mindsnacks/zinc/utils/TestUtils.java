@@ -1,6 +1,7 @@
 package com.mindsnacks.zinc.utils;
 
 import com.google.common.io.CharStreams;
+import com.mindsnacks.zinc.classes.fileutils.HashUtil;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.*;
@@ -10,6 +11,11 @@ import java.io.*;
  * Date: 9/4/13
  */
 public class TestUtils {
+
+    public static String sha1HashString(String input) {
+        return new HashUtil().sha1HashString(new ByteArrayInputStream(input.getBytes()));
+    }
+
     public static String readFile(final String path) throws IOException {
         return readFile(new File(path));
     }
