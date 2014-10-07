@@ -145,6 +145,9 @@ public class FileHelper {
     }
 
     public void streamToFile(final InputStream inputStream, final File file, final String expectedHash) throws IOException, ZincException {
+        if(!file.exists()){
+            createDirectories(file);
+        }
         final ValidatingDigestOutputStream digestStream = mHashUtil.wrapOutputStreamWithDigest(new FileOutputStream(file));
         final OutputStream dest = new BufferedOutputStream(digestStream);
         try {

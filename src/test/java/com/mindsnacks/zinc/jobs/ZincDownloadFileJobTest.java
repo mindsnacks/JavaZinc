@@ -1,6 +1,7 @@
 package com.mindsnacks.zinc.jobs;
 
 import com.google.gson.Gson;
+import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import com.mindsnacks.zinc.classes.fileutils.HashUtil;
 import com.mindsnacks.zinc.classes.jobs.ZincDownloadFileJob;
@@ -31,8 +32,10 @@ import static org.mockito.Mockito.*;
  */
 public class ZincDownloadFileJobTest extends ZincBaseTest {
     @Mock private ZincRequestExecutor mRequestExecutor;
+    @Mock private ZincCloneBundleRequest mRequest;
 
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     private static final String EMPTY_FILE_HASH = "0a4d55a8d778e5022fab701977c5d840bbc486d0";
     private final URL mUrl = TestFactory.createURL("http://mindsnacks.com");
@@ -43,6 +46,7 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
     @Before
     public void setUp() throws Exception {
         initializeJob(true);
+        when(mRequest.getRepoFolder()).thenReturn(temporaryFolder.getRoot());
     }
 
     @Test
@@ -93,7 +97,7 @@ public class ZincDownloadFileJobTest extends ZincBaseTest {
     }
 
     private void initializeJob(final boolean override) throws FileNotFoundException {
-        mJob = new ZincDownloadFileJob(mRequestExecutor, mUrl, rootFolder.getRoot(), mFilename, override, EMPTY_FILE_HASH, new FileHelper(new Gson(), new HashUtil()));
+        mJob = new ZincDownloadFileJob(mRequestExecutor, mRequest, mUrl, rootFolder.getRoot(), mFilename, override, EMPTY_FILE_HASH, new FileHelper(new Gson(), new HashUtil()));
     }
 
     private File run() throws Exception {

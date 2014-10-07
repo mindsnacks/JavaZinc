@@ -1,5 +1,7 @@
 package com.mindsnacks.zinc.classes.jobs;
 
+import com.mindsnacks.zinc.classes.data.PathHelper;
+import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import com.mindsnacks.zinc.exceptions.ZincException;
 
@@ -15,8 +17,10 @@ import java.net.URL;
 public class ZincDownloadFileJob extends AbstractZincDownloadFileJob {
     private final String expectedHash;
     private final FileHelper mFileUtil;
+    private final ZincCloneBundleRequest mRequest;
 
     public ZincDownloadFileJob(final ZincRequestExecutor requestExecutor,
+                               final ZincCloneBundleRequest request,
                                final URL url,
                                final File root,
                                final String child,
@@ -26,15 +30,25 @@ public class ZincDownloadFileJob extends AbstractZincDownloadFileJob {
         super(requestExecutor, url, root, child, override);
         this.expectedHash = expectedHash;
         this.mFileUtil = fileUtil;
+        this.mRequest = request;
     }
 
     @Override
     protected void writeFile(final InputStream inputStream, final File file) throws IOException, ZincException {
         logMessage("Saving file " + file.getAbsolutePath());
 
-        //todo: copy to temporary file, then move into final destination
-        mFileUtil.streamToFile(inputStream, file, expectedHash);
+        File temporaryFile = new File(
+                getTemporaryDownloadFolder(file.getName()),
+                file.getName());
 
-        //mFileUtil.moveFile(temporaryFile, file);
+        mFileUtil.streamToFile(inputStream, temporaryFile, expectedHash);
+        mFileUtil.moveFile(temporaryFile, file);
+    }
+
+    private File getTemporaryDownloadFolder(final String fileName) {
+        return new File(
+                mRequest.getRepoFolder(),
+                PathHelper.getLocalTemporaryDownloadFolder(fileName)
+        );
     }
 }

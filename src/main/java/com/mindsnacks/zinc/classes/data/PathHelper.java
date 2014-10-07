@@ -27,6 +27,10 @@ public class PathHelper {
         return String.format("%s/%s-%d%s%s", TEMPORARY_BUNDLES_FOLDER, bundleID, version, FLAVOR_SEPARATOR, flavorName);
     }
 
+    public static String getLocalTemporaryDownloadFolder(final String name) {
+        return String.format("%s/%s", TEMPORARY_BUNDLES_FOLDER, name);
+    }
+
     public static String getLocalCatalogFilePath(final String catalogID) {
         return String.format("%s%s.%s", getCatalogsFolder(), catalogID, CATALOGS_FORMAT);
     }

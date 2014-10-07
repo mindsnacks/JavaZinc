@@ -68,11 +68,12 @@ public class ZincDownloader implements ZincJobFactory {
 
     @Override
     public Callable<File> downloadFile(final URL url,
-                                             final File root,
-                                             final String child,
-                                             final boolean override,
-                                             final String expectedHash) {
-        return new ZincDownloadFileJob(createRequestExecutor(), url, root, child, override, expectedHash, new FileHelper(mGson, new HashUtil()));
+                                       final ZincCloneBundleRequest mRequest,
+                                       final File root,
+                                       final String child,
+                                       final boolean override,
+                                       final String expectedHash) {
+        return new ZincDownloadFileJob(createRequestExecutor(), mRequest, url, root, child, override, expectedHash, new FileHelper(mGson, new HashUtil()));
     }
 
     @Override
