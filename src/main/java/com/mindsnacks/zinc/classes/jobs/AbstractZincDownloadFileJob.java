@@ -1,6 +1,6 @@
 package com.mindsnacks.zinc.classes.jobs;
 
-import com.mindsnacks.zinc.exceptions.ZincException;
+import com.mindsnacks.zinc.classes.fileutils.ValidatingDigestOutputStream;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,5 +47,5 @@ public abstract class AbstractZincDownloadFileJob extends AbstractZincDownloadJo
         return mOverride || !mFile.exists();
     }
 
-    abstract protected void writeFile(final InputStream inputStream, final File outputFile) throws IOException, ZincException;
+    abstract protected void writeFile(final InputStream inputStream, final File outputFile) throws IOException, ValidatingDigestOutputStream.HashFailedException;
 }

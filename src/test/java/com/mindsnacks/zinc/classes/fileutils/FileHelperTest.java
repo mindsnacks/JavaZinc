@@ -4,7 +4,6 @@ import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 import com.mindsnacks.zinc.classes.data.BundleID;
 import com.mindsnacks.zinc.classes.data.ZincBundle;
-import com.mindsnacks.zinc.exceptions.ZincException;
 import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.TestUtils;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
@@ -63,7 +62,7 @@ public class FileHelperTest extends ZincBaseTest {
     }
 
     @Test
-    public void testStreamToFile() throws IOException, ZincException {
+    public void testStreamToFile() throws IOException, ValidatingDigestOutputStream.HashFailedException {
         mHelper.streamToFile(new ByteArrayInputStream(mContents.getBytes()), mDestinationFile, mOriginalHash);
 
         assertEquals(mContents, TestUtils.readFile(mDestinationFile));
@@ -83,7 +82,7 @@ public class FileHelperTest extends ZincBaseTest {
         assertEquals(mContents, TestUtils.readFile(mDestinationFile));
     }
 
-    @Test(expected = ZincException.class)
+    @Test(expected = ValidatingDigestOutputStream.HashFailedException.class)
     public void testFailingUnzipFile() throws Exception {
         mHelper.unzipFile(mBundle, mFilename, mBundle, mDestinationFilename, mOriginalHash + "NOT_THE_HASH");
     }

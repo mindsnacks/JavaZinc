@@ -2,7 +2,7 @@ package com.mindsnacks.zinc.classes.jobs;
 
 import com.mindsnacks.zinc.classes.data.*;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
-import com.mindsnacks.zinc.exceptions.ZincException;
+import com.mindsnacks.zinc.classes.fileutils.ValidatingDigestOutputStream;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
@@ -63,7 +63,7 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
 
     private void unarchiveBundle(final File downloadedBundle,
                                  final File temporaryFolder,
-                                 final ZincManifest manifest) throws IOException, ZincException {
+                                 final ZincManifest manifest) throws IOException, ValidatingDigestOutputStream.HashFailedException {
         logMessage("unarchiving");
 
         final Map<String, ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mRequest.getFlavorName());

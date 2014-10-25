@@ -1,6 +1,7 @@
 package com.mindsnacks.zinc.classes.fileutils;
 
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
+import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -8,10 +9,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.*;
 
-public class HashUtilTest {
+public class HashUtilTest extends ZincBaseTest {
 
     private HashUtil mHashUtil;
 
@@ -37,7 +39,7 @@ public class HashUtilTest {
             mHashUtil.sha1HashString(thowingInputStream);
             assertFalse("Expected exception not thrown", true);
         } catch (ZincRuntimeException e) {
-            assertTrue(true);
+            // Expected ZincRuntimeException
         }
     }
 }

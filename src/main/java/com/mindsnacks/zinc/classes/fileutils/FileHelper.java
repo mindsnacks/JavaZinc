@@ -2,7 +2,6 @@ package com.mindsnacks.zinc.classes.fileutils;
 
 import com.google.common.io.Files;
 import com.google.gson.Gson;
-import com.mindsnacks.zinc.exceptions.ZincException;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.*;
@@ -28,7 +27,7 @@ public class FileHelper {
                           final String originFilename,
                           final File destinationFolder,
                           final String destinationFilename,
-                          final String expectedHash) throws IOException, ZincException {
+                          final String expectedHash) throws IOException, ValidatingDigestOutputStream.HashFailedException {
         final File input = new File(originFolder, originFilename),
                    output = new File(destinationFolder, destinationFilename);
 
@@ -77,7 +76,7 @@ public class FileHelper {
                          final String originFilename,
                          final File destinationFolder,
                          final String destinationFilename,
-                         final String expectedHash) throws IOException, ZincException {
+                         final String expectedHash) throws IOException, ValidatingDigestOutputStream.HashFailedException {
         final File input = new File(originFolder, originFilename),
                    output = new File(destinationFolder, destinationFilename);
 
@@ -144,10 +143,8 @@ public class FileHelper {
         return file.getParentFile().mkdirs();
     }
 
-    public void streamToFile(final InputStream inputStream, final File file, final String expectedHash) throws IOException, ZincException {
-        if(!file.exists()){
-            createDirectories(file);
-        }
+    public void streamToFile(final InputStream inputStream, final File file, final String expectedHash) throws IOException, ValidatingDigestOutputStream.HashFailedException {
+        createDirectories(file);
         final ValidatingDigestOutputStream digestStream = mHashUtil.wrapOutputStreamWithDigest(new FileOutputStream(file));
         final OutputStream dest = new BufferedOutputStream(digestStream);
         try {

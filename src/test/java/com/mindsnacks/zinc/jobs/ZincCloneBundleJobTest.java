@@ -71,7 +71,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         when(mJobFactory.downloadBundle(eq(mRequest), eq(mZincCatalogFuture))).thenReturn(mDownloadBundleJob);
         when(mJobFactory.downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion))).thenReturn(mZincManifestJob);
         when(mJobFactory.unarchiveBundle(any(ZincBundle.class), eq(mRequest), eq(mZincManifest))).thenReturn(mResultBundleJob);
-        when(mJobFactory.downloadFile(eq(mObjectURL), eq(mRequest), any(File.class), eq(mSingleFilename), anyBoolean(), anyString())).thenReturn(mDownloadFileJob);
+        when(mJobFactory.downloadFile(eq(mObjectURL), any(File.class), eq(mRepoFolder), eq(mSingleFilename), anyBoolean(), anyString())).thenReturn(mDownloadFileJob);
 
         TestFactory.setCallableResult(mDownloadBundleJob, mDownloadedBundle);
         TestFactory.setCallableResult(mDownloadFileJob, mDownloadedFile);
@@ -186,7 +186,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
         run();
 
-        verify(mJobFactory).downloadFile(eq(mObjectURL), eq(mRequest), eq(expectedResultDirectory), eq(mSingleFilename), eq(false), anyString());
+        verify(mJobFactory).downloadFile(eq(mObjectURL), eq(expectedResultDirectory), eq(mRepoFolder), eq(mSingleFilename), eq(false), anyString());
     }
 
     @Test

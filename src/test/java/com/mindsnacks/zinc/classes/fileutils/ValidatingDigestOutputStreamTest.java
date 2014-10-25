@@ -1,6 +1,5 @@
 package com.mindsnacks.zinc.classes.fileutils;
 
-import com.mindsnacks.zinc.exceptions.ZincException;
 import com.mindsnacks.zinc.utils.TestUtils;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Before;
@@ -14,7 +13,6 @@ import java.io.OutputStreamWriter;
 
 import static com.mindsnacks.zinc.utils.TestFactory.randomString;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class ValidatingDigestOutputStreamTest extends ZincBaseTest {
 
@@ -22,41 +20,41 @@ public class ValidatingDigestOutputStreamTest extends ZincBaseTest {
     private HashUtil mHashUtil;
     private String mContents;
     private String mHash;
+    private ValidatingDigestOutputStream mStream;
 
     @Before
-    public void setup(){
+    public void setup() throws IOException {
         mHashUtil = new HashUtil();
         mContents = randomString();
         mHash = TestUtils.sha1HashString(mContents);
+        mStream = setupDigestStream();
     }
 
     @Test
     public void testValidStream() throws IOException {
-        ValidatingDigestOutputStream stream = new ValidatingDigestOutputStream(new ByteArrayOutputStream(), mHashUtil.newDigest());
-        OutputStreamWriter writer = new OutputStreamWriter(stream);
-        writer.write(mContents);
-        writer.flush();
-
         try{
-            stream.validate(mHash);
-        } catch (ZincException e) {
+            mStream.validate(mHash);
+        } catch (ValidatingDigestOutputStream.HashFailedException e) {
             assertFalse("Hash validation failed", true);
         }
     }
 
     @Test
     public void testInvalidStream() throws IOException {
+        try{
+            mStream.validate(mHash + "NOT_THE_HASH");
+            assertFalse("Hash validation failed", true);
+        } catch (ValidatingDigestOutputStream.HashFailedException e) {
+            // Expected Hash validation fail
+        }
+    }
+
+    private ValidatingDigestOutputStream setupDigestStream() throws IOException {
         ValidatingDigestOutputStream stream = new ValidatingDigestOutputStream(new ByteArrayOutputStream(), mHashUtil.newDigest());
         OutputStreamWriter writer = new OutputStreamWriter(stream);
         writer.write(mContents);
         writer.flush();
 
-        try{
-            stream.validate(mHash + "NOT_THE_HASH");
-            assertFalse("Hash validation failed", true);
-        } catch (ZincException e) {
-            assertTrue("Hash validation succeeded", true);
-        }
+        return stream;
     }
-
 }
