@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 import static com.mindsnacks.zinc.utils.TestFactory.randomString;
-import static org.junit.Assert.assertFalse;
 
 public class ValidatingDigestOutputStreamTest extends ZincBaseTest {
 
@@ -31,22 +30,13 @@ public class ValidatingDigestOutputStreamTest extends ZincBaseTest {
     }
 
     @Test
-    public void testValidStream() throws IOException {
-        try{
-            mStream.validate(mHash);
-        } catch (ValidatingDigestOutputStream.HashFailedException e) {
-            assertFalse("Hash validation failed", true);
-        }
+    public void testValidStream() throws ValidatingDigestOutputStream.HashFailedException {
+        mStream.validate(mHash);
     }
 
-    @Test
-    public void testInvalidStream() throws IOException {
-        try{
-            mStream.validate(mHash + "NOT_THE_HASH");
-            assertFalse("Hash validation failed", true);
-        } catch (ValidatingDigestOutputStream.HashFailedException e) {
-            // Expected Hash validation fail
-        }
+    @Test(expected = ValidatingDigestOutputStream.HashFailedException.class)
+    public void testInvalidStream() throws ValidatingDigestOutputStream.HashFailedException {
+        mStream.validate(mHash + "NOT_THE_HASH");
     }
 
     private ValidatingDigestOutputStream setupDigestStream() throws IOException {

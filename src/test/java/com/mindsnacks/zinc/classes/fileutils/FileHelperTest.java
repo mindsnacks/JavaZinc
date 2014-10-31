@@ -58,7 +58,7 @@ public class FileHelperTest extends ZincBaseTest {
 
         createGzipFile(mContents, mOriginalFile);
         mOriginalHash = TestUtils.sha1HashString(mContents);
-        mGzippedHash = mHashUtil.sha1HashString(new FileInputStream(mOriginalFile));
+        mGzippedHash = TestUtils.sha1HashString(new FileInputStream(mOriginalFile));
     }
 
     @Test

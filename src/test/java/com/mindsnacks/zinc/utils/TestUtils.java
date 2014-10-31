@@ -5,6 +5,7 @@ import com.mindsnacks.zinc.classes.fileutils.HashUtil;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.*;
+import java.security.MessageDigest;
 
 /**
  * User: NachoSoto
@@ -12,8 +13,37 @@ import java.io.*;
  */
 public class TestUtils {
 
-    public static String sha1HashString(String input) {
-        return new HashUtil().sha1HashString(new ByteArrayInputStream(input.getBytes()));
+    private static final int BUFF_SIZE = 1024;
+
+    public static String sha1HashString(String input) throws IOException {
+        return sha1HashString(new ByteArrayInputStream(input.getBytes()));
+    }
+
+    public static String sha1HashString(InputStream inputStream) throws IOException {
+        return toHexString(sha1Hash(inputStream));
+    }
+
+    private static MessageDigest sha1Hash(InputStream inputStream) throws IOException{
+        MessageDigest md = new HashUtil().newDigest();
+
+        byte[] buff = new byte[BUFF_SIZE];
+        int length;
+        while ((length = inputStream.read(buff)) > 0) {
+            md.update(buff, 0, length);
+        }
+        inputStream.close();
+
+        return md;
+    }
+
+    private static String toHexString(MessageDigest digest) {
+        StringBuilder builder = new StringBuilder();
+
+        for (byte b : digest.digest()) {
+            builder.append(String.format("%02x", b));
+        }
+
+        return builder.toString();
     }
 
     public static String readFile(final String path) throws IOException {

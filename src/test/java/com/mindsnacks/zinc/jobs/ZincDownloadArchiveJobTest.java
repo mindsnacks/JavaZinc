@@ -103,7 +103,7 @@ public class ZincDownloadArchiveJobTest extends ZincBaseTest {
 
             int count;
             byte data[] = new byte[2048];
-            while ((count = origin.read(data)) != -1) {
+            while ((count = origin.read(data)) > 0) {
                 tar.write(data, 0, count);
             }
 
