@@ -160,7 +160,7 @@ public class FileHelper {
     private void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
         int read;
         final byte[] bytes = new byte[BUFFER_SIZE];
-        while ((read = inputStream.read(bytes, 0, BUFFER_SIZE)) > 0) {
+        while ((read = inputStream.read(bytes, 0, BUFFER_SIZE)) >= 0) {
             outputStream.write(bytes, 0, read);
         }
     }

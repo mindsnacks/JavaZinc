@@ -28,7 +28,7 @@ public class TestUtils {
 
         byte[] buff = new byte[BUFF_SIZE];
         int length;
-        while ((length = inputStream.read(buff)) > 0) {
+        while ((length = inputStream.read(buff)) >= 0) {
             md.update(buff, 0, length);
         }
         inputStream.close();
