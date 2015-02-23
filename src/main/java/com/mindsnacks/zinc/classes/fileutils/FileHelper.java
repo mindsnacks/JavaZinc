@@ -16,13 +16,18 @@ public class FileHelper {
     private static final int BUFFER_SIZE = 8192;
 
     private final Gson mGson;
+    private final HashUtil mHashUtil;
 
-    public FileHelper(final Gson gson) {
+    public FileHelper(final Gson gson, final HashUtil hashUtil) {
         mGson = gson;
+        mHashUtil = hashUtil;
     }
 
-    public void unzipFile(final File originFolder, final String originFilename,
-                          final File destinationFolder, final String destinationFilename) throws IOException {
+    public void unzipFile(final File originFolder,
+                          final String originFilename,
+                          final File destinationFolder,
+                          final String destinationFilename,
+                          final String expectedHash) throws IOException, ValidatingDigestOutputStream.HashFailedException {
         final File input = new File(originFolder, originFilename),
                    output = new File(destinationFolder, destinationFilename);
 
@@ -37,18 +42,16 @@ public class FileHelper {
                 throw new ZincRuntimeException("Error opening gzip file: " + input.getAbsolutePath(), e);
             }
 
-            final OutputStream dest = new BufferedOutputStream(new FileOutputStream(output));
+            final ValidatingDigestOutputStream digestStream = mHashUtil.wrapOutputStreamWithDigest(new FileOutputStream(output));
+            final OutputStream dest = new BufferedOutputStream(digestStream);
             try {
-                int count;
-                final byte data[] = new byte[BUFFER_SIZE];
-
-                while ((count = in.read(data)) != -1) {
-                    dest.write(data, 0, count);
-                }
+                copy(in, dest);
             } finally {
                 dest.close();
                 in.close();
             }
+
+            digestStream.validate(expectedHash);
         }
     }
 
@@ -56,8 +59,10 @@ public class FileHelper {
         return new BufferedReader(new FileReader(file));
     }
 
-    public boolean moveFile(final File originFolder, final String originFilename,
-                            final File destinationFolder, final String destinationFilename) {
+    public boolean moveFile(final File originFolder,
+                            final String originFilename,
+                            final File destinationFolder,
+                            final String destinationFilename) {
         return moveFile(new File(originFolder, originFilename),
                         new File(destinationFolder, destinationFilename));
     }
@@ -67,14 +72,22 @@ public class FileHelper {
         return originFile.renameTo(destinationFile);
     }
 
-    public void copyFile(final File originFolder, final String originFilename,
-                         final File destinationFolder, final String destinationFilename) throws IOException {
+    public void copyFile(final File originFolder,
+                         final String originFilename,
+                         final File destinationFolder,
+                         final String destinationFilename,
+                         final String expectedHash) throws IOException, ValidatingDigestOutputStream.HashFailedException {
         final File input = new File(originFolder, originFilename),
                    output = new File(destinationFolder, destinationFilename);
 
         if (!output.exists()) {
             createDirectories(output);
-            Files.copy(input, output);
+            output.createNewFile();
+            final ValidatingDigestOutputStream digestStream = mHashUtil.wrapOutputStreamWithDigest(new FileOutputStream(output));
+
+            Files.copy(input, digestStream);
+
+            digestStream.validate(expectedHash);
         }
     }
 
@@ -128,5 +141,27 @@ public class FileHelper {
 
     private boolean createDirectories(final File file) {
         return file.getParentFile().mkdirs();
+    }
+
+    public void streamToFile(final InputStream inputStream, final File file, final String expectedHash) throws IOException, ValidatingDigestOutputStream.HashFailedException {
+        createDirectories(file);
+        final ValidatingDigestOutputStream digestStream = mHashUtil.wrapOutputStreamWithDigest(new FileOutputStream(file));
+        final OutputStream dest = new BufferedOutputStream(digestStream);
+        try {
+            copy(inputStream, dest);
+        } finally {
+            dest.close();
+            inputStream.close();
+        }
+
+        digestStream.validate(expectedHash);
+    }
+
+    private void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+        int read;
+        final byte[] bytes = new byte[BUFFER_SIZE];
+        while ((read = inputStream.read(bytes, 0, BUFFER_SIZE)) >= 0) {
+            outputStream.write(bytes, 0, read);
+        }
     }
 }

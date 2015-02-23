@@ -1,7 +1,10 @@
 package com.mindsnacks.zinc.classes.jobs;
 
+import com.mindsnacks.zinc.classes.data.PathHelper;
+import com.mindsnacks.zinc.classes.fileutils.FileHelper;
+import com.mindsnacks.zinc.classes.fileutils.ValidatingDigestOutputStream;
+
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -11,30 +14,39 @@ import java.net.URL;
  * Date: 9/4/13
  */
 public class ZincDownloadFileJob extends AbstractZincDownloadFileJob {
-    private static final int BUFFER_SIZE = 1024;
+    private final String expectedHash;
+    private final FileHelper mFileUtil;
+    private final File mRepoFolder;
 
     public ZincDownloadFileJob(final ZincRequestExecutor requestExecutor,
                                final URL url,
                                final File root,
+                               final File repoFolder,
                                final String child,
-                               final boolean override) {
+                               final boolean override,
+                               final String expectedHash,
+                               final FileHelper fileUtil) {
         super(requestExecutor, url, root, child, override);
+        this.expectedHash = expectedHash;
+        this.mFileUtil = fileUtil;
+        this.mRepoFolder = repoFolder;
     }
 
-    // TODO: use FileHelper
     @Override
-    protected void writeFile(final InputStream inputStream, final File file) throws IOException {
+    protected void writeFile(final InputStream inputStream, final File file) throws IOException, ValidatingDigestOutputStream.HashFailedException {
         logMessage("Saving file " + file.getAbsolutePath());
 
-        final FileOutputStream outputStream = new FileOutputStream(file);
+        File temporaryFile = new File(
+                getTemporaryDownloadFolder(file.getName()),
+                file.getName());
 
-        int read = 0;
-        final byte[] bytes = new byte[BUFFER_SIZE];
+        mFileUtil.streamToFile(inputStream, temporaryFile, expectedHash);
+        mFileUtil.moveFile(temporaryFile, file);
+    }
 
-        while ((read = inputStream.read(bytes, 0, BUFFER_SIZE)) != -1) {
-            outputStream.write(bytes, 0, read);
-        }
-
-        outputStream.close();
+    private File getTemporaryDownloadFolder(final String fileName) {
+        return new File(mRepoFolder,
+                PathHelper.getLocalTemporaryDownloadFolder(fileName)
+        );
     }
 }

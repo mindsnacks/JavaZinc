@@ -52,7 +52,7 @@ public class ZincDownloadArchiveJob extends AbstractZincDownloadFileJob {
         final BufferedOutputStream dest = new BufferedOutputStream(fos);
 
         try {
-            while ((count = inputStream.read(data)) != -1) {
+            while ((count = inputStream.read(data, 0, BUFFER_SIZE)) >= 0) {
                 dest.write(data, 0, count);
             }
         } finally {

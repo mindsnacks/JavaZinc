@@ -7,6 +7,7 @@ import com.mindsnacks.zinc.classes.downloads.DownloadPriority;
 import com.mindsnacks.zinc.classes.downloads.PriorityCalculator;
 import com.mindsnacks.zinc.classes.downloads.PriorityJobQueue;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
+import com.mindsnacks.zinc.classes.fileutils.HashUtil;
 import com.mindsnacks.zinc.classes.jobs.ZincDownloader;
 
 import java.io.File;
@@ -51,7 +52,7 @@ public final class ZincRepoFactory {
                                             final ZincRepoIndex repoIndex,
                                             final ScheduledExecutorService executorService) {
         return new ZincCatalogs(root,
-                    new FileHelper(gson),
+                    new FileHelper(gson, new HashUtil()),
                     new HashSet<SourceURL>(repoIndex.getSources()),
                     jobFactory,
                     executorService,
