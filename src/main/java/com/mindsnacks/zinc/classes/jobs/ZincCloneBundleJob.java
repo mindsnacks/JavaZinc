@@ -59,6 +59,7 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
     }
 
     private boolean shouldDownloadBundle(final File localBundleFolder) {
+//        return true;
         // TODO: extract this logic as a first step to implement bundle verification
         return (!localBundleFolder.exists() || localBundleFolder.listFiles().length == 0);
     }

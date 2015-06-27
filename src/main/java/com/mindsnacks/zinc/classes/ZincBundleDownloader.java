@@ -3,6 +3,7 @@ package com.mindsnacks.zinc.classes;
 import com.mindsnacks.zinc.classes.data.ZincBundle;
 import com.mindsnacks.zinc.classes.data.ZincCatalogsCache;
 import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
+import com.mindsnacks.zinc.classes.data.ZincManifestCache;
 import com.mindsnacks.zinc.classes.downloads.PriorityJobQueue;
 
 import java.util.concurrent.Callable;

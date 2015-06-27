@@ -6,6 +6,7 @@ import com.mindsnacks.zinc.classes.data.SourceURL;
 import com.mindsnacks.zinc.classes.data.ZincBundle;
 import com.mindsnacks.zinc.classes.data.ZincCatalogsCache;
 import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
+import com.mindsnacks.zinc.classes.data.ZincManifestCache;
 import com.mindsnacks.zinc.classes.data.ZincRepoIndex;
 import com.mindsnacks.zinc.classes.downloads.PriorityJobQueue;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
