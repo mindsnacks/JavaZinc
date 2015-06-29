@@ -51,7 +51,7 @@ public class ZincManifests implements ZincManifestsCache {
         if (!mFutures.containsKey(manifestID)) {
             ListenableFuture<ZincManifest> result;
 
-            final File manifestFile = getManifestFile(manifestID);
+            final File manifestFile = getManifestFile(sourceURL.getCatalogID(), manifestID);
 
             try {
                 result = getPersistedManifest(manifestID, manifestFile);
@@ -128,8 +128,8 @@ public class ZincManifests implements ZincManifestsCache {
         return new File(mRoot, PathHelper.getManifestsFolder());
     }
 
-    private File getManifestFile(final String manifestID) {
-        return new File(mRoot, PathHelper.getLocalManifestFilePath(manifestID));
+    private File getManifestFile(final String catalogID, final String manifestID) {
+        return new File(mRoot, PathHelper.getLocalManifestFilePath(catalogID, manifestID));
     }
 
     private String getManifestID(final String bundleName,
