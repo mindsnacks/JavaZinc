@@ -2,6 +2,7 @@ package com.mindsnacks.zinc.classes.jobs;
 
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.*;
+import com.mindsnacks.zinc.classes.fileutils.BundleIntegrityVerifier;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
@@ -36,12 +37,11 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
         mVersion = getBundleVersion(mBundleID);
 
         final File localBundleFolder = getLocalBundleFolder();
+        final ZincManifest manifest = getManifest();
+        final String flavorName = mRequest.getFlavorName();
 
-        if (shouldDownloadBundle(localBundleFolder)) {
+        if (shouldDownloadBundle(localBundleFolder, manifest, flavorName)) {
             createFolder(localBundleFolder);
-
-            final ZincManifest manifest = getManifest();
-            final String flavorName = mRequest.getFlavorName();
 
             if (manifest.containsFiles(flavorName)) {
                 if (manifest.archiveExists(flavorName)) {
@@ -61,10 +61,12 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
         }
     }
 
-    private boolean shouldDownloadBundle(final File localBundleFolder) {
-//        return true;
-        // TODO: extract this logic as a first step to implement bundle verification
-        return (!localBundleFolder.exists() || localBundleFolder.listFiles().length == 0);
+    private boolean shouldDownloadBundle(final File localBundleFolder,
+                                         final ZincManifest manifest,
+                                         final String flavorName) {
+        return (!localBundleFolder.exists() ||
+                localBundleFolder.listFiles().length == 0 ||
+                !BundleIntegrityVerifier.isLocalBundleValid(localBundleFolder, manifest, flavorName));
     }
 
     private void createFolder(final File folder) {

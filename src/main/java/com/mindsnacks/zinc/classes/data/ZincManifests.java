@@ -57,9 +57,9 @@ public class ZincManifests implements ZincManifestsCache {
                 result = getPersistedManifest(manifestID, manifestFile);
             } catch (final FileNotFoundException e) {
                 result = downloadManifest(sourceURL,
-                        bundleName,
-                        version,
-                        manifestFile);
+                                          bundleName,
+                                          version,
+                                          manifestFile);
             }
 
             cacheFuture(manifestID, result);
