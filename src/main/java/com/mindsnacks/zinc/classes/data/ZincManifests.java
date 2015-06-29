@@ -15,7 +15,7 @@ import java.util.concurrent.Future;
 /**
  * Created by Miguel Carranza on 6/26/15.
  */
-public class ZincManifests implements ZincManifestCache {
+public class ZincManifests implements ZincManifestsCache {
     private final File mRoot;
     private final FileHelper mFileHelper;
 
@@ -57,9 +57,9 @@ public class ZincManifests implements ZincManifestCache {
                 result = getPersistedManifest(manifestID, manifestFile);
             } catch (final FileNotFoundException e) {
                 result = downloadManifest(sourceURL,
-                                          bundleName,
-                                          version,
-                                          manifestFile);
+                        bundleName,
+                        version,
+                        manifestFile);
             }
 
             cacheFuture(manifestID, result);

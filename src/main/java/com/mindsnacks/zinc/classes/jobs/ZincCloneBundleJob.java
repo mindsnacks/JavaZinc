@@ -16,15 +16,18 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
     private final ZincCloneBundleRequest mRequest;
     private final ZincJobFactory mJobFactory;
     private final Future<ZincCatalog> mCatalogFuture;
+    private final ZincManifestsCache mManifests;
     private BundleID mBundleID;
     private int mVersion;
 
     public ZincCloneBundleJob(final ZincCloneBundleRequest request,
                               final ZincJobFactory jobFactory,
-                              final Future<ZincCatalog> catalogFuture) {
+                              final Future<ZincCatalog> catalogFuture,
+                              final ZincManifestsCache manifests) {
         mRequest = request;
         mJobFactory = jobFactory;
         mCatalogFuture = catalogFuture;
+        mManifests = manifests;
     }
 
     @Override
@@ -97,10 +100,9 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
     }
 
     private ZincManifest getManifest() throws Exception {
-        return mJobFactory.downloadManifest(
-                mRequest.getSourceURL(),
-                mBundleID.getBundleName(),
-                mVersion).call();
+        return mManifests.getManifest(mRequest.getSourceURL(),
+                                      mBundleID.getBundleName(),
+                                      mVersion).get();
     }
 
     private File getLocalBundleFolder() {

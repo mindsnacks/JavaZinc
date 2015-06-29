@@ -6,7 +6,7 @@ import com.mindsnacks.zinc.classes.data.SourceURL;
 import com.mindsnacks.zinc.classes.data.ZincBundle;
 import com.mindsnacks.zinc.classes.data.ZincCatalogsCache;
 import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
-import com.mindsnacks.zinc.classes.data.ZincManifestCache;
+import com.mindsnacks.zinc.classes.data.ZincManifestsCache;
 import com.mindsnacks.zinc.classes.data.ZincRepoIndex;
 import com.mindsnacks.zinc.classes.downloads.PriorityJobQueue;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
@@ -26,6 +26,7 @@ public class ZincRepo implements Repo {
     private final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> mQueue;
     private final ZincRepoIndexWriter mIndexWriter;
     private final ZincCatalogsCache mCatalogsCache;
+    private final ZincManifestsCache mManifestsCache;
     private final String mFlavorName;
 
     private final File mRoot;
@@ -40,9 +41,11 @@ public class ZincRepo implements Repo {
                     final URI root,
                     final ZincRepoIndexWriter repoIndexWriter,
                     final ZincCatalogsCache catalogsCache,
+                    final ZincManifestsCache manifestsCache,
                     final String flavorName) {
         mQueue = queue;
         mCatalogsCache = catalogsCache;
+        mManifestsCache = manifestsCache;
         mFlavorName = flavorName;
         mRoot = new File(root);
         mIndexWriter = repoIndexWriter;
@@ -107,8 +110,9 @@ public class ZincRepo implements Repo {
     }
 
     @Override
-    public void clearCachedCatalogs() {
+    public void clearCachedCatalogsAndManifests() {
         mCatalogsCache.clearCachedCatalogs();
+        mManifestsCache.clearCachedManifests();
     }
 
     @Override

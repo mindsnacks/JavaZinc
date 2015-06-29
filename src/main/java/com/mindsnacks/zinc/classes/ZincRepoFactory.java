@@ -37,14 +37,14 @@ public final class ZincRepoFactory {
         final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(CATALOG_DOWNLOAD_THREAD_POOL_SIZE, threadFactory);
 
         final ZincCatalogsCache catalogs = createCatalogCache(jobFactory, root, gson, indexWriter.getIndex(), executorService);
-        final ZincManifestCache manifests = createManifestCache(jobFactory, root, gson, executorService);
+        final ZincManifestsCache manifests = createManifestCache(jobFactory, root, gson, executorService);
 
         final PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> queue = createQueue(
                 bundleCloneConcurrency,
-                new ZincBundleDownloader(jobFactory, catalogs),
+                new ZincBundleDownloader(jobFactory, catalogs, manifests),
                 createPriorityCalculator(priorityCalculator));
 
-        return new ZincRepo(queue, root.toURI(), indexWriter, catalogs, flavorName);
+        return new ZincRepo(queue, root.toURI(), indexWriter, catalogs, manifests, flavorName);
     }
 
     private ZincCatalogsCache createCatalogCache(final ZincJobFactory jobFactory,
@@ -61,7 +61,7 @@ public final class ZincRepoFactory {
                     new Timer(ZincCatalogs.class.getSimpleName(), true));
     }
 
-    private ZincManifestCache createManifestCache(final ZincJobFactory jobFactory,
+    private ZincManifestsCache createManifestCache(final ZincJobFactory jobFactory,
                                                   final File root,
                                                   final Gson gson,
                                                   final ScheduledExecutorService executorService) {

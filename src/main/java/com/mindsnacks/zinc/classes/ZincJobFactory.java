@@ -15,7 +15,7 @@ public interface ZincJobFactory {
     Callable<ZincCatalog> downloadCatalog(SourceURL sourceURL);
     Callable<ZincManifest> downloadManifest(SourceURL sourceURL, String bundleName, int version);
     Callable<File> downloadArchive(URL url, File root, String child, boolean override);
-    Callable<ZincBundle> cloneBundle(ZincCloneBundleRequest request, Future<ZincCatalog> catalogFuture);
+    Callable<ZincBundle> cloneBundle(ZincCloneBundleRequest request, Future<ZincCatalog> catalogFuture, ZincManifestsCache manifests);
     Callable<ZincBundle> downloadBundle(ZincCloneBundleRequest request, Future<ZincCatalog> catalogFuture);
     Callable<File> downloadFile(URL url, File root, File repoFolder, String child, boolean override, String expectedHash);
     Callable<ZincBundle> unarchiveBundle(ZincBundle downloadedBundle, ZincCloneBundleRequest request, ZincManifest manifest);

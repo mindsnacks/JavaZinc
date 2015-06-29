@@ -4,7 +4,7 @@ import java.util.concurrent.Future;
 /**
  * Created by Miguel Carranza on 6/26/15.
  */
-public interface ZincManifestCache {
+public interface ZincManifestsCache {
     boolean clearCachedManifests();
 
     Future<ZincManifest> getManifest(final SourceURL sourceURL,

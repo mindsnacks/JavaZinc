@@ -28,5 +28,5 @@ public interface Repo {
     /**
      * Must be called before calling start.
      */
-    void clearCachedCatalogs();
+    void clearCachedCatalogsAndManifests();
 }
