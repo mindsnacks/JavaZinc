@@ -134,7 +134,7 @@ public class ZincManifests implements ZincManifestsCache {
 
     private String getManifestID(final String bundleName,
                                  final int version) {
-        return String.format("%s_%d", bundleName, version);
+        return String.format("%s-%d", bundleName, version);
     }
 
     private ZincManifest readManifestFile(final File manifestFile) throws FileNotFoundException {
