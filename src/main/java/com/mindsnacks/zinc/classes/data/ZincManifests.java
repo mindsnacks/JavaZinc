@@ -1,6 +1,7 @@
 package com.mindsnacks.zinc.classes.data;
 
 import com.google.common.util.concurrent.*;
+import com.google.gson.JsonSyntaxException;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.ZincLogging;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
@@ -55,7 +56,7 @@ public class ZincManifests implements ZincManifestsCache {
 
             try {
                 result = getPersistedManifest(manifestID, manifestFile);
-            } catch (final FileNotFoundException e) {
+            } catch (final FileNotFoundException | JsonSyntaxException e) {
                 result = downloadManifest(sourceURL,
                                           bundleName,
                                           version,
@@ -138,6 +139,10 @@ public class ZincManifests implements ZincManifestsCache {
     }
 
     private ZincManifest readManifestFile(final File manifestFile) throws FileNotFoundException {
+        if (manifestFile.length() == 0) {
+            throw new FileNotFoundException("Manifest file is empty");
+        }
+
         return mFileHelper.readJSON(manifestFile, ZincManifest.class);
     }
 
