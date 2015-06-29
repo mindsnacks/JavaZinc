@@ -50,9 +50,7 @@ public class BundleIntegrityVerifier {
             in.close();
             digestStream.validate(expectedHash);
             isValid = true;
-        } catch (FileNotFoundException e) {
-        } catch (ValidatingDigestInputStream.HashFailedException e) {
-        } catch (IOException e) {}
+        } catch (ValidatingDigestInputStream.HashFailedException|IOException e) {}
 
         return isValid;
     }
