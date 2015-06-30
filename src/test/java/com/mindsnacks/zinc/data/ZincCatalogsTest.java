@@ -52,6 +52,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
     @Mock private ListeningExecutorService mExecutorService;
     @Mock private ZincCatalog mResultCatalog;
     @Mock private Timer mTimer;
+    @Mock private File mCatalogFile;
 
     private TimerTask mScheduledTask;
     private boolean runTaskImmediately = false;
@@ -73,14 +74,14 @@ public class ZincCatalogsTest extends ZincBaseTest {
     }
 
     private void initialize() {
-        catalogs = new ZincCatalogs(
-                rootFolder.getRoot(),
-                mFileHelper,
-                mTrackedSourceURLs,
-                mJobFactory,
-                mExecutorService,
-                MoreExecutors.sameThreadExecutor(),
-                mTimer);
+        catalogs = spy(new ZincCatalogs(rootFolder.getRoot(),
+                                        mFileHelper,
+                                        mTrackedSourceURLs,
+                                        mJobFactory,
+                                        mExecutorService,
+                                        MoreExecutors.sameThreadExecutor(),
+                                        mTimer));
+        setCatalogFileLength((long)1);
     }
 
     private void scheduleUpdate() {
@@ -324,6 +325,11 @@ public class ZincCatalogsTest extends ZincBaseTest {
                 return null;
             }
         }).when(mTimer).schedule(any(TimerTask.class), anyLong(), anyLong());
+    }
+
+    private void setCatalogFileLength(final long length) {
+        doReturn((long)1).when(mCatalogFile).length();
+        doReturn(mCatalogFile).when(catalogs).getCatalogFile(mSourceURL);
     }
 
     private void runScheduledTask() {

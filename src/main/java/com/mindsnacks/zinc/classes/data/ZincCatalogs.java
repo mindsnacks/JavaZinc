@@ -169,7 +169,7 @@ public class ZincCatalogs implements ZincCatalogsCache {
         return new File(mRoot, PathHelper.getCatalogsFolder());
     }
 
-    private File getCatalogFile(final SourceURL sourceURL) {
+    public File getCatalogFile(final SourceURL sourceURL) {
         return new File(mRoot, PathHelper.getLocalCatalogFilePath(sourceURL.getCatalogID()));
     }
 
