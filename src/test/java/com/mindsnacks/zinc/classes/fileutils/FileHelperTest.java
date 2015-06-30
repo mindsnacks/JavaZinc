@@ -116,8 +116,13 @@ public class FileHelperTest extends ZincBaseTest {
 
     @Test
     public void removeDirectory() throws Exception {
+        final File subFolder = rootFolder.newFolder("subFolder");
+        final File file3 = new File(subFolder, "file3.txt");
+        TestUtils.writeToFile(file3, "file3");
+
         assertTrue(file1.exists());
         assertTrue(file2.exists());
+        assertTrue(file3.exists());
 
         // run
         assertTrue(mHelper.removeDirectory(mBundle));
@@ -125,6 +130,7 @@ public class FileHelperTest extends ZincBaseTest {
         assertFalse(mBundle.exists());
         assertFalse(file1.exists());
         assertFalse(file2.exists());
+        assertFalse(file3.exists());
     }
 
     @Test
