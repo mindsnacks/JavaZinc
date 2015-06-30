@@ -39,6 +39,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
+import com.google.gson.JsonSyntaxException;
+
 /**
  * User: NachoSoto
  * Date: 10/7/13
@@ -81,7 +83,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
                                         mExecutorService,
                                         MoreExecutors.sameThreadExecutor(),
                                         mTimer));
-        setCatalogFileLength((long)1);
+        setLocalCatalogFileLength((long) 1);
     }
 
     private void scheduleUpdate() {
@@ -133,8 +135,31 @@ public class ZincCatalogsTest extends ZincBaseTest {
     }
 
     @Test
-    public void catalogIsDownloaded() throws Exception {
+    public void catalogIsDownloadedIfFileNotPresent() throws Exception {
         setLocalCatalogFileDoesNotExist();
+        setMockFutureAsResult();
+
+        run();
+
+        verifyCatalogIsDownloaded();
+    }
+
+    @Test
+    public void catalogIsDownloadedIfFileSizeIsZero() throws Exception {
+        setLocalCatalogFileContent();
+        setLocalCatalogFileLength(0);
+
+        setMockFutureAsResult();
+
+        run();
+
+        verifyCatalogIsDownloaded();
+    }
+
+    @Test
+    public void catalogIsDownloadedIfFileContainsJSON() throws Exception {
+        setLocalCatalogFileContainsInvalidJSON();
+
         setMockFutureAsResult();
 
         run();
@@ -276,6 +301,10 @@ public class ZincCatalogsTest extends ZincBaseTest {
         doThrow(FileNotFoundException.class).when(mFileHelper).readJSON(any(File.class), any(Class.class));
     }
 
+    private void setLocalCatalogFileContainsInvalidJSON() throws FileNotFoundException {
+        doThrow(JsonSyntaxException.class).when(mFileHelper).readJSON(any(File.class), any(Class.class));
+    }
+
     private void setDownloadTaskFails() {
         final SettableFuture<ZincCatalog> future = SettableFuture.create();
         future.setException(new ZincRuntimeException("Something went wrong downloading catalog"));
@@ -327,8 +356,8 @@ public class ZincCatalogsTest extends ZincBaseTest {
         }).when(mTimer).schedule(any(TimerTask.class), anyLong(), anyLong());
     }
 
-    private void setCatalogFileLength(final long length) {
-        doReturn((long)1).when(mCatalogFile).length();
+    private void setLocalCatalogFileLength(final long length) {
+        doReturn((long)length).when(mCatalogFile).length();
         doReturn(mCatalogFile).when(catalogs).getCatalogFile(mSourceURL);
     }
 
