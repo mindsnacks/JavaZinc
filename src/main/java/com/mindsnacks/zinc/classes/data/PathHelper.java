@@ -39,7 +39,7 @@ public class PathHelper {
     }
 
     public static String getLocalManifestFilePath(final String catalogID, final String manifestID) {
-        return String.format("%s/%s/%s.%s", getManifestsFolder(), catalogID, manifestID, MANIFESTS_FORMAT);
+        return String.format("%s%s/%s.%s", getManifestsFolder(), catalogID, manifestID, MANIFESTS_FORMAT);
     }
 
     public static String getCatalogsFolder() {
