@@ -1,8 +1,6 @@
 package com.mindsnacks.zinc.classes.fileutils;
 
 import com.mindsnacks.zinc.classes.data.ZincManifest;
-import com.pegasus.data.accounts.PegasusAccountFieldValidator;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
