@@ -91,6 +91,7 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
 
     private void moveToBundlesFolder(final File temporaryFolder, final File bundleFolder) {
         logMessage("moving bundle");
+        mFileHelper.removeDirectory(bundleFolder);
 
         if ((!bundleFolder.exists() && !bundleFolder.mkdirs()) || !mFileHelper.moveFile(temporaryFolder, bundleFolder)) {
             throw new ZincRuntimeException(String.format("Error moving bundle from '%s' to '%s'", temporaryFolder, bundleFolder));

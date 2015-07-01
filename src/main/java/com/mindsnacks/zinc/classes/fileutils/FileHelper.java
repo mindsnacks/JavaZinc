@@ -107,7 +107,7 @@ public class FileHelper {
     }
 
     /**
-     * Removes all the files from a directory. Not recursively.
+     * Removes all the files from a directory. Recursively.
      * @param folder directory to empty
      * @return true if all the files were correctly removed.
      */
@@ -116,6 +116,9 @@ public class FileHelper {
 
         if (folder.exists()) {
             for (final File file : folder.listFiles()) {
+                if (file.isDirectory()) {
+                    emptyDirectory(file);
+                }
                 result &= removeFile(file);
             }
         }

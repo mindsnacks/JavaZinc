@@ -1,6 +1,7 @@
 package com.mindsnacks.zinc.classes.data;
 
 import com.google.common.util.concurrent.*;
+import com.google.gson.JsonSyntaxException;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.ZincLogging;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
@@ -65,7 +66,7 @@ public class ZincCatalogs implements ZincCatalogsCache {
 
             try {
                 result = getPersistedCatalog(sourceURL, catalogFile);
-            } catch (final FileNotFoundException e) {
+            } catch (final FileNotFoundException | JsonSyntaxException e) {
                 result = downloadCatalog(sourceURL, catalogFile);
             }
 
@@ -168,11 +169,15 @@ public class ZincCatalogs implements ZincCatalogsCache {
         return new File(mRoot, PathHelper.getCatalogsFolder());
     }
 
-    private File getCatalogFile(final SourceURL sourceURL) {
+    public File getCatalogFile(final SourceURL sourceURL) {
         return new File(mRoot, PathHelper.getLocalCatalogFilePath(sourceURL.getCatalogID()));
     }
 
     private ZincCatalog readCatalogFile(final File catalogFile) throws FileNotFoundException {
+        if (catalogFile.length() == 0) {
+            throw new FileNotFoundException("Catalog file is empty");
+        }
+
         return mFileHelper.readJSON(catalogFile, ZincCatalog.class);
     }
 

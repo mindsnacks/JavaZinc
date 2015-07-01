@@ -11,8 +11,11 @@ public class PathHelper {
     private static final String TEMPORARY_BUNDLES_FOLDER = "temp";
 
     private static final String CATALOGS_FOLDER = "catalogs";
-
     private static final String CATALOGS_FORMAT = "json";
+
+    private static final String MANIFESTS_FOLDER = "manifests";
+    private static final String MANIFESTS_FORMAT = "json";
+
     public static final String FLAVOR_SEPARATOR = "~";
 
     public static String getLocalDownloadFolder(final BundleID bundleID, final int version, final String flavorName) {
@@ -35,7 +38,16 @@ public class PathHelper {
         return String.format("%s%s.%s", getCatalogsFolder(), catalogID, CATALOGS_FORMAT);
     }
 
+    public static String getLocalManifestFilePath(final String catalogID, final String manifestID) {
+        return String.format("%s%s/%s.%s", getManifestsFolder(), catalogID, manifestID, MANIFESTS_FORMAT);
+    }
+
     public static String getCatalogsFolder() {
         return String.format("%s/", CATALOGS_FOLDER);
     }
+
+    public static String getManifestsFolder() {
+        return String.format("%s/", MANIFESTS_FOLDER);
+    }
+
 }

@@ -3,16 +3,17 @@ package com.mindsnacks.zinc.classes.fileutils;
 
 import com.mindsnacks.zinc.exceptions.ZincException;
 
-import java.io.OutputStream;
-import java.security.DigestOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 
 /**
- * @author John Ericksen
+ * @author Miguel Carranza
  */
-public class ValidatingDigestOutputStream extends DigestOutputStream {
+public class ValidatingDigestInputStream extends DigestInputStream {
 
-    public ValidatingDigestOutputStream(OutputStream stream, MessageDigest digest) {
+    public ValidatingDigestInputStream(InputStream stream, MessageDigest digest) {
         super(stream, digest);
     }
 

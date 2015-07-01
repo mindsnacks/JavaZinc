@@ -2,6 +2,7 @@ package com.mindsnacks.zinc.classes.fileutils;
 
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -23,6 +24,10 @@ public class HashUtil {
 
     public ValidatingDigestOutputStream wrapOutputStreamWithDigest(OutputStream outputStream) {
         return new ValidatingDigestOutputStream(outputStream, newDigest());
+    }
+
+    public ValidatingDigestInputStream wrapInputStreamWithDigest(InputStream outputStream) {
+        return new ValidatingDigestInputStream(outputStream, newDigest());
     }
 
     public class HashUtilRuntimeException extends ZincRuntimeException {

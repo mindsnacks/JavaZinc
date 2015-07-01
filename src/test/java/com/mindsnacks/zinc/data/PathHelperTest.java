@@ -67,7 +67,7 @@ public class PathHelperTest extends ZincBaseTest {
     }
 
     @Test
-    public void localCatalogFolder() throws Exception {
+    public void localCatalogFilePath() throws Exception {
         final String catalogID = "com.mindsnacks.games";
 
         final String result = PathHelper.getLocalCatalogFilePath(catalogID);
@@ -77,7 +77,24 @@ public class PathHelperTest extends ZincBaseTest {
     }
 
     @Test
+    public void localManifestFilePath() {
+        final String catalogID = "com.mindsnacks.games";
+        final String manifestID = "watto-1";
+
+        final String result = PathHelper.getLocalManifestFilePath(catalogID, manifestID);
+
+        assertTrue(result.contains(catalogID));
+        assertTrue(result.contains(manifestID));
+        assertTrue(result.endsWith(".json"));
+    }
+
+    @Test
     public void catalogsFolder() throws Exception {
         assertTrue(PathHelper.getCatalogsFolder().endsWith("/"));
+    }
+
+    @Test
+    public void manifestsFolder() throws Exception {
+        assertTrue(PathHelper.getManifestsFolder().endsWith("/"));
     }
 }

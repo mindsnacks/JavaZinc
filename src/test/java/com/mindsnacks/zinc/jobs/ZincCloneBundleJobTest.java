@@ -42,8 +42,10 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     @Mock private ZincJobFactory mJobFactory;
     @Mock private Future<ZincCatalog> mZincCatalogFuture;
     @Mock private ZincCatalog mZincCatalog;
+    @Mock private Future<ZincManifest> mZincManifestFuture;
     @Mock private ZincManifest mZincManifest;
     @Mock private ZincManifest.FileInfo mFileWithFlavor;
+    @Mock private ZincManifests mZincManifests;
     private URL mObjectURL;
 
     private final String mDistribution = "master";
@@ -66,7 +68,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         mObjectURL = new URL("https://www.nsa.gov");
 
         mRequest = new ZincCloneBundleRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
-        job = new ZincCloneBundleJob(mRequest, mJobFactory, mZincCatalogFuture);
+        job = new ZincCloneBundleJob(mRequest, mJobFactory, mZincCatalogFuture, mZincManifests);
 
         when(mJobFactory.downloadBundle(eq(mRequest), eq(mZincCatalogFuture))).thenReturn(mDownloadBundleJob);
         when(mJobFactory.downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion))).thenReturn(mZincManifestJob);
@@ -78,12 +80,16 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         TestFactory.setCallableResult(mResultBundleJob, mResultBundle);
         TestFactory.setCallableResult(mZincManifestJob, mZincManifest);
         TestFactory.setFutureResult(mZincCatalogFuture, mZincCatalog);
+        TestFactory.setFutureResult(mZincManifestFuture, mZincManifest);
+
 
         when(mBundleID.getBundleName()).thenReturn(mBundleName);
         when(mZincCatalog.getVersionForBundleName(mBundleName, mDistribution)).thenReturn(mVersion);
         when(mZincManifest.getFileWithFlavor(mFlavorName)).thenReturn(mFileWithFlavor);
         when(mZincManifest.getFilenameWithFlavor(mFlavorName)).thenReturn(mSingleFilename);
         when(mSourceURL.getObjectURL(mFileWithFlavor)).thenReturn(mObjectURL);
+
+        when(mZincManifests.getManifest(mSourceURL, mBundleName, mVersion)).thenReturn(mZincManifestFuture);
 
         setManifestContainsFiles(true);
         setManifestArchiveExists(true);
@@ -100,7 +106,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     public void manifestIsDownloaded() throws Exception {
         run();
 
-        verify(mJobFactory).downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion));
+        verify(mZincManifestFuture).get();
     }
 
     @Test

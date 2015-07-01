@@ -57,8 +57,8 @@ public class ZincDownloader implements ZincJobFactory {
     }
 
     @Override
-    public Callable<ZincBundle> cloneBundle(final ZincCloneBundleRequest request, final Future<ZincCatalog> catalogFuture) {
-        return new ZincCloneBundleJob(request, this, catalogFuture);
+    public Callable<ZincBundle> cloneBundle(final ZincCloneBundleRequest request, final Future<ZincCatalog> catalogFuture, final ZincManifestsCache manifests) {
+        return new ZincCloneBundleJob(request, this, catalogFuture, manifests);
     }
 
     @Override

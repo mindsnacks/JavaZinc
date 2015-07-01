@@ -3,6 +3,7 @@ package com.mindsnacks.zinc.repo;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.mindsnacks.zinc.classes.data.ZincCatalogsCache;
+import com.mindsnacks.zinc.classes.data.ZincManifestsCache;
 import com.mindsnacks.zinc.classes.downloads.PriorityJobQueue;
 import com.mindsnacks.zinc.classes.ZincRepo;
 import com.mindsnacks.zinc.classes.ZincRepoIndexWriter;
@@ -33,6 +34,7 @@ public abstract class ZincRepoBaseTest extends ZincBaseTest {
 
     @Mock protected PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> mQueue;
     @Mock protected ZincCatalogsCache mCatalogsCache;
+    @Mock protected ZincManifestsCache mManifestsCache;
 
     protected Gson mGson;
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
@@ -46,7 +48,7 @@ public abstract class ZincRepoBaseTest extends ZincBaseTest {
 
     protected void initializeRepo() {
         mIndexWriter = newRepoIndexWriter();
-        mRepo = new ZincRepo(mQueue, rootFolder.getRoot().toURI(), mIndexWriter, mCatalogsCache, mFlavorName);
+        mRepo = new ZincRepo(mQueue, rootFolder.getRoot().toURI(), mIndexWriter, mCatalogsCache, mManifestsCache, mFlavorName);
     }
 
     protected ZincRepoIndexWriter newRepoIndexWriter() {
