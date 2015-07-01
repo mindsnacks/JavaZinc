@@ -129,7 +129,7 @@ public class ZincManifests implements ZincManifestsCache {
         return new File(mRoot, PathHelper.getManifestsFolder());
     }
 
-    private File getManifestFile(final String catalogID, final String manifestID) {
+    public File getManifestFile(final String catalogID, final String manifestID) {
         return new File(mRoot, PathHelper.getLocalManifestFilePath(catalogID, manifestID));
     }
 

@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.gson.JsonSyntaxException;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.data.SourceURL;
 import com.mindsnacks.zinc.classes.data.ZincCatalog;
@@ -12,6 +13,7 @@ import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 import com.mindsnacks.zinc.utils.TestFactory;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,9 +39,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
-
-import com.google.gson.JsonSyntaxException;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * User: NachoSoto
@@ -157,7 +165,7 @@ public class ZincCatalogsTest extends ZincBaseTest {
     }
 
     @Test
-    public void catalogIsDownloadedIfFileContainsJSON() throws Exception {
+    public void catalogIsDownloadedIfFileContainsInvalidJSON() throws Exception {
         setLocalCatalogFileContainsInvalidJSON();
 
         setMockFutureAsResult();
