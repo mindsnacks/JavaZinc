@@ -110,9 +110,8 @@ public class ZincRepo implements Repo {
     }
 
     @Override
-    public void clearCachedCatalogsAndManifests() {
+    public void clearCachedCatalogs() {
         mCatalogsCache.clearCachedCatalogs();
-        mManifestsCache.clearCachedManifests();
     }
 
     @Override
