@@ -46,6 +46,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     @Mock private ZincManifest mZincManifest;
     @Mock private ZincManifest.FileInfo mFileWithFlavor;
     @Mock private ZincManifests mZincManifests;
+    @Mock private ZincUntrackedBundlesCleaner mBundlesCleaner;
     private URL mObjectURL;
 
     private final String mDistribution = "master";
@@ -68,7 +69,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         mObjectURL = new URL("https://www.nsa.gov");
 
         mRequest = new ZincCloneBundleRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
-        job = new ZincCloneBundleJob(mRequest, mJobFactory, mZincCatalogFuture, mZincManifests);
+        job = new ZincCloneBundleJob(mRequest, mJobFactory, mZincCatalogFuture, mZincManifests, mBundlesCleaner);
 
         when(mJobFactory.downloadBundle(eq(mRequest), eq(mZincCatalogFuture))).thenReturn(mDownloadBundleJob);
         when(mJobFactory.downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion))).thenReturn(mZincManifestJob);

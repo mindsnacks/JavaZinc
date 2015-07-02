@@ -1,7 +1,14 @@
 package com.mindsnacks.zinc.classes.jobs;
 
 import com.mindsnacks.zinc.classes.ZincJobFactory;
-import com.mindsnacks.zinc.classes.data.*;
+import com.mindsnacks.zinc.classes.data.BundleID;
+import com.mindsnacks.zinc.classes.data.PathHelper;
+import com.mindsnacks.zinc.classes.data.ZincBundle;
+import com.mindsnacks.zinc.classes.data.ZincCatalog;
+import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
+import com.mindsnacks.zinc.classes.data.ZincManifest;
+import com.mindsnacks.zinc.classes.data.ZincManifestsCache;
+import com.mindsnacks.zinc.classes.data.ZincUntrackedBundlesCleaner;
 import com.mindsnacks.zinc.classes.fileutils.BundleIntegrityVerifier;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
@@ -20,15 +27,18 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
     private final ZincManifestsCache mManifests;
     private BundleID mBundleID;
     private int mVersion;
+    private final ZincUntrackedBundlesCleaner mBundlesCleaner;
 
     public ZincCloneBundleJob(final ZincCloneBundleRequest request,
                               final ZincJobFactory jobFactory,
                               final Future<ZincCatalog> catalogFuture,
-                              final ZincManifestsCache manifests) {
+                              final ZincManifestsCache manifests,
+                              final ZincUntrackedBundlesCleaner bundlesCleaner) {
         mRequest = request;
         mJobFactory = jobFactory;
         mCatalogFuture = catalogFuture;
         mManifests = manifests;
+        mBundlesCleaner = bundlesCleaner;
     }
 
     @Override
@@ -41,6 +51,7 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
         final String flavorName = mRequest.getFlavorName();
 
         if (shouldDownloadBundle(localBundleFolder, manifest, flavorName)) {
+            mBundlesCleaner.cleanUntrackedBundles(mRequest.getRepoFolder(), mBundleID, mVersion);
             createFolder(localBundleFolder);
 
             if (manifest.containsFiles(flavorName)) {

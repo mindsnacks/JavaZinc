@@ -5,11 +5,12 @@ import com.mindsnacks.zinc.classes.data.PathHelper;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
 import org.junit.Test;
 
+import java.nio.file.Path;
+
 import static com.mindsnacks.zinc.utils.TestFactory.randomInt;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * User: NachoSoto
@@ -96,5 +97,36 @@ public class PathHelperTest extends ZincBaseTest {
     @Test
     public void manifestsFolder() throws Exception {
         assertTrue(PathHelper.getManifestsFolder().endsWith("/"));
+    }
+
+    @Test
+    public void manifestsFolderWithParams() throws Exception {
+        assertTrue(PathHelper.getManifestsFolder("meh").endsWith("/"));
+    }
+
+    @Test
+    public void getBundleName() {
+        final String bundleName = "a-simple-random_Bundle-name";
+        final String manifestFilename = String.format("%s.json", PathHelper.getManifestID(bundleName, 213));
+
+        assertEquals(bundleName, PathHelper.getBundleName(manifestFilename));
+    }
+
+    @Test
+    public void getBundleVersion() {
+        final String bundleName = "a-simple-random_Bundle-name";
+        final int version = 4245;
+        final String manifestFilename = String.format("%s.json", PathHelper.getManifestID(bundleName, version));
+
+        assertEquals(version, PathHelper.getBundleVersion(manifestFilename));
+    }
+
+    @Test
+    public void getBundleID() {
+        final BundleID bundleID = new BundleID("com.wonder.content3.sat-trol");
+        final String bundleFolder = PathHelper.getLocalBundleFolder(bundleID, 4, "3x-Android");
+        final String bundleFolderName = bundleFolder.substring(bundleFolder.indexOf("/") + 1);
+
+        assertEquals(bundleID.toString(), PathHelper.getBundleID(bundleFolderName));
     }
 }
