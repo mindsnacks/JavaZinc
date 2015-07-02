@@ -100,6 +100,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     public void bundleIsDownloaded() throws Exception {
         run();
 
+        verifyUntrackedBundlesAreCleaned();
         verify(mJobFactory).downloadBundle(eq(mRequest), eq(mZincCatalogFuture));
     }
 
@@ -114,6 +115,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     public void bundleIsUnarchived() throws Exception {
         run();
 
+        verifyUntrackedBundlesAreCleaned();
         verify(mJobFactory).unarchiveBundle(eq(mDownloadedBundle), eq(mRequest), eq(mZincManifest));
     }
 
@@ -128,6 +130,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
         run();
 
+        verifyUntrackedBundlesAreCleaned();
         verify(mJobFactory).downloadBundle(eq(mRequest), eq(mZincCatalogFuture));
     }
 
@@ -137,6 +140,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
         run();
 
+        verifyUntrackedBundlesAreNotCleaned();
         verifyBundleIsNotUnarchived();
         verifyArchiveIsNotDownloaded();
     }
@@ -248,6 +252,14 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         assertEquals(directory.getAbsolutePath(), result.getAbsolutePath());
         assertEquals(mBundleID, result.getBundleID());
         assertEquals(mVersion, result.getVersion());
+    }
+
+    private void verifyUntrackedBundlesAreCleaned() {
+        verify(mBundlesCleaner, times(1)).cleanUntrackedBundles(any(File.class), any(BundleID.class), any(Integer.class));
+    }
+
+    private void verifyUntrackedBundlesAreNotCleaned() {
+        verify(mBundlesCleaner, times(0)).cleanUntrackedBundles(any(File.class), any(BundleID.class), any(Integer.class));
     }
 
     private static Future<ZincCatalog> anyCatalogFuture() {
