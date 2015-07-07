@@ -47,7 +47,7 @@ public class ZincManifests implements ZincManifestsCache {
     public synchronized Future<ZincManifest> getManifest(final SourceURL sourceURL,
                                                          final String bundleName,
                                                          final int version) {
-        String manifestID = getManifestID(bundleName, version);
+        String manifestID = PathHelper.getManifestID(bundleName, version);
 
         if (!mFutures.containsKey(manifestID)) {
             ListenableFuture<ZincManifest> result;
@@ -84,7 +84,7 @@ public class ZincManifests implements ZincManifestsCache {
                                                                          final String bundleName,
                                                                          final int version,
                                                                          final File manifestFile) {
-        final String manifestID = getManifestID(bundleName, version);
+        final String manifestID = PathHelper.getManifestID(bundleName, version);
         final ListenableFuture<ZincManifest> originalFuture = mFutures.get(manifestID);
         final ListenableFuture<ZincManifest> result = mDownloadExecutorService.submit(mJobFactory.downloadManifest(sourceURL, bundleName, version));
 
@@ -131,11 +131,6 @@ public class ZincManifests implements ZincManifestsCache {
 
     public File getManifestFile(final String catalogID, final String manifestID) {
         return new File(mRoot, PathHelper.getLocalManifestFilePath(catalogID, manifestID));
-    }
-
-    private String getManifestID(final String bundleName,
-                                 final int version) {
-        return String.format("%s-%d", bundleName, version);
     }
 
     private ZincManifest readManifestFile(final File manifestFile) throws FileNotFoundException {

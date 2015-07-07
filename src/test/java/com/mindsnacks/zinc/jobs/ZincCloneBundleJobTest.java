@@ -46,6 +46,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     @Mock private ZincManifest mZincManifest;
     @Mock private ZincManifest.FileInfo mFileWithFlavor;
     @Mock private ZincManifests mZincManifests;
+    @Mock private ZincUntrackedBundlesCleaner mBundlesCleaner;
     private URL mObjectURL;
 
     private final String mDistribution = "master";
@@ -68,7 +69,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         mObjectURL = new URL("https://www.nsa.gov");
 
         mRequest = new ZincCloneBundleRequest(mSourceURL, mBundleID, mDistribution, mFlavorName, mRepoFolder);
-        job = new ZincCloneBundleJob(mRequest, mJobFactory, mZincCatalogFuture, mZincManifests);
+        job = new ZincCloneBundleJob(mRequest, mJobFactory, mZincCatalogFuture, mZincManifests, mBundlesCleaner);
 
         when(mJobFactory.downloadBundle(eq(mRequest), eq(mZincCatalogFuture))).thenReturn(mDownloadBundleJob);
         when(mJobFactory.downloadManifest(eq(mSourceURL), eq(mBundleName), eq(mVersion))).thenReturn(mZincManifestJob);
@@ -99,6 +100,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     public void bundleIsDownloaded() throws Exception {
         run();
 
+        verifyUntrackedBundlesAreCleaned();
         verify(mJobFactory).downloadBundle(eq(mRequest), eq(mZincCatalogFuture));
     }
 
@@ -113,6 +115,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
     public void bundleIsUnarchived() throws Exception {
         run();
 
+        verifyUntrackedBundlesAreCleaned();
         verify(mJobFactory).unarchiveBundle(eq(mDownloadedBundle), eq(mRequest), eq(mZincManifest));
     }
 
@@ -127,6 +130,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
         run();
 
+        verifyUntrackedBundlesAreCleaned();
         verify(mJobFactory).downloadBundle(eq(mRequest), eq(mZincCatalogFuture));
     }
 
@@ -136,6 +140,7 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
 
         run();
 
+        verifyUntrackedBundlesAreNotCleaned();
         verifyBundleIsNotUnarchived();
         verifyArchiveIsNotDownloaded();
     }
@@ -247,6 +252,14 @@ public class ZincCloneBundleJobTest extends ZincBaseTest {
         assertEquals(directory.getAbsolutePath(), result.getAbsolutePath());
         assertEquals(mBundleID, result.getBundleID());
         assertEquals(mVersion, result.getVersion());
+    }
+
+    private void verifyUntrackedBundlesAreCleaned() {
+        verify(mBundlesCleaner, times(1)).cleanUntrackedBundles(any(File.class), any(BundleID.class), any(Integer.class));
+    }
+
+    private void verifyUntrackedBundlesAreNotCleaned() {
+        verify(mBundlesCleaner, times(0)).cleanUntrackedBundles(any(File.class), any(BundleID.class), any(Integer.class));
     }
 
     private static Future<ZincCatalog> anyCatalogFuture() {

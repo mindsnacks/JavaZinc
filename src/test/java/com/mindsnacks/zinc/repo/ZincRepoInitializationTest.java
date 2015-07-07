@@ -80,11 +80,10 @@ public class ZincRepoInitializationTest extends ZincRepoBaseTest {
     }
 
     @Test
-    public void clearCachedCatalogsAndManifests() throws Exception {
-        mRepo.clearCachedCatalogsAndManifests();
+    public void clearCachedCatalogs() throws Exception {
+        mRepo.clearCachedCatalogs();
 
         verify(mCatalogsCache).clearCachedCatalogs();
-        verify(mManifestsCache).clearCachedManifests();
     }
 
     private void writeSourceURLsToIndexFile(final List<SourceURL> newSourceURL) throws IOException {
