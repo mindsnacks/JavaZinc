@@ -39,6 +39,7 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
         final File temporaryFolder = getTemporaryBundleFolder(bundleID),
                    resultFolder = getBundleFolder(bundleID);
 
+        mFileHelper.removeDirectory(temporaryFolder);
         unarchiveBundle(mDownloadedBundle, temporaryFolder, mManifest);
 
         cleanUpDownloadedFolder();
