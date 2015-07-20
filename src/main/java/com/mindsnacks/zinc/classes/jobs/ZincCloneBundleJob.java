@@ -51,6 +51,7 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
         final String flavorName = mRequest.getFlavorName();
 
         if (shouldDownloadBundle(localBundleFolder, manifest, flavorName)) {
+            logMessage(String.format("cloning bundle %s", localBundleFolder));
             mBundlesCleaner.cleanUntrackedBundles(mRequest.getRepoFolder(), mBundleID, mVersion);
             createFolder(localBundleFolder);
 
@@ -75,9 +76,16 @@ public class ZincCloneBundleJob extends ZincJob<ZincBundle> {
     private boolean shouldDownloadBundle(final File localBundleFolder,
                                          final ZincManifest manifest,
                                          final String flavorName) {
-        return (!localBundleFolder.exists() ||
-                localBundleFolder.listFiles().length == 0 ||
-                !BundleIntegrityVerifier.isLocalBundleValid(localBundleFolder, manifest, flavorName));
+        boolean isLocalBundleEmpty = (!localBundleFolder.exists() || localBundleFolder.listFiles().length == 0);
+        boolean isLocalBundleInvalid = (!BundleIntegrityVerifier.isLocalBundleValid(localBundleFolder, manifest, flavorName));
+        boolean shouldDownload = (isLocalBundleEmpty || isLocalBundleInvalid);
+
+        if (shouldDownload) {
+            logMessage(String.format("local bundle %s is empty = %b, is invalid + %b",
+                                      localBundleFolder, isLocalBundleEmpty, isLocalBundleInvalid));
+        }
+
+        return shouldDownload;
     }
 
     private void createFolder(final File folder) {

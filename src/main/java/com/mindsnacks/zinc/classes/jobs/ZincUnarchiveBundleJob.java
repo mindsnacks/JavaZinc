@@ -65,7 +65,7 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
     private void unarchiveBundle(final File downloadedBundle,
                                  final File temporaryFolder,
                                  final ZincManifest manifest) throws IOException, ValidatingDigestOutputStream.HashFailedException {
-        logMessage("unarchiving");
+        logMessage(String.format("unarchiving %s to %s", downloadedBundle, temporaryFolder));
 
         final Map<String, ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(mRequest.getFlavorName());
 
@@ -91,12 +91,14 @@ public class ZincUnarchiveBundleJob extends ZincJob<ZincBundle> {
     }
 
     private void moveToBundlesFolder(final File temporaryFolder, final File bundleFolder) {
-        logMessage("moving bundle");
+        logMessage(String.format("moving bundle from %s to %s", temporaryFolder, bundleFolder));
         mFileHelper.removeDirectory(bundleFolder);
 
         if ((!bundleFolder.exists() && !bundleFolder.mkdirs()) || !mFileHelper.moveFile(temporaryFolder, bundleFolder)) {
             throw new ZincRuntimeException(String.format("Error moving bundle from '%s' to '%s'", temporaryFolder, bundleFolder));
         }
+
+        logMessage(String.format("bundle properly downloaded and unarchived to %s", bundleFolder));
     }
 
     @Override
