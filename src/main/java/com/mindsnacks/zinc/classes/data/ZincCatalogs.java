@@ -178,7 +178,13 @@ public class ZincCatalogs implements ZincCatalogsCache {
             throw new FileNotFoundException("Catalog file is empty");
         }
 
-        return mFileHelper.readJSON(catalogFile, ZincCatalog.class);
+        ZincCatalog catalog = mFileHelper.readJSON(catalogFile, ZincCatalog.class);
+
+        if (catalog == null || !catalog.isValid()) {
+            throw new FileNotFoundException(String.format("Catalog contains invalid JSON %s", catalogFile));
+        }
+
+        return catalog;
     }
 
     private void logMessage(final String catalogID, final String message) {
