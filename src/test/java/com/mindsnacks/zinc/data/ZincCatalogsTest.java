@@ -48,6 +48,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * User: NachoSoto
@@ -176,6 +177,15 @@ public class ZincCatalogsTest extends ZincBaseTest {
     }
 
     @Test
+    public void catalogIsDownloadedIfCatalogIsNull() throws Exception {
+        setMockFutureAsResult();
+
+        run();
+
+        verifyCatalogIsDownloaded();
+    }
+
+    @Test
     public void catalogDownloadIsSubmitted() throws Exception {
         final Callable downloadTask = mock(Callable.class);
 
@@ -223,6 +233,8 @@ public class ZincCatalogsTest extends ZincBaseTest {
 
     @Test
     public void gettingCatalogForSourceURLAddsItToTheListOfTrackedSources() throws Exception {
+        setLocalCatalogFileContent();
+
         run();
 
         verify(mTrackedSourceURLs).add(mSourceURL);
@@ -302,6 +314,8 @@ public class ZincCatalogsTest extends ZincBaseTest {
     }
 
     private void setLocalCatalogFileContent() throws FileNotFoundException {
+        when(mResultCatalog.isValid()).thenReturn(true);
+
         doReturn(mResultCatalog).when(mFileHelper).readJSON(any(File.class), eq(ZincCatalog.class));
     }
 

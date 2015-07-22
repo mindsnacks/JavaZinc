@@ -138,7 +138,13 @@ public class ZincManifests implements ZincManifestsCache {
             throw new FileNotFoundException("Manifest file is empty");
         }
 
-        return mFileHelper.readJSON(manifestFile, ZincManifest.class);
+        ZincManifest manifest = mFileHelper.readJSON(manifestFile, ZincManifest.class);
+
+        if (manifest == null) {
+            throw new FileNotFoundException(String.format("Manifest contains invalid JSON %s", manifestFile));
+        }
+
+        return manifest;
     }
 
     private void logMessage(final String manifestID, final String message) {

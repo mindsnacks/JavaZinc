@@ -35,6 +35,13 @@ public class ZincCatalog {
         }
     }
 
+    public boolean isValid() {
+        return (mIdentifier != null &&
+                mIdentifier.length() > 0 &&
+                mBundles != null &&
+                mBundles.size() > 0);
+    }
+
     @Override
     public String toString() {
         return "ZincCatalog {" +
