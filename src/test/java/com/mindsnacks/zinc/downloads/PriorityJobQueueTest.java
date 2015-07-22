@@ -290,6 +290,14 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         queue.get(data);
     }
 
+    @Test(expected = PriorityJobQueue.JobNotFoundException.class)
+    public void dataIsNotReaddedIfNotAlreadyThere() throws Exception {
+        final TestData data = TestData.randomTestData();
+
+        queue.start();
+        queue.reAdd(data);
+    }
+
     private TestData processAndAddRandomData() {
         return processAndAddData(TestData.randomTestData());
     }
