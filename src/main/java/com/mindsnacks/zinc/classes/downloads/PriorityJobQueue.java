@@ -141,6 +141,14 @@ public class PriorityJobQueue<Input, Output> {
         return (result != null) ? result : waitForFuture(element);
     }
 
+    public void reAdd(final Input element) throws JobNotFoundException {
+        checkServiceIsRunning(true, "Service should be running");
+        checkJobWasAlreadyAdded(element);
+        ListenableFuture<Output> result = findExistingFuture(element);
+        removeCachedFuture(element);
+        addElementToQueue(element);
+    }
+
     private ListenableFuture<Output> findExistingFuture(final Input element) {
         mLock.lock();
 

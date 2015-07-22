@@ -1,6 +1,9 @@
 package com.mindsnacks.zinc.classes.data;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * User: NachoSoto
@@ -22,6 +25,31 @@ public class ZincBundle extends File {
 
         mBundleID = bundleID;
         mVersion = version;
+    }
+
+    public boolean isValid(final ZincManifestsCache manifests,
+                           final SourceURL sourceURL,
+                           final String flavorName) {
+        boolean isValid = true;
+
+        final ZincManifest manifest;
+        try {
+            manifest = manifests.getManifest(sourceURL, mBundleID.getBundleName(), mVersion).get();
+
+            final Map<String, ZincManifest.FileInfo> files = manifest.getFilesWithFlavor(flavorName);
+            final Iterator<String> it = files.keySet().iterator();
+
+            while(it.hasNext() && isValid) {
+                final String fileName = it.next();
+                final File localFile = new File(this, fileName);
+
+                isValid &= localFile.exists();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            isValid = false;
+        }
+
+        return isValid;
     }
 
     @Override

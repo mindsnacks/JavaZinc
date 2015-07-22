@@ -12,11 +12,13 @@ import java.util.concurrent.Future;
  */
 public interface Repo {
     void start();
+
     void pause() throws InterruptedException;
 
     void addSourceURL(SourceURL sourceURL);
 
     void startTrackingBundle(BundleID bundleID, String distribution);
+
     void startTrackingBundles(List<BundleID> bundleIDs, String distribution);
 
     Future<ZincBundle> getBundle(BundleID bundleID);
@@ -29,4 +31,8 @@ public interface Repo {
      * Must be called before calling start.
      */
     void clearCachedCatalogs();
+
+    public boolean isBundleValid(final ZincBundle bundle);
+
+    public void retrackBundle(final ZincBundle bundle);
 }

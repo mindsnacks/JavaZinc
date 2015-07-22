@@ -147,4 +147,15 @@ public class ZincRepo implements Repo {
         mQueue.add(cloneBundleRequest);
         mBundles.put(bundleID, cloneBundleRequest);
     }
+
+    public boolean isBundleValid(final ZincBundle bundle) {
+        return bundle.isValid(mManifestsCache,
+                              mBundles.get(bundle.getBundleID()).getSourceURL(),
+                              mFlavorName);
+
+    }
+
+    public void retrackBundle(final ZincBundle bundle) {
+        mQueue.reAdd(mBundles.get(bundle.getBundleID()));
+    }
 }
