@@ -43,7 +43,7 @@ public class ZincBundle extends File {
                 final String fileName = it.next();
                 final File localFile = new File(this, fileName);
 
-                isValid &= localFile.exists();
+                isValid &= localFile.exists() && localFile.length() > 0;
             }
         } catch (InterruptedException | ExecutionException e) {
             isValid = false;

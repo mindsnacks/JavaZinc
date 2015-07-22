@@ -144,7 +144,6 @@ public class PriorityJobQueue<Input, Output> {
     public void reAdd(final Input element) throws JobNotFoundException {
         checkServiceIsRunning(true, "Service should be running");
         checkJobWasAlreadyAdded(element);
-        ListenableFuture<Output> result = findExistingFuture(element);
         removeCachedFuture(element);
         addElementToQueue(element);
     }
