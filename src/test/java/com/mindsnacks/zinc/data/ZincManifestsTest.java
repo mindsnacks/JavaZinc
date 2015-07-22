@@ -142,6 +142,15 @@ public class ZincManifestsTest extends ZincBaseTest {
     }
 
     @Test
+    public void manifestIsDownloadedIfManifestIsNull() throws Exception {
+        setMockFutureAsResult();
+
+        run();
+
+        verifyManifestIsDownloaded();
+    }
+
+    @Test
     public void manifestDownloadIsSubmitted() throws Exception {
         final Callable downloadTask = mock(Callable.class);
 
