@@ -1,10 +1,10 @@
 package com.mindsnacks.zinc.repo;
 
-import com.mindsnacks.zinc.classes.data.BundleID;
-import com.mindsnacks.zinc.classes.data.SourceURL;
-import com.mindsnacks.zinc.classes.data.ZincRepoIndex;
+import com.mindsnacks.zinc.classes.data.*;
+import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mock;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,7 +16,9 @@ import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * User: NachoSoto
@@ -24,6 +26,9 @@ import static org.mockito.Mockito.verify;
  */
 public class ZincRepoInitializationTest extends ZincRepoBaseTest {
     private final SourceURL mSourceURL;
+
+    @Mock private ZincBundle mResultBundle;
+    @Mock private BundleID mBundleID;
 
     public ZincRepoInitializationTest() throws MalformedURLException {
         mSourceURL = new SourceURL(new URL("https://mindsnacks.com"), "com.mindsnacks.lessons");
@@ -77,6 +82,18 @@ public class ZincRepoInitializationTest extends ZincRepoBaseTest {
         // verify
         final ZincRepoIndex.TrackingInfo trackingInfo = readRepoIndex().getTrackingInfo(bundleID);
         Assert.assertEquals(distribution, trackingInfo.getDistribution());
+    }
+
+    @Test
+    public void bundleIsNotValidIfNotTracked() {
+        when(mResultBundle.getBundleID()).thenReturn(mBundleID);
+        assertFalse(mRepo.isBundleValid(mResultBundle));
+    }
+
+    @Test(expected = ZincRuntimeException.class)
+    public void notAllowedToRetrackABundleThatIsNotAlreadyTracked() {
+        when(mResultBundle.getBundleID()).thenReturn(mBundleID);
+        mRepo.retrackBundle(mResultBundle);
     }
 
     @Test

@@ -147,4 +147,20 @@ public class ZincRepo implements Repo {
         mQueue.add(cloneBundleRequest);
         mBundles.put(bundleID, cloneBundleRequest);
     }
+
+    public boolean isBundleValid(final ZincBundle bundle) {
+        ZincCloneBundleRequest cloneBundleRequest = mBundles.get(bundle.getBundleID());
+        return cloneBundleRequest != null &&
+                bundle.isValid(mManifestsCache,
+                        cloneBundleRequest.getSourceURL(),
+                        mFlavorName);
+    }
+
+    public void retrackBundle(final ZincBundle bundle) {
+        ZincCloneBundleRequest cloneBundleRequest = mBundles.get(bundle.getBundleID());
+        if (cloneBundleRequest == null) {
+            throw new ZincRuntimeException("Can't retrack bundle that hasn't been previously tracked");
+        }
+        mQueue.reAdd(cloneBundleRequest);
+    }
 }
