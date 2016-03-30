@@ -23,9 +23,12 @@ import java.util.concurrent.Future;
  */
 public class ZincDownloader implements ZincJobFactory {
     private final Gson mGson;
+    private final File mRepoFolder;
 
-    public ZincDownloader(final Gson gson) {
+    public ZincDownloader(final Gson gson,
+                          final File repoFolder) {
         mGson = gson;
+        mRepoFolder = repoFolder;
     }
 
     @Override
@@ -37,7 +40,7 @@ public class ZincDownloader implements ZincJobFactory {
             throw new ZincRuntimeException("Error getting catalog file URL for source: " + sourceURL, e);
         }
 
-        return new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class);
+        return new ZincDownloadObjectJob<>(createRequestExecutor(), url, mGson, new FileHelper(mGson, new HashUtil()), mRepoFolder, ZincCatalog.class);
     }
 
     @Override
@@ -48,7 +51,7 @@ public class ZincDownloader implements ZincJobFactory {
         } catch (MalformedURLException e) {
             throw new ZincRuntimeException("Invalid manifest URL: " + sourceURL, e);
         }
-        return new ZincDownloadObjectJob<ZincManifest>(createRequestExecutor(), manifestFileURL, mGson, ZincManifest.class);
+        return new ZincDownloadObjectJob<>(createRequestExecutor(), manifestFileURL, mGson, new FileHelper(mGson, new HashUtil()), mRepoFolder, ZincManifest.class);
     }
 
     @Override

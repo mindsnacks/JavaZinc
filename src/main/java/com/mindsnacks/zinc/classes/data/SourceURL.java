@@ -11,13 +11,13 @@ import java.net.URL;
  * Date: 9/9/13
  */
 public class SourceURL {
-    private static final String CATALOG_FILENAME = "catalog.json";
+    private static final String CATALOG_FILENAME = "catalog.json.gz";
     private static final String ARCHIVES_FOLDER = "archives";
     private static final String MANIFESTS_FOLDER = "manifests";
     private static final String OBJECTS_FOLDER = "objects";
 
     private static final String ARCHIVES_FORMAT = "tar";
-    private static final String MANIFESTS_FORMAT = "json";
+    private static final String MANIFESTS_FORMAT = "json.gz";
 
     private final URL mUrl;
     private transient final String mCatalogID;

@@ -1,6 +1,7 @@
 package com.mindsnacks.zinc.classes.data;
 
 import com.google.gson.annotations.SerializedName;
+import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
@@ -124,8 +125,6 @@ public class ZincManifest {
     }
 
     public static class FileInfo {
-        public static final String GZIPPED_FORMAT = "gz";
-
         @SerializedName("flavors")
         private final Set<String> mFlavors;
 
@@ -165,14 +164,14 @@ public class ZincManifest {
 
         public String getHashWithExtension() {
             if (isGzipped()) {
-                return getHash() + "." + GZIPPED_FORMAT;
+                return getHash() + "." + FileHelper.GZIPPED_FORMAT;
             } else {
                 return getHash();
             }
         }
 
         public boolean isGzipped() {
-            return mFormats.containsKey(GZIPPED_FORMAT);
+            return mFormats.containsKey(FileHelper.GZIPPED_FORMAT);
         }
 
         @Override

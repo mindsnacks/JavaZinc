@@ -12,7 +12,6 @@ import com.mindsnacks.zinc.classes.jobs.ZincDownloader;
 
 import java.io.File;
 import java.util.HashSet;
-import java.util.Timer;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -30,7 +29,7 @@ public final class ZincRepoFactory {
                            final int bundleCloneConcurrency,
                            final PriorityCalculator<BundleID> priorityCalculator) {
         final Gson gson = createGson();
-        final ZincJobFactory jobFactory = createJobFactory(gson);
+        final ZincJobFactory jobFactory = createJobFactory(gson, root);
         final ZincRepoIndexWriter indexWriter = createRepoIndexWriter(root, gson);
 
         final ThreadFactory threadFactory = new DaemonThreadFactory();
@@ -57,8 +56,7 @@ public final class ZincRepoFactory {
                     new HashSet<SourceURL>(repoIndex.getSources()),
                     jobFactory,
                     executorService,
-                    executorService,
-                    new Timer(ZincCatalogs.class.getSimpleName(), true));
+                    executorService);
     }
 
     private ZincManifestsCache createManifestCache(final ZincJobFactory jobFactory,
@@ -80,8 +78,8 @@ public final class ZincRepoFactory {
         return gsonBuilder.create();
     }
 
-    private ZincJobFactory createJobFactory(final Gson gson) {
-        return new ZincDownloader(gson);
+    private ZincJobFactory createJobFactory(final Gson gson, final File root) {
+        return new ZincDownloader(gson, root);
     }
 
     private ZincRepoIndexWriter createRepoIndexWriter(final File root, final Gson gson) {
