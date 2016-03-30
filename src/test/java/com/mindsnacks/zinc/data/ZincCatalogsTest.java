@@ -220,29 +220,6 @@ public class ZincCatalogsTest extends ZincBaseTest {
     }
 
     @Test
-    public void updatingCatalogsDownloadsNewOnes() throws Exception {
-        setUpUpdateTask();
-
-        run();
-
-        verifyCatalogIsDownloaded();
-    }
-
-    @Test
-    public void updatingCatalogsIgnoresCachedCatalogs() throws Exception {
-        setUpUpdateTask();
-
-        verify(mFileHelper, times(0)).readJSON(any(File.class), any(Class.class));
-    }
-
-    @Test
-    public void updatingCatalogsReplacesFutures() throws Exception {
-        final ListenableFuture future = setUpUpdateTask();
-
-        assertEquals(future, catalogs.getCatalog(mSourceURL));
-    }
-
-    @Test
     public void failedCatalogDownloadReplacesFutureWithOriginalOne() throws Exception {
         // cache the future with the persisted copy
         setLocalCatalogFileContent();
