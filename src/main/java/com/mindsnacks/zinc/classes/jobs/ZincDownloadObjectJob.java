@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.zip.GZIPInputStream;
 
 /**
  * User: NachoSoto
@@ -12,14 +13,17 @@ import java.net.URL;
 public class ZincDownloadObjectJob<V> extends AbstractZincDownloadJob<V> {
     private final Gson mGson;
 
-    public ZincDownloadObjectJob(final ZincRequestExecutor requestFactory, final URL url, final Gson gson, final Class<V> theClass) {
+    public ZincDownloadObjectJob(final ZincRequestExecutor requestFactory,
+                                 final URL url,
+                                 final Gson gson,
+                                 final Class<V> theClass) {
         super(requestFactory, url, theClass);
         mGson = gson;
     }
 
     @Override
     public V run() throws Exception {
-        return mGson.fromJson(new InputStreamReader(mRequestExecutor.get(mUrl)), mClass);
+        return mGson.fromJson(new InputStreamReader(new GZIPInputStream(mRequestExecutor.get(mUrl))), mClass);
     }
 
     @Override

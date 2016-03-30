@@ -72,13 +72,6 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
     }
 
     @Test
-    public void startRepoStartsSchedulesCatalogUpdates() throws Exception {
-        mRepo.start();
-
-        verify(mCatalogsCache).scheduleUpdate();
-    }
-
-    @Test
     public void pauseRepo() throws Exception {
         mRepo.start();
         mRepo.pause();

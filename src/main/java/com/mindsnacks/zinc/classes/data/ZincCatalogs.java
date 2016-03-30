@@ -5,7 +5,6 @@ import com.google.gson.JsonSyntaxException;
 import com.mindsnacks.zinc.classes.ZincJobFactory;
 import com.mindsnacks.zinc.classes.ZincLogging;
 import com.mindsnacks.zinc.classes.fileutils.FileHelper;
-import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,7 +12,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Nacho Soto
@@ -21,9 +19,6 @@ import java.util.concurrent.TimeUnit;
  * This class deals with persisting and scheduling downloading catalogs.
  */
 public class ZincCatalogs implements ZincCatalogsCache {
-    private static final long INITIAL_UPDATE_DELAY = TimeUnit.MINUTES.toMillis(5);
-    private static final long UPDATE_FREQUENCY = TimeUnit.MINUTES.toMillis(5);
-
     private final File mRoot;
     private final FileHelper mFileHelper;
 
@@ -32,18 +27,15 @@ public class ZincCatalogs implements ZincCatalogsCache {
     private final ZincJobFactory mJobFactory;
     private final ListeningExecutorService mDownloadExecutorService;
     private final ExecutorService mPersistenceExecutorService;
-    private final Timer mUpdateTimer;
 
     private final Map<SourceURL, ListenableFuture<ZincCatalog>> mFutures = new HashMap<SourceURL, ListenableFuture<ZincCatalog>>();
-    private boolean mUpdateScheduled = false;
 
     public ZincCatalogs(final File root,
                         final FileHelper fileHelper,
                         final Set<SourceURL> trackedSourceURLs,
                         final ZincJobFactory jobFactory,
                         final ExecutorService downloadExecutorService,
-                        final ExecutorService persistenceExecutorService,
-                        final Timer timer) {
+                        final ExecutorService persistenceExecutorService) {
         mRoot = root;
         mFileHelper = fileHelper;
 
@@ -52,7 +44,6 @@ public class ZincCatalogs implements ZincCatalogsCache {
         mJobFactory = jobFactory;
         mDownloadExecutorService = MoreExecutors.listeningDecorator(downloadExecutorService);
         mPersistenceExecutorService = persistenceExecutorService;
-        mUpdateTimer = timer;
     }
 
     @Override
@@ -81,24 +72,7 @@ public class ZincCatalogs implements ZincCatalogsCache {
      */
     @Override
     public synchronized boolean clearCachedCatalogs() {
-        if (mUpdateScheduled) {
-            throw new ZincRuntimeException("Updates were already scheduled");
-        }
-
         return mFileHelper.emptyDirectory(getCatalogsFolder());
-    }
-
-    @Override
-    public void scheduleUpdate() {
-        if (!mUpdateScheduled) {
-            mUpdateScheduled = true;
-
-            mUpdateTimer.schedule(new TimerTask() {
-                @Override public void run() {
-                    updateCatalogsForTrackedSourceURLs();
-                }
-            }, INITIAL_UPDATE_DELAY, UPDATE_FREQUENCY);
-        }
     }
 
     private synchronized SettableFuture<ZincCatalog> getPersistedCatalog(final SourceURL sourceURL, final File catalogFile) throws FileNotFoundException {
@@ -151,18 +125,6 @@ public class ZincCatalogs implements ZincCatalogsCache {
 
     private synchronized void removeFuture(final SourceURL sourceURL) {
         mFutures.remove(sourceURL);
-    }
-
-    private synchronized void updateCatalogsForTrackedSourceURLs() {
-        logMessage("All", "Updating catalogs for tracked source URLs");
-
-        for (final SourceURL sourceURL : mTrackedSourceURLs) {
-            final ListenableFuture<ZincCatalog> future = downloadCatalog(sourceURL, getCatalogFile(sourceURL));
-
-            if (!future.isDone()) { // otherwise downloadCatalog has already cached the result
-                cacheFuture(sourceURL, future);
-            }
-        }
     }
 
     private File getCatalogsFolder() {

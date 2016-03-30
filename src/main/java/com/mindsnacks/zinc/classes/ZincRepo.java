@@ -56,7 +56,6 @@ public class ZincRepo implements Repo {
     @Override
     public void start() {
         mQueue.start();
-        mCatalogsCache.scheduleUpdate();
     }
 
     @Override

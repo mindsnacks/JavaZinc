@@ -64,7 +64,7 @@ public class FileHelper {
                             final File destinationFolder,
                             final String destinationFilename) {
         return moveFile(new File(originFolder, originFilename),
-                        new File(destinationFolder, destinationFilename));
+                new File(destinationFolder, destinationFilename));
     }
 
     public boolean moveFile(final File originFile,

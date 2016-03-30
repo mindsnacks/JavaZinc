@@ -71,7 +71,7 @@ public class SourceURLTest extends ZincBaseTest {
         final URL result = sourceURL.getCatalogFileURL();
 
         assertTrue(result.toString().contains(catalogID));
-        assertTrue(result.getFile().endsWith(".json"));
+        assertTrue(result.getFile().endsWith(".json.gz"));
     }
 
     @Test
@@ -81,7 +81,7 @@ public class SourceURLTest extends ZincBaseTest {
         assertTrue(result.toString().contains(catalogID));
         assertTrue(result.toString().contains(Integer.toString(version)));
         assertTrue(result.toString().contains(bundleName));
-        assertTrue(result.getFile().endsWith(".json"));
+        assertTrue(result.getFile().endsWith(".json.gz"));
     }
 
     @Test

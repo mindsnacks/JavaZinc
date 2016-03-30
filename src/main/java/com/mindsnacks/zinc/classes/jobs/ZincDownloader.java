@@ -37,7 +37,7 @@ public class ZincDownloader implements ZincJobFactory {
             throw new ZincRuntimeException("Error getting catalog file URL for source: " + sourceURL, e);
         }
 
-        return new ZincDownloadObjectJob<ZincCatalog>(createRequestExecutor(), url, mGson, ZincCatalog.class);
+        return new ZincDownloadObjectJob<>(createRequestExecutor(), url, mGson, ZincCatalog.class);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class ZincDownloader implements ZincJobFactory {
         } catch (MalformedURLException e) {
             throw new ZincRuntimeException("Invalid manifest URL: " + sourceURL, e);
         }
-        return new ZincDownloadObjectJob<ZincManifest>(createRequestExecutor(), manifestFileURL, mGson, ZincManifest.class);
+        return new ZincDownloadObjectJob<>(createRequestExecutor(), manifestFileURL, mGson, ZincManifest.class);
     }
 
     @Override
