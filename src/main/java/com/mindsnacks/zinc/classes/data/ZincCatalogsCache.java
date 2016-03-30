@@ -7,7 +7,6 @@ import java.util.concurrent.Future;
  */
 public interface ZincCatalogsCache {
     boolean clearCachedCatalogs();
-    void scheduleUpdate();
 
     Future<ZincCatalog> getCatalog(final SourceURL sourceURL);
 }
