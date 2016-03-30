@@ -13,8 +13,6 @@ import java.util.zip.ZipException;
  * Date: 9/10/13
  */
 public class FileHelper {
-    public static final String GZIPPED_FORMAT = "gz";
-
     private static final int BUFFER_SIZE = 8192;
 
     private final Gson mGson;
@@ -36,39 +34,24 @@ public class FileHelper {
         if (!output.exists()) {
             createDirectories(output);
 
-            final InputStream in = getGzippedInputStream(input);
+            final InputStream in;
+
+            try {
+                in = new BufferedInputStream(new GZIPInputStream(new FileInputStream(input)));
+            } catch (ZipException e) {
+                throw new ZincRuntimeException("Error opening gzip file: " + input.getAbsolutePath(), e);
+            }
+
             final ValidatingDigestOutputStream digestStream = mHashUtil.wrapOutputStreamWithDigest(new FileOutputStream(output));
             final OutputStream dest = new BufferedOutputStream(digestStream);
-            copyFile(in, dest);
+            try {
+                copy(in, dest);
+            } finally {
+                dest.close();
+                in.close();
+            }
+
             digestStream.validate(expectedHash);
-        }
-    }
-
-    public void unzipFileWithoutValidation(final File input,
-                                           final File output) throws IOException {
-        if (!output.exists()) {
-            createDirectories(output);
-
-            final InputStream in = getGzippedInputStream(input);
-            final OutputStream dest = new BufferedOutputStream(new FileOutputStream(output));
-            copyFile(in, dest);
-        }
-    }
-
-    private InputStream getGzippedInputStream(final File input) throws IOException {
-        try {
-            return new BufferedInputStream(new GZIPInputStream(new FileInputStream(input)));
-        } catch (ZipException e) {
-            throw new ZincRuntimeException("Error opening gzip file: " + input.getAbsolutePath(), e);
-        }
-    }
-
-    private void copyFile(InputStream input, OutputStream output) throws IOException {
-        try {
-            copy(input, output);
-        } finally {
-            output.close();
-            input.close();
         }
     }
 
@@ -81,7 +64,7 @@ public class FileHelper {
                             final File destinationFolder,
                             final String destinationFilename) {
         return moveFile(new File(originFolder, originFilename),
-                        new File(destinationFolder, destinationFilename));
+                new File(destinationFolder, destinationFilename));
     }
 
     public boolean moveFile(final File originFile,
@@ -167,15 +150,14 @@ public class FileHelper {
         createDirectories(file);
         final ValidatingDigestOutputStream digestStream = mHashUtil.wrapOutputStreamWithDigest(new FileOutputStream(file));
         final OutputStream dest = new BufferedOutputStream(digestStream);
-        copyFile(inputStream, dest);
+        try {
+            copy(inputStream, dest);
+        } finally {
+            dest.close();
+            inputStream.close();
+        }
 
         digestStream.validate(expectedHash);
-    }
-
-    public void streamToFileWithoutValidation(final InputStream inputStream, final File file) throws IOException {
-        createDirectories(file);
-        final OutputStream dest = new BufferedOutputStream(new FileOutputStream(file));
-        copyFile(inputStream, dest);
     }
 
     private void copy(InputStream inputStream, OutputStream outputStream) throws IOException {

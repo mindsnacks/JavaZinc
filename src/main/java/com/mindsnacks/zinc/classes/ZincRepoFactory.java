@@ -29,7 +29,7 @@ public final class ZincRepoFactory {
                            final int bundleCloneConcurrency,
                            final PriorityCalculator<BundleID> priorityCalculator) {
         final Gson gson = createGson();
-        final ZincJobFactory jobFactory = createJobFactory(gson, root);
+        final ZincJobFactory jobFactory = createJobFactory(gson);
         final ZincRepoIndexWriter indexWriter = createRepoIndexWriter(root, gson);
 
         final ThreadFactory threadFactory = new DaemonThreadFactory();
@@ -78,8 +78,8 @@ public final class ZincRepoFactory {
         return gsonBuilder.create();
     }
 
-    private ZincJobFactory createJobFactory(final Gson gson, final File root) {
-        return new ZincDownloader(gson, root);
+    private ZincJobFactory createJobFactory(final Gson gson) {
+        return new ZincDownloader(gson);
     }
 
     private ZincRepoIndexWriter createRepoIndexWriter(final File root, final Gson gson) {
