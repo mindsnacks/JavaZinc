@@ -8,8 +8,11 @@ import com.mindsnacks.zinc.classes.data.ZincCatalogsCache;
 import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
 import com.mindsnacks.zinc.classes.data.ZincManifestsCache;
 import com.mindsnacks.zinc.classes.data.ZincRepoIndex;
+import com.mindsnacks.zinc.classes.data.ZincUntrackedBundlesCleaner;
 import com.mindsnacks.zinc.classes.downloads.PriorityJobQueue;
+import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
+
 import java.io.File;
 import java.net.URI;
 import java.util.Arrays;
@@ -17,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 /**
  * User: NachoSoto
@@ -27,6 +31,7 @@ public class ZincRepo implements Repo {
     private final ZincRepoIndexWriter mIndexWriter;
     private final ZincCatalogsCache mCatalogsCache;
     private final ZincManifestsCache mManifestsCache;
+    private final FileHelper mFileHelper;
     private final String mFlavorName;
 
     private final File mRoot;
@@ -42,10 +47,12 @@ public class ZincRepo implements Repo {
                     final ZincRepoIndexWriter repoIndexWriter,
                     final ZincCatalogsCache catalogsCache,
                     final ZincManifestsCache manifestsCache,
+                    final FileHelper fileHelper,
                     final String flavorName) {
         mQueue = queue;
         mCatalogsCache = catalogsCache;
         mManifestsCache = manifestsCache;
+        mFileHelper = fileHelper;
         mFlavorName = flavorName;
         mRoot = new File(root);
         mIndexWriter = repoIndexWriter;
@@ -86,6 +93,33 @@ public class ZincRepo implements Repo {
         }
 
         if (newTrackedBundles) {
+            mIndexWriter.saveIndex();
+        }
+    }
+
+    @Override
+    public void stopTrackingBundles(final Set<BundleID> bundleIDs, final String distribution) {
+        final ZincRepoIndex index = mIndexWriter.getIndex();
+        boolean bundlesStoppedTracking = false;
+
+        ZincUntrackedBundlesCleaner bundlesCleaner = new ZincUntrackedBundlesCleaner(mFileHelper);
+
+        for (final BundleID bundleID : bundleIDs) {
+            boolean stoppedTrackingBundle = index.stopTrackingBundle(bundleID, distribution);
+            bundlesStoppedTracking |= stoppedTrackingBundle;
+            if (stoppedTrackingBundle && mBundles.containsKey(bundleID)) {
+                ZincCloneBundleRequest zincCloneBundleRequest = mBundles.get(bundleID);
+                mBundles.remove(bundleID);
+                Future<ZincBundle> zincBundleFuture = mQueue.get(zincCloneBundleRequest);
+                if (zincBundleFuture != null) {
+                    zincBundleFuture.cancel(true);
+                }
+                mQueue.remove(zincCloneBundleRequest);
+                bundlesCleaner.cleanBundle(mRoot, bundleID);
+            }
+        }
+
+        if (bundlesStoppedTracking) {
             mIndexWriter.saveIndex();
         }
     }

@@ -148,6 +148,14 @@ public class PriorityJobQueue<Input, Output> {
         addElementToQueue(element);
     }
 
+    public void remove(final Input element) throws JobNotFoundException {
+        checkServiceIsRunning(true, "Service should be running");
+        checkJobWasAlreadyAdded(element);
+        mAddedElements.remove(element);
+        mQueue.remove(element);
+        removeCachedFuture(element);
+    }
+
     private ListenableFuture<Output> findExistingFuture(final Input element) {
         mLock.lock();
 

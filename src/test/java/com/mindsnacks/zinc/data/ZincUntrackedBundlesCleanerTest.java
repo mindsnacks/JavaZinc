@@ -79,6 +79,36 @@ public class ZincUntrackedBundlesCleanerTest extends ZincBaseTest {
                                               mVersion);
     }
 
+    @Test
+    public void cleanBundleCleansBundles() throws Exception {
+        createZincBundles();
+
+        assertTrue(mBundle1.exists());
+        assertTrue(mBundle2.exists());
+        assertTrue(mBundle3.exists());
+
+        mBundlesCleaner.cleanBundle(rootFolder.getRoot(), mBundleID);
+
+        verify(mFileHelper, times(1)).removeDirectory(eq(mBundle1));
+        verify(mFileHelper, times(1)).removeDirectory(eq(mBundle2));
+        verify(mFileHelper, times(0)).removeDirectory(eq(mBundle3));
+    }
+
+    @Test
+    public void cleanBundleCleansAllManifests() throws Exception {
+        createZincManifests();
+
+        assertTrue(mManifest1.exists());
+        assertTrue(mManifest2.exists());
+        assertTrue(mManifest3.exists());
+
+        mBundlesCleaner.cleanBundle(rootFolder.getRoot(), mBundleID);
+
+        verify(mFileHelper, times(1)).removeFile(eq(mManifest1));
+        verify(mFileHelper, times(1)).removeFile(eq(mManifest2));
+        verify(mFileHelper, times(1)).removeFile(eq(mManifest3));
+    }
+
     private void createZincBundles() throws Exception {
         String  localBundleFolder1 = PathHelper.getLocalBundleFolder(mBundleID, 23, "3xiOS"),
                 localBundleFolder2 = PathHelper.getLocalBundleFolder(mBundleID, 1323, "3xAndroid"),

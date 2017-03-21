@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertFalse;
 
 /**
  * User: NachoSoto
@@ -73,6 +75,35 @@ public class ZincRepoIndexTest extends ZincBaseTest {
 
         // verify
         assertEquals(new HashSet<BundleID>(Arrays.asList(bundleID1, bundleID2)), index.getTrackedBundleIDs());
+    }
+
+    @Test
+    public void stopTrackingBundle() throws Exception {
+        final BundleID bundleID1 = new BundleID("com.mindsnacks.games.swell"),
+                bundleID2 = new BundleID("com.mindsnacks.lessons.body-parts");
+
+        // run
+        index.trackBundle(bundleID1, "master");
+        index.trackBundle(bundleID2, "develop");
+
+        // verify
+        assertEquals(new HashSet<BundleID>(Arrays.asList(bundleID1, bundleID2)), index.getTrackedBundleIDs());
+
+        assertTrue(index.stopTrackingBundle(bundleID1, "master"));
+        assertTrue(index.stopTrackingBundle(bundleID2, "develop"));
+
+        assertEquals(new HashSet<BundleID>(), index.getTrackedBundleIDs());
+    }
+
+    @Test
+    public void stopTrackingNotTrackingBundleReturnsFalse() throws Exception {
+        final BundleID bundleID1 = new BundleID("com.mindsnacks.games.swell"),
+                bundleID2 = new BundleID("com.mindsnacks.lessons.body-parts");
+
+        index.trackBundle(bundleID1, "onedistribution");
+
+        assertFalse(index.stopTrackingBundle(bundleID1, "anotherdistribution"));
+        assertFalse(index.stopTrackingBundle(bundleID2, "onedistribution"));
     }
 
     @Test

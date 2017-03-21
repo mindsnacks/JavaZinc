@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
@@ -155,6 +156,29 @@ public class ZincRepoJobsTest extends ZincRepoBaseTest {
 
         // verify
         verifySaveIndex();
+    }
+
+    @Test
+    public void stopTrackingBundlesStopsTrackingThem() throws Exception {
+        mockGetTrackingInfo(mBundleID, mDistribution);
+        mockGetTrackingInfo(mAnotherBundleID, mDistribution);
+
+        when(mRepoIndex.stopTrackingBundle(mBundleID, mDistribution)).thenReturn(true);
+
+        // run
+        mRepo.startTrackingBundles(Arrays.asList(mBundleID, mAnotherBundleID), mDistribution);
+
+        // verify
+        verifyCloneBundle(mBundleID, mDistribution);
+        verifyCloneBundle(mAnotherBundleID, mDistribution);
+
+        Set<BundleID> bundlesToStop = new HashSet<>();
+        bundlesToStop.add(mBundleID);
+        mRepo.stopTrackingBundles(bundlesToStop, mDistribution);
+
+        verify(mRepoIndex, times(1)).stopTrackingBundle(eq(mBundleID), eq(mDistribution));
+        verify(mQueue, times(1)).remove(any(ZincCloneBundleRequest.class));
+        verify(mIndexWriter, times(2)).saveIndex();
     }
 
     @Test

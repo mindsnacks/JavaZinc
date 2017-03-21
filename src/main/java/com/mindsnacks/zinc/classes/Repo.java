@@ -21,6 +21,8 @@ public interface Repo {
 
     void startTrackingBundles(List<BundleID> bundleIDs, String distribution);
 
+    void stopTrackingBundles(Set<BundleID> bundleIDs, String distribution);
+
     Future<ZincBundle> getBundle(BundleID bundleID);
 
     Set<BundleID> getTrackedBundleIDs();
