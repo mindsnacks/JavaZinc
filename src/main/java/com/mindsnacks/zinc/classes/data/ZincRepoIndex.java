@@ -50,6 +50,17 @@ public class ZincRepoIndex {
         }
     }
 
+    public boolean stopTrackingBundle(final BundleID bundleID, final String distribution) {
+        final String key = bundleID.toString();
+
+        if (mBundles.containsKey(key) && mBundles.get(key).getDistribution().equals(distribution)) {
+            mBundles.remove(key);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public TrackingInfo getTrackingInfo(final BundleID bundleID) throws BundleNotBeingTrackedException {
         final String key = bundleID.toString();
 

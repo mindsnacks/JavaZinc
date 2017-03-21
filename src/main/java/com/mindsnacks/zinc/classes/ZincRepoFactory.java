@@ -29,6 +29,7 @@ public final class ZincRepoFactory {
                            final int bundleCloneConcurrency,
                            final PriorityCalculator<BundleID> priorityCalculator) {
         final Gson gson = createGson();
+        final FileHelper fileHelper = new FileHelper(gson, new HashUtil());
         final ZincJobFactory jobFactory = createJobFactory(gson);
         final ZincRepoIndexWriter indexWriter = createRepoIndexWriter(root, gson);
 
@@ -43,7 +44,7 @@ public final class ZincRepoFactory {
                 new ZincBundleDownloader(jobFactory, catalogs, manifests),
                 createPriorityCalculator(priorityCalculator));
 
-        return new ZincRepo(queue, root.toURI(), indexWriter, catalogs, manifests, flavorName);
+        return new ZincRepo(queue, root.toURI(), indexWriter, catalogs, manifests, fileHelper, flavorName);
     }
 
     private ZincCatalogsCache createCatalogCache(final ZincJobFactory jobFactory,
