@@ -10,6 +10,7 @@ import com.mindsnacks.zinc.classes.ZincRepoIndexWriter;
 import com.mindsnacks.zinc.classes.data.ZincBundle;
 import com.mindsnacks.zinc.classes.data.ZincCloneBundleRequest;
 import com.mindsnacks.zinc.classes.data.ZincRepoIndex;
+import com.mindsnacks.zinc.classes.fileutils.FileHelper;
 import com.mindsnacks.zinc.exceptions.ZincRuntimeException;
 import com.mindsnacks.zinc.utils.TestUtils;
 import com.mindsnacks.zinc.utils.ZincBaseTest;
@@ -35,6 +36,7 @@ public abstract class ZincRepoBaseTest extends ZincBaseTest {
     @Mock protected PriorityJobQueue<ZincCloneBundleRequest, ZincBundle> mQueue;
     @Mock protected ZincCatalogsCache mCatalogsCache;
     @Mock protected ZincManifestsCache mManifestsCache;
+    @Mock protected FileHelper mFileHelper;
 
     protected Gson mGson;
     @Rule public final TemporaryFolder rootFolder = new TemporaryFolder();
@@ -48,7 +50,7 @@ public abstract class ZincRepoBaseTest extends ZincBaseTest {
 
     protected void initializeRepo() {
         mIndexWriter = newRepoIndexWriter();
-        mRepo = new ZincRepo(mQueue, rootFolder.getRoot().toURI(), mIndexWriter, mCatalogsCache, mManifestsCache, mFlavorName);
+        mRepo = new ZincRepo(mQueue, rootFolder.getRoot().toURI(), mIndexWriter, mCatalogsCache, mManifestsCache, mFileHelper, mFlavorName);
     }
 
     protected ZincRepoIndexWriter newRepoIndexWriter() {
