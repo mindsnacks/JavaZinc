@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 /**
  * User: NachoSoto
@@ -109,7 +110,10 @@ public class ZincRepo implements Repo {
             if (stoppedTrackingBundle && mBundles.containsKey(bundleID)) {
                 ZincCloneBundleRequest zincCloneBundleRequest = mBundles.get(bundleID);
                 mBundles.remove(bundleID);
-                mQueue.get(zincCloneBundleRequest).cancel(true);
+                Future<ZincBundle> zincBundleFuture = mQueue.get(zincCloneBundleRequest);
+                if (zincBundleFuture != null) {
+                    zincBundleFuture.cancel(true);
+                }
                 mQueue.remove(zincCloneBundleRequest);
                 bundlesCleaner.cleanBundle(mRoot, bundleID);
             }

@@ -298,6 +298,36 @@ public class PriorityJobQueueTest extends ZincBaseTest {
         queue.reAdd(data);
     }
 
+    @Test(expected = ZincRuntimeException.class)
+    public void removingElementWhenServiceIsStoppedThrows() throws Exception {
+        final TestData data = processAndAddRandomData();
+
+        queue.start();
+        queue.stop();
+
+        queue.remove(data);
+    }
+
+    @Test
+    public void removingDataDoesntThrow() throws Exception {
+        final TestData data = processAndAddRandomData();
+
+        queue.start();
+
+        queue.remove(data);
+    }
+
+    @Test(expected = PriorityJobQueue.JobNotFoundException.class)
+    public void afterRemovingDataCannotGetData() throws Exception {
+        final TestData data = processAndAddRandomData();
+
+        queue.start();
+
+        queue.remove(data);
+
+        queue.get(data);
+    }
+
     private TestData processAndAddRandomData() {
         return processAndAddData(TestData.randomTestData());
     }
