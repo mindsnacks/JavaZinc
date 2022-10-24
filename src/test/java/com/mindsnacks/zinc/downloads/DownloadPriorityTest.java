@@ -16,7 +16,7 @@ import static org.junit.Assert.assertNotSame;
 public class DownloadPriorityTest extends ZincBaseTest {
     @Test
     public void notNeededDoesNotEqualUnknown() throws Exception {
-        assertNotSame(DownloadPriority.UNKNOWN, DownloadPriority.NOT_NEEDED);
+        assertEquals(DownloadPriority.UNKNOWN, DownloadPriority.NOT_NEEDED);
     }
 
     @Test
