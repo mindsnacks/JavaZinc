@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup
-        run: brew install mvn
+        run: sudo apt -y install maven
 
       - uses: actions/setup-java@v3
         with:
