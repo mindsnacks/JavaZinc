@@ -25,4 +25,4 @@ jobs:
           java-version: '17'
 
       - name: Run Unit Tests
-        run: mvn test
+        run: mvn --batch-mode test
